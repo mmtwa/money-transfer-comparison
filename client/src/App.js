@@ -1,5 +1,3 @@
-jsx
-
 import React from 'react';
 import MoneyTransferComparison from './MoneyTransferComparison';
 import './App.css';
