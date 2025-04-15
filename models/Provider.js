@@ -1,4 +1,4 @@
-// models/Provider.js
+
 const mongoose = require('mongoose');
 
 const ProviderSchema = new mongoose.Schema({
