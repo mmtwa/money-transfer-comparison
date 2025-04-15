@@ -1,37 +1,39 @@
-
 {
     "name": "money-transfer-comparison",
     "version": "1.0.0",
     "description": "International money transfer comparison tool",
     "main": "server.js",
     "scripts": {
-      "start": "node server.js",
-      "server": "nodemon server.js",
-      "client": "npm start --prefix client",
-      "dev": "concurrently \"npm run server\" \"npm run client\"",
-      "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client"
+        "start": "node server.js",
+        "server": "nodemon server.js",
+        "client": "npm start --prefix client",
+        "dev": "concurrently \"npm run server\" \"npm run client\"",
+        "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client"
     },
     "author": "",
     "license": "MIT",
     "dependencies": {
-      "axios": "^0.21.4",
-      "bcryptjs": "^2.4.3",
-      "cookie-parser": "^1.4.6",
-      "cors": "^2.8.5",
-      "dotenv": "^10.0.0",
-      "express": "^4.17.1",
-      "express-rate-limit": "^5.5.0",
-      "express-validator": "^6.12.1",
-      "helmet": "^4.6.0",
-      "jsonwebtoken": "^8.5.1",
-      "mongoose": "^5.13.7",
-      "morgan": "^1.10.0"
+        "axios": "^0.21.4",
+        "bcryptjs": "^2.4.3",
+        "cookie-parser": "^1.4.6",
+        "cors": "^2.8.5",
+        "dotenv": "^10.0.0",
+        "express": "^4.17.1",
+        "express-rate-limit": "^5.5.0",
+        "express-validator": "^6.12.1",
+        "helmet": "^4.6.0",
+        "jsonwebtoken": "^8.5.1",
+        "mongoose": "^5.13.7",
+        "morgan": "^1.10.0"
     },
     "devDependencies": {
-      "concurrently": "^6.2.1",
-      "nodemon": "^2.0.12"
+        "autoprefixer": "^10.4.21",
+        "concurrently": "^6.2.1",
+        "nodemon": "^2.0.12",
+        "postcss": "^8.5.3",
+        "tailwindcss": "^4.1.4"
     },
     "engines": {
-      "node": ">=14.0.0"
+        "node": ">=14.0.0"
     }
-  }
+}
