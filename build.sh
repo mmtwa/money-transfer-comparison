@@ -11,32 +11,82 @@ cd client
 # Install dependencies 
 npm install --legacy-peer-deps
 
-# Create a temporary version of index.css without Tailwind directives
-cp src/index.css src/index.css.bak
-sed -i 's/@tailwind/\/\* @tailwind/g' src/index.css
+# Create a completely new minimal CSS file without Tailwind
+echo "/* Minimal CSS file for production */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-# Modify postcss.config.js to remove tailwind
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}" > src/index.css
+
+# Create a minimal App.css file
+echo "/* Minimal App CSS */
+.App {
+  text-align: center;
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}" > src/App.css
+
+# Create empty postcss.config.js
 echo "module.exports = {
-  plugins: {
-    autoprefixer: {},
-  }
+  plugins: {}
 }" > postcss.config.js
 
-# Remove tailwind config
-if [ -f tailwind.config.js ]; then
-  mv tailwind.config.js tailwind.config.js.bak
-fi
-
-# Remove craco config (if exists)
-if [ -f craco.config.js ]; then
-  mv craco.config.js craco.config.js.bak
-fi
-
-# Modify package.json to use react-scripts directly
-sed -i 's/"build": "craco build"/"build": "react-scripts build"/g' package.json
-
-# Build the client using react-scripts directly
-npx react-scripts build
-
-# Return to the root directory
-cd ..
+# Configure package.json to use react-scripts directly
+cat > temp-package.json << EOF
+{
+  "name": "client",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^14.0.0",
+    "@testing-library/user-event": "^13.5.0",
+    "lucide-react": "^0.263.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",
+    "recharts": "^2.5.0",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version
