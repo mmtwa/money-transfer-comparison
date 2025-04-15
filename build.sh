@@ -11,50 +11,12 @@ cd client
 # Install dependencies 
 npm install --legacy-peer-deps
 
-# Create a completely new minimal CSS file without Tailwind
-echo "/* Minimal CSS file for production */
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}" > src/index.css
-
-# Create a minimal App.css file
-echo "/* Minimal App CSS */
-.App {
-  text-align: center;
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}" > src/App.css
-
-# Create empty postcss.config.js
-echo "module.exports = {
-  plugins: {}
-}" > postcss.config.js
+# Create simple CSS files
+echo "body { margin: 0; font-family: Arial, sans-serif; }" > src/index.css
+echo ".App { text-align: center; }" > src/App.css
 
 # Configure package.json to use react-scripts directly
-cat > temp-package.json << EOF
+cat > temp-package.json << EOFMARKER
 {
   "name": "client",
   "version": "0.1.0",
@@ -89,4 +51,40 @@ cat > temp-package.json << EOF
       "not op_mini all"
     ],
     "development": [
-      "last 1 chrome version
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
+EOFMARKER
+
+mv temp-package.json package.json
+
+# Build the client using react-scripts directly
+GENERATE_SOURCEMAP=false npm run build
+
+# Make sure the build directory exists and has the right permissions
+if [ -d build ]; then
+  chmod -R 755 build
+else
+  echo "Error: Build directory not found!"
+  exit 1
+fi
+
+# List contents to verify
+ls -la build/
+
+# Return to the root directory
+cd ..
+
+# Verify server knows where to find the client build files
+# Modify server.js if needed to point to the correct build directory
+if [ -f server.js ]; then
+  echo "Checking server.js configuration..."
+  if grep -q "client/build" server.js; then
+    echo "Server is configured to use client/build directory"
+  else
+    echo "Warning: Server may not be correctly configured to serve client build files"
+  fi
+fi  
