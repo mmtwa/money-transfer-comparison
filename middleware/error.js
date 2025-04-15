@@ -1,7 +1,4 @@
-// middleware/error.js
-/**
- * Error handling middleware
- */
+
 const errorHandler = (err, req, res, next) => {
     let error = { ...err };
     error.message = err.message;
