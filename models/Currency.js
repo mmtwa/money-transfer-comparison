@@ -1,4 +1,4 @@
-// models/Currency.js
+
 const mongoose = require('mongoose');
 
 const CurrencySchema = new mongoose.Schema({
