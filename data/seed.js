@@ -1,4 +1,4 @@
-// data/seed.js - Script to seed the database with initial data
+
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const Provider = require('../models/Provider');
