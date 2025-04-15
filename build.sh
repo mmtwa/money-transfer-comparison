@@ -8,32 +8,32 @@ npm install
 # Navigate to client directory
 cd client
 
-# Install dependencies with legacy peer deps flag to avoid dependency conflicts
+# Install dependencies 
 npm install --legacy-peer-deps
 
-# Install tailwindcss explicitly
-npm install --save-dev tailwindcss@latest postcss@latest autoprefixer@latest
+# Create a temporary version of index.css without Tailwind directives
+cp src/index.css src/index.css.bak
+sed -i 's/@tailwind/\/\* @tailwind/g' src/index.css
 
-# Create a minimal tailwind.config.js if it doesn't exist
-if [ ! -f tailwind.config.js ]; then
-  echo "module.exports = {
-    content: ['./src/**/*.{js,jsx,ts,tsx}', './public/index.html'],
-    theme: {
-      extend: {},
-    },
-    plugins: [],
-  }" > tailwind.config.js
+# Modify postcss.config.js to remove tailwind
+echo "module.exports = {
+  plugins: {
+    autoprefixer: {},
+  }
+}" > postcss.config.js
+
+# Remove tailwind config
+if [ -f tailwind.config.js ]; then
+  mv tailwind.config.js tailwind.config.js.bak
 fi
 
-# Create a minimal postcss.config.js if it doesn't exist
-if [ ! -f postcss.config.js ]; then
-  echo "module.exports = {
-    plugins: {
-      tailwindcss: {},
-      autoprefixer: {},
-    }
-  }" > postcss.config.js
+# Remove craco config (if exists)
+if [ -f craco.config.js ]; then
+  mv craco.config.js craco.config.js.bak
 fi
+
+# Modify package.json to use react-scripts directly
+sed -i 's/"build": "craco build"/"build": "react-scripts build"/g' package.json
 
 # Build the client using react-scripts directly
 npx react-scripts build
