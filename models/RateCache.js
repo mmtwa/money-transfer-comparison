@@ -1,4 +1,4 @@
-// models/RateCache.js
+
 const mongoose = require('mongoose');
 
 const RateCacheSchema = new mongoose.Schema({
