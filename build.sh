@@ -2,16 +2,12 @@
 # Exit on error
 set -e
 
-# Install root dependencies
+# Install dependencies for the server
 npm install
 
-# Navigate to client directory, install dependencies and build
+# Install dependencies and build the client
 cd client
 npm install
-npm run build
-
-# Return to the root directory
+# Use react-scripts directly instead of craco for building
+npx react-scripts build
 cd ..
-
-# Install server dependencies (if you haven't already from the root)
-npm install
