@@ -1,4 +1,3 @@
-// services/providerService.js
 const axios = require('axios');
 const Provider = require('../models/Provider');
 const RateCache = require('../models/RateCache');
