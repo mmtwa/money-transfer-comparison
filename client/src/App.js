@@ -1,5 +1,7 @@
-jsximport React from 'react';
-import MoneyTransferComparison from './components/MoneyTransferComparison';
+jsx
+
+import React from 'react';
+import MoneyTransferComparison from './MoneyTransferComparison';
 import './App.css';
 
 function App() {
