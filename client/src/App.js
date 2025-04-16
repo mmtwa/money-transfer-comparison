@@ -1,5 +1,5 @@
 import React from 'react';
-import ModernMoneyCompare from './ModernMoneyCompare';
+import ModernMoneyCompare from './components/ModernMoneyCompare';
 import './App.css';
 
 function App() {
