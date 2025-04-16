@@ -136,7 +136,7 @@ const CurrencyFlag = ({ currency }) => {
             <div style={{ background: '#3C3B6E', width: '30%', height: '50%' }}>                      </div>
                   </div>
                 </div>
-              ))}
+              ))};
             </div>
           </div>
           
