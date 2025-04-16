@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ArrowRightCircle, Search, ChevronDown } from 'lucide-react';
 
-const MoneyTransferComparison = () => {
+const MoneyTransferHomepage = () => {
   const [fromCurrency, setFromCurrency] = useState('USD');
   const [toCurrency, setToCurrency] = useState('EUR');
   const [amount, setAmount] = useState(1000);
@@ -304,4 +304,4 @@ const MoneyTransferComparison = () => {
   );
 };
 
-export default MoneyTransferComparison;
+export default MoneyTransferHomepage;
