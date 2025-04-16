@@ -1,5 +1,5 @@
 import React from 'react';
-import MoneyTransferComparison from './MoneyTransferComparison.js';
+import MoneyTransferComparison from './MoneyTransferComparison';
 import './App.css';
 
 function App() {
