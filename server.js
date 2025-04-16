@@ -47,12 +47,14 @@ app.use('/api/providers', providerRoutes);
 app.use('/api/rates', rateRoutes);
 app.use('/api/users', userRoutes);
 
-// Serve React static files regardless of NODE_ENV
-app.use(express.static(path.join(__dirname, 'client/build')));
-
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
-});
+// Serve static assets in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, 'client/build')));
+  
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
+  });
+}
 
 // Error handling
 app.use((err, req, res, next) => {
