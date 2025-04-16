@@ -21,11 +21,11 @@
   "postcss": "^8.4.21",
   "tailwindcss": "^3.3.0"
 },
-  "scripts": {
-    "start": "npx craco start",
-    "build": "npx craco build",
-    "test": "npx craco test",
-    "eject": "react-scripts eject"
+"scripts": {
+  "start": "node ./node_modules/.bin/craco start",
+  "build": "node ./node_modules/.bin/craco build",
+  "test": "node ./node_modules/.bin/craco test",
+  "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
