@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, ArrowUpDown, ExternalLink, ChevronDown } from 'lucide-react';
+import { ArrowRightCircle, Search, ArrowUpDown, ExternalLink, ChevronDown } from 'lucide-react';
 
 // Mock data for providers
 const providers = [
@@ -55,130 +55,127 @@ const providers = [
   },
 ];
 
-// Comprehensive list of world currencies
-const currenciesList = [
-  { code: 'USD', name: 'US Dollar', symbol: '$', flag: '🇺🇸' },
-  { code: 'EUR', name: 'Euro', symbol: '€', flag: '🇪🇺' },
-  { code: 'GBP', name: 'British Pound', symbol: '£', flag: '🇬🇧' },
-  { code: 'JPY', name: 'Japanese Yen', symbol: '¥', flag: '🇯🇵' },
-  { code: 'AUD', name: 'Australian Dollar', symbol: 'A$', flag: '🇦🇺' },
-  { code: 'CAD', name: 'Canadian Dollar', symbol: 'C$', flag: '🇨🇦' },
-  { code: 'CHF', name: 'Swiss Franc', symbol: 'CHF', flag: '🇨🇭' },
-  { code: 'CNY', name: 'Chinese Yuan', symbol: '¥', flag: '🇨🇳' },
-  { code: 'HKD', name: 'Hong Kong Dollar', symbol: 'HK$', flag: '🇭🇰' },
-  { code: 'NZD', name: 'New Zealand Dollar', symbol: 'NZ$', flag: '🇳🇿' },
-  { code: 'SEK', name: 'Swedish Krona', symbol: 'kr', flag: '🇸🇪' },
-  { code: 'SGD', name: 'Singapore Dollar', symbol: 'S$', flag: '🇸🇬' },
-  { code: 'NOK', name: 'Norwegian Krone', symbol: 'kr', flag: '🇳🇴' },
-  { code: 'MXN', name: 'Mexican Peso', symbol: '$', flag: '🇲🇽' },
-  { code: 'INR', name: 'Indian Rupee', symbol: '₹', flag: '🇮🇳' },
-  { code: 'BRL', name: 'Brazilian Real', symbol: 'R$', flag: '🇧🇷' },
-  { code: 'RUB', name: 'Russian Ruble', symbol: '₽', flag: '🇷🇺' },
-  { code: 'ZAR', name: 'South African Rand', symbol: 'R', flag: '🇿🇦' },
-  { code: 'TRY', name: 'Turkish Lira', symbol: '₺', flag: '🇹🇷' },
-  { code: 'DKK', name: 'Danish Krone', symbol: 'kr', flag: '🇩🇰' },
-  { code: 'PLN', name: 'Polish Złoty', symbol: 'zł', flag: '🇵🇱' },
-  { code: 'THB', name: 'Thai Baht', symbol: '฿', flag: '🇹🇭' },
-  { code: 'IDR', name: 'Indonesian Rupiah', symbol: 'Rp', flag: '🇮🇩' },
-  { code: 'HUF', name: 'Hungarian Forint', symbol: 'Ft', flag: '🇭🇺' },
-  { code: 'CZK', name: 'Czech Koruna', symbol: 'Kč', flag: '🇨🇿' },
-  { code: 'ILS', name: 'Israeli New Shekel', symbol: '₪', flag: '🇮🇱' },
-  { code: 'CLP', name: 'Chilean Peso', symbol: '$', flag: '🇨🇱' },
-  { code: 'PHP', name: 'Philippine Peso', symbol: '₱', flag: '🇵🇭' },
-  { code: 'AED', name: 'UAE Dirham', symbol: 'د.إ', flag: '🇦🇪' },
-  { code: 'COP', name: 'Colombian Peso', symbol: '$', flag: '🇨🇴' },
-  { code: 'SAR', name: 'Saudi Riyal', symbol: '﷼', flag: '🇸🇦' },
-  { code: 'MYR', name: 'Malaysian Ringgit', symbol: 'RM', flag: '🇲🇾' },
-  { code: 'RON', name: 'Romanian Leu', symbol: 'lei', flag: '🇷🇴' },
-  { code: 'BGN', name: 'Bulgarian Lev', symbol: 'лв', flag: '🇧🇬' },
-  { code: 'KRW', name: 'South Korean Won', symbol: '₩', flag: '🇰🇷' },
-  { code: 'EGP', name: 'Egyptian Pound', symbol: 'E£', flag: '🇪🇬' },
-  { code: 'ARS', name: 'Argentine Peso', symbol: '$', flag: '🇦🇷' },
-  { code: 'QAR', name: 'Qatari Riyal', symbol: 'ر.ق', flag: '🇶🇦' },
-  { code: 'KWD', name: 'Kuwaiti Dinar', symbol: 'د.ك', flag: '🇰🇼' },
-  { code: 'NGN', name: 'Nigerian Naira', symbol: '₦', flag: '🇳🇬' },
-];
-
-// Generate exchange rates for all currency pairs
-const generateExchangeRates = () => {
-  const rates = {};
-  
-  // Initialize structure for each currency
-  currenciesList.forEach(currency => {
-    rates[currency.code] = {};
-  });
-  
-  // Base rates against USD
-  const baseRatesAgainstUSD = {
-    USD: 1.00,
+// Mock exchange rates data
+const exchangeRates = {
+  USD: {
     EUR: 0.91,
     GBP: 0.78,
     JPY: 110.23,
-    AUD: 1.43,
     CAD: 1.35,
-    CHF: 0.92,
-    CNY: 7.25,
-    HKD: 7.82,
-    NZD: 1.58,
-    SEK: 10.48,
-    SGD: 1.34,
-    NOK: 10.65,
-    MXN: 19.87,
+    AUD: 1.43,
     INR: 73.12,
-    BRL: 5.45,
-    RUB: 73.78,
-    ZAR: 18.35,
-    TRY: 8.56,
-    DKK: 6.78,
-    PLN: 4.18,
-    THB: 32.65,
-    IDR: 14250.00,
-    HUF: 330.50,
-    CZK: 23.15,
-    ILS: 3.28,
-    CLP: 820.45,
-    PHP: 50.25,
-    AED: 3.67,
-    COP: 3850.00,
-    SAR: 3.75,
-    MYR: 4.19,
-    RON: 4.48,
-    BGN: 1.78,
-    KRW: 1175.50,
-    EGP: 15.70,
-    ARS: 98.50,
-    QAR: 3.64,
-    KWD: 0.30,
-    NGN: 410.50
-  };
-  
-  // Generate rates for all currency pairs
-  currenciesList.forEach(fromCurrency => {
-    currenciesList.forEach(toCurrency => {
-      if (fromCurrency.code !== toCurrency.code) {
-        // Calculate cross-rate via USD
-        const fromToUSD = 1 / baseRatesAgainstUSD[fromCurrency.code];
-        const usdToTarget = baseRatesAgainstUSD[toCurrency.code];
-        rates[fromCurrency.code][toCurrency.code] = fromToUSD * usdToTarget;
-      } else {
-        rates[fromCurrency.code][toCurrency.code] = 1;
-      }
-    });
-  });
-  
-  return rates;
+  },
+  EUR: {
+    USD: 1.10,
+    GBP: 0.86,
+    JPY: 121.34,
+    CAD: 1.48,
+    AUD: 1.58,
+    INR: 80.56,
+  },
+  GBP: {
+    USD: 1.28,
+    EUR: 1.16,
+    JPY: 140.87,
+    CAD: 1.72,
+    AUD: 1.83,
+    INR: 93.45,
+  },
+  JPY: {
+    USD: 0.0091,
+    EUR: 0.0082,
+    GBP: 0.0071,
+    CAD: 0.012,
+    AUD: 0.013,
+    INR: 0.67,
+  },
+  CAD: {
+    USD: 0.74,
+    EUR: 0.67,
+    GBP: 0.58,
+    JPY: 81.65,
+    AUD: 1.06,
+    INR: 54.25,
+  },
+  AUD: {
+    USD: 0.70,
+    EUR: 0.63,
+    GBP: 0.55,
+    JPY: 77.14,
+    CAD: 0.94,
+    INR: 51.23,
+  },
+  INR: {
+    USD: 0.014,
+    EUR: 0.012,
+    GBP: 0.011,
+    JPY: 1.51,
+    CAD: 0.018,
+    AUD: 0.02,
+  },
 };
 
-const exchangeRates = generateExchangeRates();
+const currencySymbols = {
+  USD: '$',
+  EUR: '€',
+  GBP: '£',
+  JPY: '¥',
+  CAD: 'CA$',
+  AUD: 'A$',
+  INR: '₹',
+};
 
-// Currency flag component
+// Currency flags component
 const CurrencyFlag = ({ currency }) => {
-  const currencyInfo = currenciesList.find(c => c.code === currency);
-  return (
-    <div className="flex-shrink-0 flex items-center justify-center">
-      <span className="text-lg mr-1">{currencyInfo?.flag || '🏳️'}</span>
-    </div>
-  );
+  switch (currency) {
+    case 'USD':
+      return (
+        <div className="w-6 h-4 rounded-sm overflow-hidden flex-shrink-0 border border-gray-200">
+          <div style={{ background: '#B22234', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div style={{ background: '#3C3B6E', width: '30%', height: '50%' }}></div>
+          </div>
+        </div>
+      );
+    case 'EUR':
+      return (
+        <div className="w-6 h-4 rounded-sm overflow-hidden flex-shrink-0 border border-gray-200">
+          <div style={{ background: '#0052B4', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <div style={{ border: '1px solid #FFDA44', borderRadius: '50%', width: '60%', height: '60%' }}></div>
+          </div>
+        </div>
+      );
+    case 'GBP':
+      return (
+        <div className="w-6 h-4 rounded-sm overflow-hidden flex-shrink-0 border border-gray-200">
+          <div style={{ background: '#012169', height: '100%', position: 'relative' }}>
+            <div style={{ position: 'absolute', width: '100%', height: '100%', background: 'linear-gradient(45deg, transparent 40%, #FFF 40%, #FFF 60%, transparent 60%)' }}></div>
+            <div style={{ position: 'absolute', width: '100%', height: '100%', background: 'linear-gradient(-45deg, transparent 40%, #FFF 40%, #FFF 60%, transparent 60%)' }}></div>
+          </div>
+        </div>
+      );
+    case 'JPY':
+      return (
+        <div className="w-6 h-4 rounded-sm overflow-hidden flex-shrink-0 border border-gray-200">
+          <div style={{ background: '#FFFFFF', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <div style={{ background: '#BC002D', width: '40%', height: '40%', borderRadius: '50%' }}></div>
+          </div>
+        </div>
+      );
+    case 'CAD':
+      return (
+        <div className="w-6 h-4 rounded-sm overflow-hidden flex-shrink-0 border border-gray-200">
+          <div style={{ background: '#FFFFFF', height: '100%', display: 'flex', justifyContent: 'center', position: 'relative' }}>
+            <div style={{ background: '#FF0000', width: '20%', height: '100%', position: 'absolute', left: 0 }}></div>
+            <div style={{ background: '#FF0000', width: '20%', height: '100%', position: 'absolute', right: 0 }}></div>
+            <div style={{ color: '#FF0000', fontSize: '10px' }}>🍁</div>
+          </div>
+        </div>
+      );
+    default:
+      return (
+        <div className="w-6 h-4 rounded-sm overflow-hidden flex-shrink-0 border border-gray-200 bg-gray-100"></div>
+      );
+  }
 };
 
 const ModernMoneyCompare = () => {
@@ -188,11 +185,16 @@ const ModernMoneyCompare = () => {
   const [amount, setAmount] = useState(1000);
   const [sortBy, setSortBy] = useState('amount');
   const [sortDirection, setSortDirection] = useState('desc');
+  const [currencyOptions, setCurrencyOptions] = useState([]);
   const [providerResults, setProviderResults] = useState([]);
   const [showFromCurrencyDropdown, setShowFromCurrencyDropdown] = useState(false);
   const [showToCurrencyDropdown, setShowToCurrencyDropdown] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState({ from: '', to: '' });
+  
+  // Initialize currency options on component mount
+  useEffect(() => {
+    setCurrencyOptions(Object.keys(exchangeRates));
+  }, []);
   
   // Calculate provider results whenever relevant parameters change
   useEffect(() => {
@@ -281,17 +283,6 @@ const ModernMoneyCompare = () => {
       maximumFractionDigits: 2
     }).format(value);
   };
-
-  // Filter currencies based on search
-  const filteredFromCurrencies = currenciesList.filter(currency => 
-    currency.code.toLowerCase().includes(searchQuery.from.toLowerCase()) || 
-    currency.name.toLowerCase().includes(searchQuery.from.toLowerCase())
-  );
-
-  const filteredToCurrencies = currenciesList.filter(currency => 
-    currency.code.toLowerCase().includes(searchQuery.to.toLowerCase()) || 
-    currency.name.toLowerCase().includes(searchQuery.to.toLowerCase())
-  );
   
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-900">
@@ -325,10 +316,10 @@ const ModernMoneyCompare = () => {
             <div className="absolute left-24 z-10 max-w-md">
               <div className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-100">
                 <div className="p-6">
-                  <h2 className="text-lg font-bold mb-6 text-center text-gray-800">What are you sending & where?</h2>
+                  <h2 className="text-lg font-bold mb-6 text-center text-gray-800">Compare Money Transfers</h2>
                   
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-600 mb-1 text-left">You send</label>
+                    <label className="block text-sm font-medium text-gray-600 mb-1">You Send</label>
                     <div className="flex">
                       <div className="relative w-2/5">
                         <button 
@@ -343,27 +334,15 @@ const ModernMoneyCompare = () => {
                         </button>
                         
                         {showFromCurrencyDropdown && (
-                          <div className="absolute z-20 w-64 bg-white border border-gray-200 mt-1 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                            <div className="p-2 sticky top-0 bg-white border-b border-gray-200">
-                              <input
-                                type="text"
-                                placeholder="Search currency..."
-                                className="w-full p-2 border rounded text-sm"
-                                value={searchQuery.from}
-                                onChange={(e) => setSearchQuery({...searchQuery, from: e.target.value})}
-                              />
-                            </div>
-                            {filteredFromCurrencies.map(currency => (
+                          <div className="absolute z-20 w-full bg-white border border-gray-200 mt-1 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                            {currencyOptions.map(currency => (
                               <div 
-                                key={currency.code} 
+                                key={currency} 
                                 className="p-2 hover:bg-gray-100 cursor-pointer flex items-center"
-                                onClick={() => handleFromCurrencyChange(currency.code)}
+                                onClick={() => handleFromCurrencyChange(currency)}
                               >
-                                <span className="mr-2">{currency.flag}</span>
-                                <div>
-                                  <div className="font-medium">{currency.code}</div>
-                                  <div className="text-xs text-gray-500">{currency.name}</div>
-                                </div>
+                                <CurrencyFlag currency={currency} />
+                                <span className="ml-2">{currency}</span>
                               </div>
                             ))}
                           </div>
@@ -379,8 +358,12 @@ const ModernMoneyCompare = () => {
                     </div>
                   </div>
                   
+                  <div className="flex justify-center my-4">
+                    <ArrowRightCircle size={24} className="text-blue-500" />
+                  </div>
+                  
                   <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-600 mb-1 text-left">They receive</label>
+                    <label className="block text-sm font-medium text-gray-600 mb-1">They Receive</label>
                     <div className="relative">
                       <button 
                         onClick={() => setShowToCurrencyDropdown(!showToCurrencyDropdown)}
@@ -394,27 +377,15 @@ const ModernMoneyCompare = () => {
                       </button>
                       
                       {showToCurrencyDropdown && (
-                        <div className="absolute z-20 w-64 bg-white border border-gray-200 mt-1 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                          <div className="p-2 sticky top-0 bg-white border-b border-gray-200">
-                            <input
-                              type="text"
-                              placeholder="Search currency..."
-                              className="w-full p-2 border rounded text-sm"
-                              value={searchQuery.to}
-                              onChange={(e) => setSearchQuery({...searchQuery, to: e.target.value})}
-                            />
-                          </div>
-                          {filteredToCurrencies.map(currency => (
+                        <div className="absolute z-20 w-full bg-white border border-gray-200 mt-1 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                          {currencyOptions.map(currency => (
                             <div 
-                              key={currency.code} 
+                              key={currency} 
                               className="p-2 hover:bg-gray-100 cursor-pointer flex items-center"
-                              onClick={() => handleToCurrencyChange(currency.code)}
+                              onClick={() => handleToCurrencyChange(currency)}
                             >
-                              <span className="mr-2">{currency.flag}</span>
-                              <div>
-                                <div className="font-medium">{currency.code}</div>
-                                <div className="text-xs text-gray-500">{currency.name}</div>
-                              </div>
+                              <CurrencyFlag currency={currency} />
+                              <span className="ml-2">{currency}</span>
                             </div>
                           ))}
                         </div>
@@ -515,10 +486,11 @@ const ModernMoneyCompare = () => {
                   <div className="text-sm text-gray-500 mb-1">You send</div>
                   <div className="flex items-center">
                     <CurrencyFlag currency={fromCurrency} />
-                    <span className="ml-2 text-2xl font-bold">
-                      {currenciesList.find(c => c.code === fromCurrency)?.symbol}{formatAmount(amount)} {fromCurrency}
-                    </span>
+                    <span className="ml-2 text-2xl font-bold">{currencySymbols[fromCurrency]}{formatAmount(amount)} {fromCurrency}</span>
                   </div>
+                </div>
+                <div className="hidden md:block text-gray-400">
+                  <ArrowRightCircle size={24} />
                 </div>
                 <div className="mb-4 md:mb-0 md:mx-8">
                   <div className="text-sm text-gray-500 mb-1">They receive</div>
@@ -526,8 +498,8 @@ const ModernMoneyCompare = () => {
                     <CurrencyFlag currency={toCurrency} />
                     <span className="ml-2 text-2xl font-bold">
                       {providerResults.length > 0 
-                        ? `${currenciesList.find(c => c.code === toCurrency)?.symbol}${formatAmount(providerResults[0].amountReceived)} ${toCurrency}`
-                        : `~ ${currenciesList.find(c => c.code === toCurrency)?.symbol}${formatAmount(amount * exchangeRates[fromCurrency][toCurrency])} ${toCurrency}`
+                        ? `${currencySymbols[toCurrency]}${formatAmount(providerResults[0].amountReceived)} ${toCurrency}`
+                        : `~ ${currencySymbols[toCurrency]}${formatAmount(amount * exchangeRates[fromCurrency][toCurrency])} ${toCurrency}`
                       }
                     </span>
                   </div>
@@ -547,6 +519,24 @@ const ModernMoneyCompare = () => {
             <div className="mb-6">
               <div className="flex items-center overflow-x-auto bg-white p-4 rounded-lg shadow-sm border border-gray-100">
                 <span className="font-medium text-gray-600 mr-6 whitespace-nowrap">Sort by:</span>
+                <button 
+                  className={`flex items-center whitespace-nowrap mr-6 ${sortBy === 'amount' ? 'text-blue-600 font-bold' : 'text-gray-600'}`}
+                  onClick={() => { setSortBy('amount'); toggleSortDirection(); }}
+                >
+                  Amount Received
+                  {sortBy === 'amount' && (
+                    <ArrowUpDown size={16} className="ml-1" />
+                  )}
+                </button>
+                <button 
+                  className={`flex items-center whitespace-nowrap mr-6 ${sortBy === 'fees' ? 'text-blue-600 font-bold' : 'text-gray-600'}`}
+                  onClick={() => { setSortBy('fees'); toggleSortDirection(); }}
+                >
+                  Fees
+                  {sortBy === 'fees' && (
+                    <ArrowUpDown size={16} className="ml-1" />
+                  )}
+                </button>
                 <button 
                   className={`flex items-center whitespace-nowrap mr-6 ${sortBy === 'rate' ? 'text-blue-600 font-bold' : 'text-gray-600'}`}
                   onClick={() => { setSortBy('rate'); toggleSortDirection(); }}
@@ -573,7 +563,7 @@ const ModernMoneyCompare = () => {
               <div className="mb-4 bg-green-50 border-l-4 border-green-500 p-4 rounded-md">
                 <div className="flex items-center">
                   <div className="font-bold text-green-800">Best deal: {providerResults[0].name}</div>
-                  <div className="ml-auto font-bold text-green-800">{currenciesList.find(c => c.code === toCurrency)?.symbol}{formatAmount(providerResults[0].amountReceived)}</div>
+                  <div className="ml-auto font-bold text-green-800">{currencySymbols[toCurrency]}{formatAmount(providerResults[0].amountReceived)}</div>
                 </div>
               </div>
             )}
@@ -603,7 +593,7 @@ const ModernMoneyCompare = () => {
                       <div className="flex flex-col md:flex-row justify-between mb-4">
                         <div className="mb-2 md:mb-0">
                           <div className="text-sm text-gray-500">You Send</div>
-                          <div className="font-bold">{currenciesList.find(c => c.code === fromCurrency)?.symbol}{formatAmount(amount)} {fromCurrency}</div>
+                          <div className="font-bold">{currencySymbols[fromCurrency]}{formatAmount(amount)} {fromCurrency}</div>
                         </div>
                         <div className="mb-2 md:mb-0 md:text-center">
                           <div className="text-sm text-gray-500">Exchange Rate</div>
@@ -611,13 +601,13 @@ const ModernMoneyCompare = () => {
                         </div>
                         <div className="md:text-right">
                           <div className="text-sm text-gray-500">They Receive</div>
-                          <div className="font-bold">{currenciesList.find(c => c.code === toCurrency)?.symbol}{formatAmount(provider.amountReceived)} {toCurrency}</div>
+                          <div className="font-bold">{currencySymbols[toCurrency]}{formatAmount(provider.amountReceived)} {toCurrency}</div>
                         </div>
                       </div>
                       
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                         <div className="bg-gray-50 p-3 rounded">
-                          <span className="text-gray-500">Fee:</span> {currenciesList.find(c => c.code === fromCurrency)?.symbol}{provider.transferFee.toFixed(2)}
+                          <span className="text-gray-500">Fee:</span> {currencySymbols[fromCurrency]}{provider.transferFee.toFixed(2)}
                         </div>
                         <div className="bg-gray-50 p-3 rounded">
                           <span className="text-gray-500">Rate Margin:</span> {(provider.exchangeRateMargin * 100).toFixed(2)}%
@@ -640,10 +630,10 @@ const ModernMoneyCompare = () => {
                     {/* CTA */}
                     <div className="p-6 border-t md:border-t-0 md:border-l border-gray-200 flex flex-col items-center justify-center md:w-1/4 bg-white">
                       <div className="mb-2 font-bold text-center text-2xl">
-                        {currenciesList.find(c => c.code === toCurrency)?.symbol}{formatAmount(provider.amountReceived)}
+                        {currencySymbols[toCurrency]}{formatAmount(provider.amountReceived)}
                       </div>
                       <div className="text-xs mb-4 text-center text-gray-500">
-                        Total fees: {currenciesList.find(c => c.code === fromCurrency)?.symbol}{formatAmount(provider.totalFees)}
+                        Total fees: {currencySymbols[fromCurrency]}{formatAmount(provider.totalFees)}
                       </div>
                       <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-md flex items-center justify-center">
                         Get Deal
@@ -722,22 +712,4 @@ const ModernMoneyCompare = () => {
   );
 };
 
-export default ModernMoneyCompare;${sortBy === 'amount' ? 'text-blue-600 font-bold' : 'text-gray-600'}`}
-                  onClick={() => { setSortBy('amount'); toggleSortDirection(); }}
-                >
-                  Amount Received
-                  {sortBy === 'amount' && (
-                    <ArrowUpDown size={16} className="ml-1" />
-                  )}
-                </button>
-                <button 
-                  className={`flex items-center whitespace-nowrap mr-6 ${sortBy === 'fees' ? 'text-blue-600 font-bold' : 'text-gray-600'}`}
-                  onClick={() => { setSortBy('fees'); toggleSortDirection(); }}
-                >
-                  Fees
-                  {sortBy === 'fees' && (
-                    <ArrowUpDown size={16} className="ml-1" />
-                  )}
-                </button>
-                <button 
-                  className={`flex items-center whitespace-nowrap mr-6
+export default ModernMoneyCompare;
