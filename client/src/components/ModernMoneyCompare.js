@@ -723,20 +723,3 @@ const ModernMoneyCompare = () => {
 };
 
 export default ModernMoneyCompare;
-                  onClick={() => { setSortBy('amount'); toggleSortDirection(); }}
-                >
-                  Amount Received
-                  {sortBy === 'amount' && (
-                    <ArrowUpDown size={16} className="ml-1" />
-                  )}
-                <button 
-                  className={`flex items-center whitespace-nowrap mr-6 ${sortBy === 'fees' ? 'text-blue-600 font-bold' : 'text-gray-600'}`}
-                  onClick={() => { setSortBy('fees'); toggleSortDirection(); }}
-                >
-                  Fees
-                  {sortBy === 'fees' && (
-                    <ArrowUpDown size={16} className="ml-1" />
-                  )}
-                </button>
-                <button 
-                  className={`flex items-center whitespace-nowrap mr-6
