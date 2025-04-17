@@ -306,13 +306,13 @@ const ModernMoneyCompare = () => {
     <div className="flex flex-col min-h-screen bg-white text-gray-900">
       {!showResults ? (
         // Landing Page - Modern Design
-        <div className="relative min-h-screen overflow-hidden bg-cover bg-[center-80%] bg-no-repeat" style={{ backgroundImage: "url('/ad.jpg')" }}>
-        {/* Header */}
+        <div className="relative min-h-screen overflow-hidden bg-gradient-to-r from-blue-500 via-blue-400 to-indigo-500">
+          {/* Header */}
           <div className="absolute top-0 left-0 w-full z-10">
             <header className="px-8 py-6">
               <div className="container mx-auto flex justify-between items-center">
                 <div className="flex items-center">
-                <img src="/mmtlogo.png" alt="mymoneytransfers Logo" className="h-10" />
+                  <h1 className="text-2xl font-bold text-white">MoneyCompare</h1>
                 </div>
                 <div className="hidden md:flex space-x-6">
                   <button className="text-white hover:text-white/80 font-medium">Features</button>
@@ -329,10 +329,10 @@ const ModernMoneyCompare = () => {
           </div>
 
           {/* Main Content */}
-          <div className="flex flex-col lg:flex-row items-center justify-left min-h-screen px-20 py-16 md:py-24">
+          <div className="flex items-center justify-center min-h-screen">
             {/* Left Side - Search Tool */}
-            <div className="w-full max-w-md mx-auto lg:mx-0 lg:mr-8 z-10 mb-12 lg:mb-0">
-            <div className="bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-100">
+            <div className="absolute left-24 z-10 max-w-md">
+              <div className="bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-100">
                 <div className="p-8">
                   <h2 className="text-4xl font-serif uppercase font-medium mb-6 text-center tracking-tight leading-none text-gray-800" style={{ fontFamily: 'Special Gothic Expanded One, sans-serif' }}>Find the best deals on money transfers</h2>
                   
@@ -457,30 +457,28 @@ const ModernMoneyCompare = () => {
                     </div>
                   </div>
                   
-                                    <button 
+                  <button 
                     onClick={handleSearch}
                     disabled={isLoading}
-                    className="relative overflow-hidden group w-full bg-[#1B1464] hover:bg-[#252170] text-white text-xl mt-10 py-5 px-5 rounded-xl font-medium flex items-center justify-center transition duration-200"
+                    className="w-full bg-blue-800 hover:bg-blue-600 text-white text-xl mt-10 py-5 px-5 rounded-xl font-medium flex items-center justify-center transition duration-200"
                   >
-                    <span className="relative z-10 flex items-center">
-                      {isLoading ? (
-                        <>
-                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Searching...
-                        </>
-                      ) : (
-                        <>
-                          <Search size={22} className="mr-3" />
-                          Find Deals Now
-                        </>
-                      )}
-                    </span>
+                    {isLoading ? (
+                      <div className="flex items-center">
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Searching...
+                      </div>
+                    ) : (
+                      <>
+                        <Search size={22
+                      
 
-                    {/* shimmer overlay */}
-                    <span className="absolute inset-0 before:content-[''] before:absolute before:top-0 before:left-[-75%] before:h-full before:w-[200%] before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent before:rotate-12 before:opacity-0 group-hover:before:opacity-100 group-hover:before:animate-shimmer" />
+                        } className="mr-3" />
+                        Find Deals Now
+                      </>
+                    )}
                   </button>
                   
                   <div className="mt-8 mb-4 text-xs text-center text-gray-500">
@@ -491,34 +489,33 @@ const ModernMoneyCompare = () => {
             </div>
             
             {/* Right Side - Hero Content */}
-            <div className="hidden">w-full max-w-xl text-white z-10 mx-auto lg:mx-0 lg:ml-8 text-center lg:text-left">
-      <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6">Need to send money overseas?</h1>
-      <p className="text-lg md:text-xl mb-6 md:mb-8">Find the best rates and lowest fees for international money transfers. Save up to 90% compared to banks.</p>
-      {/* Stats section - make it responsive */}
-      <div className="flex flex-wrap justify-center lg:justify-start items-center text-white/90">
-        <div className="border-r border-white/20 pr-4 mr-4 mb-4 lg:mb-0">
-          <div className="font-bold text-2xl">5+</div>
-          <div className="text-sm">Transfer providers</div>
+            <div className="absolute right-20 max-w-xl text-white z-10">
+              <h1 className="text-6xl font-bold mb-6">Need to send money overseas?</h1>
+              <p className="text-xl mb-8">Find the best rates and lowest fees for international money transfers. Save up to 90% compared to banks.</p>
+              <div className="flex items-center text-white/90">
+                <div className="border-r border-white/20 pr-4 mr-4">
+                  <div className="font-bold text-2xl">5+</div>
+                  <div className="text-sm">Transfer providers</div>
+                </div>
+                <div className="border-r border-white/20 pr-4 mr-4">
+                  <div className="font-bold text-2xl">160+</div>
+                  <div className="text-sm">Countries supported</div>
+                </div>
+                <div>
+                  <div className="font-bold text-2xl">$0</div>
+                  <div className="text-sm">Sign-up fee</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="border-r border-white/20 pr-4 mr-4 mb-4 lg:mb-0">
-          <div className="font-bold text-2xl">160+</div>
-          <div className="text-sm">Countries supported</div>
-        </div>
-        <div className="mb-4 lg:mb-0">
-          <div className="font-bold text-2xl">$0</div>
-          <div className="text-sm">Sign-up fee</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
       ) : (
         // Results Page
         <div className="flex flex-col min-h-screen">
           {/* Header */}
           <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
             <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-            <img src="/mmtlogo.png" alt="mymoneytransfers Logo" className="h-10 cursor-pointer hover:opacity-80 transition"  onClick={handleBackToHome}/>
+              <h1 className="text-2xl font-bold text-blue-600 cursor-pointer" onClick={handleBackToHome}>MoneyCompare</h1>
               <div className="hidden md:flex space-x-6">
                 <button className="text-gray-600 hover:text-gray-900 font-medium">Features</button>
                 <button className="text-gray-600 hover:text-gray-900 font-medium">Providers</button>
