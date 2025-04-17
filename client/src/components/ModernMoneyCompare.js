@@ -6,7 +6,7 @@ const providers = [
   {
     id: 1,
     name: 'Wise (TransferWise)',
-    logo: '🔄',
+    logo: <img src="https://d21buns5ku92am.cloudfront.net/69651/images/470484-Frame%2039263-b56b9a-original-1677658160.png" alt="Wise logo" width="150" height="150" />,
     exchangeRateMargin: 0.005, // 0.5%
     transferFee: 3.99,
     transferTime: '1-2 days',
@@ -335,7 +335,11 @@ const ModernMoneyCompare = () => {
             <div className="w-full max-w-md mx-auto lg:mx-0 lg:mr-8 z-10 mb-12 lg:mb-0">
             <div className="bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-100">
                 <div className="p-8">
-                  <h2 className="text-4xl font-serif uppercase font-medium mb-6 text-center tracking-tight leading-none text-gray-800" style={{ fontFamily: 'Special Gothic Expanded One, sans-serif' }}>Find the best deals on money transfers</h2>
+                  <h2 className="text-3xl uppercase font-bold mb-6 text-center tracking-snug leading-none text-[#1B1464]" style={{ fontFamily: 'Special Gothic Expanded One, sans-serif' }}
+                  >  
+                  FIND THE BEST<br />
+                  RATES FOR YOUR<br />
+                  MONEY TRANSFERS</h2>
                   
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-black-600 mb-2 text-left">You send</label>
@@ -350,7 +354,7 @@ const ModernMoneyCompare = () => {
                         >
                           <div className="flex items-center">
                             <CurrencyFlag currency={fromCurrency} />
-                            <span className="ml-2 font-medium">{fromCurrency}</span>
+                            <span className="ml-2 text-xl font-medium">{fromCurrency}</span>
                           </div>
                           <ChevronDown size={16} className="text-gray-600 ml-1" />
                         </button>
@@ -398,7 +402,7 @@ const ModernMoneyCompare = () => {
                           const numericValue = Number(e.target.value.replace(/[^0-9.]/g, ''));
                           setAmount(Math.max(0, numericValue));
                         }}
-                        className="w-3/5 border border-gray-500 bg-white-100 rounded-xl p-5 focus:outline-none text-gray-800 font-medium text-right ml-8"
+                        className="w-3/5 border border-gray-500 bg-white-100 rounded-xl p-5 focus:outline-none text-gray-800 font-medium text-xl text-right ml-8"
                         inputMode="decimal"
                       />
                     </div>
@@ -416,7 +420,7 @@ const ModernMoneyCompare = () => {
                       >
                         <div className="flex items-center">
                           <CurrencyFlag currency={toCurrency} />
-                          <span className="ml-2 font-medium">{toCurrency}</span>
+                          <span className="ml-2 text-xl font-medium">{toCurrency}</span>
                         </div>
                         <ChevronDown size={16} className="text-gray-600 ml-1" />
                       </button>
@@ -461,7 +465,7 @@ const ModernMoneyCompare = () => {
                                     <button 
                     onClick={handleSearch}
                     disabled={isLoading}
-                    className="relative overflow-hidden group w-full bg-[#1B1464] hover:bg-[#252170] text-white text-xl mt-10 py-5 px-5 rounded-xl font-medium flex items-center justify-center transition duration-200"
+                    className="relative overflow-hidden group w-full bg-[#1B1464] hover:bg-[#252170] text-white text-xl mt-10 py-5 px-5 rounded-xl font-medium flex items-center justify-center transition duration-200" 
                   >
                     <span className="relative z-10 flex items-center">
                       {isLoading ? (
@@ -484,7 +488,7 @@ const ModernMoneyCompare = () => {
                     <span className="absolute inset-0 before:content-[''] before:absolute before:top-0 before:left-[-75%] before:h-full before:w-[200%] before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent before:rotate-12 before:opacity-0 group-hover:before:opacity-100 group-hover:before:animate-shimmer" />
                   </button>
                   
-                  <div className="mt-8 mb-4 text-xs text-center text-gray-500">
+                  <div className="mt-8 text-sm text-center text-gray-800">
                     Compare rates from worldwide providers instantly
                   </div>
                 </div>
