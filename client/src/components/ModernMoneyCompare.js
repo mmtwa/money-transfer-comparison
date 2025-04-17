@@ -180,10 +180,11 @@ const CurrencyFlag = ({ currency }) => {
       <img 
         src={flagUrl} 
         alt={`${currency} flag`} 
-        className="w-6 h-6 rounded-full object-cover"
+        className="w-6 h-6 rounded-full object-cover bg-gray-200"
         onError={(e) => {
           e.target.onerror = null;
-          e.target.src = "/api/placeholder/24/24"; // Fallback if flag image doesn't exist
+          // Display the first two letters of the currency code as fallback
+          e.target.src = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><text x='50%' y='50%' font-size='10' text-anchor='middle' dominant-baseline='middle'>${currency.substring(0, 2)}</text></svg>`;
         }}
       />
     </div>
@@ -374,10 +375,10 @@ const ModernMoneyCompare = () => {
                                 <img 
                                   src={`https://wise.com/web-art/assets/flags/${currency.code.toLowerCase()}.svg`}
                                   alt={`${currency.code} flag`}
-                                  className="w-5 h-5 rounded-full object-cover mr-4"
+                                  className="w-5 h-5 rounded-full object-cover mr-4 bg-gray-200"
                                   onError={(e) => {
                                     e.target.onerror = null;
-                                    e.target.src = "/api/placeholder/20/20";
+                                    e.target.src = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'><text x='50%' y='50%' font-size='8' text-anchor='middle' dominant-baseline='middle'>${currency.code.substring(0, 2)}</text></svg>`;
                                   }}
                                 />
                                 <div className="flex flex-col text-left">
@@ -437,15 +438,15 @@ const ModernMoneyCompare = () => {
                               className="p-2 hover:bg-gray-100 cursor-pointer flex items-center"
                               onClick={() => handleToCurrencyChange(currency.code)}
                             >
-                              <img 
-                                src={`https://wise.com/web-art/assets/flags/${currency.code.toLowerCase()}.svg`}
-                                alt={`${currency.code} flag`}
-                                className="w-5 h-5 rounded-full object-cover mr-[16px]"
-                                onError={(e) => {
-                                  e.target.onerror = null;
-                                  e.target.src = "/api/placeholder/20/20";
-                                }}
-                              />
+                            <img 
+                              src={`https://wise.com/web-art/assets/flags/${currency.code.toLowerCase()}.svg`}
+                              alt={`${currency.code} flag`}
+                              className="w-5 h-5 rounded-full object-cover mr-[16px] bg-gray-200"
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'><text x='50%' y='50%' font-size='8' text-anchor='middle' dominant-baseline='middle'>${currency.code.substring(0, 2)}</text></svg>`;
+                              }}
+                            />
                               <div className="flex flex-col text-left">
                                 <div className="font-medium">{currency.code}</div>
                                 <div className="text-xs text-gray-500">{currency.name}</div>
