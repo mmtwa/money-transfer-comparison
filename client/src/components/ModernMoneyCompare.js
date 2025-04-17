@@ -6,7 +6,7 @@ const providers = [
   {
     id: 1,
     name: 'Wise (TransferWise)',
-    logo: <img src="https://d21buns5ku92am.cloudfront.net/69651/images/470484-Frame%2039263-b56b9a-original-1677658160.png" alt="Wise logo" width="150" height="150" />,
+    logo: <img src="/wiselogo.png" alt="Wise logo" width="150" height="150" />,
     exchangeRateMargin: 0.005, // 0.5%
     transferFee: 3.99,
     transferTime: '1-2 days',
