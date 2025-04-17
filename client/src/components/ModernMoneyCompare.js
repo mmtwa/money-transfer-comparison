@@ -173,7 +173,7 @@ const exchangeRates = generateExchangeRates();
 
 // Currency flag component
 const CurrencyFlag = ({ currency }) => {
-  const flagUrl = `https://wise.com/web-art/assets/flags/${currency.toLowerCase()}.svg`;
+  const flagUrl = `/flags/${currency.toLowerCase()}.svg`;
   
   return (
     <div className="flex-shrink-0 flex items-center justify-center">
@@ -373,7 +373,7 @@ const ModernMoneyCompare = () => {
                                 onClick={() => handleFromCurrencyChange(currency.code)}
                                 >
                                 <img 
-                                  src={`https://wise.com/web-art/assets/flags/${currency.code.toLowerCase()}.svg`}
+                                  src={`/flags/${currency.code.toLowerCase()}.svg`}
                                   alt={`${currency.code} flag`}
                                   className="w-5 h-5 rounded-full object-cover mr-4 bg-gray-200"
                                   onError={(e) => {
@@ -439,7 +439,7 @@ const ModernMoneyCompare = () => {
                               onClick={() => handleToCurrencyChange(currency.code)}
                             >
                             <img 
-                              src={`https://wise.com/web-art/assets/flags/${currency.code.toLowerCase()}.svg`}
+                              src={`/flags/${currency.code.toLowerCase()}.svg`}
                               alt={`${currency.code} flag`}
                               className="w-5 h-5 rounded-full object-cover mr-[16px] bg-gray-200"
                               onError={(e) => {
