@@ -489,7 +489,7 @@ const ModernMoneyCompare = () => {
                   </button>
                   
                   <div className="mt-8 text-sm text-center text-gray-800">
-                    Compare rates from worldwide providers instantly
+                    We're funded by ad partners so we don't take any cut, which enables us to truly give you the best rates available
                   </div>
                 </div>
               </div>
