@@ -41,6 +41,7 @@ app.use(helmet({
       ...helmet.contentSecurityPolicy.getDefaultDirectives(),
       "script-src": ["'self'", "https://www.googletagmanager.com", "https://www.google-analytics.com"],
       "img-src": ["'self'", "https://www.google-analytics.com", "https://stats.g.doubleclick.net"]
+      "connect-src": ["'self'", "https://www.google-analytics.com", "https://*.google-analytics.com", "https://region1.google-analytics.com", "https://stats.g.doubleclick.net"]
     }
   }
 })); // Security headers
