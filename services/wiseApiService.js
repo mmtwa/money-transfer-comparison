@@ -1,6 +1,6 @@
 const axios = require('axios');
 const axiosRateLimit = require('axios-rate-limit');
-const axiosRetry = require('axios-retry');
+const { default: axiosRetry } = require('axios-retry');
 const NodeCache = require('node-cache');
 
 // Cache configuration - items expire after 1 hour (3600 seconds)
