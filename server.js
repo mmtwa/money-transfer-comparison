@@ -35,7 +35,15 @@ mongoose.connect(process.env.MONGODB_URI, {
 .catch(err => console.error('MongoDB connection error:', err));
 
 // Middleware
-app.use(helmet()); // Security headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+      "script-src": ["'self'", "https://www.googletagmanager.com", "https://www.google-analytics.com"],
+      "img-src": ["'self'", "https://www.google-analytics.com", "https://stats.g.doubleclick.net"]
+    }
+  }
+})); // Security headers
 app.use(cors()); // Enable CORS
 app.use(express.json()); // Parse JSON request body
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
