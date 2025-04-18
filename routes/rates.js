@@ -3,6 +3,12 @@ const router = express.Router();
 const { check, validationResult } = require('express-validator');
 const providerService = require('../services/providerService');
 const auth = require('../middleware/auth');
+const User = require('../models/User');
+const { cacheApiResponse, createRateLimiter } = require('../middleware/apiMiddleware');
+
+// Apply rate limiting to all routes
+const ratesLimiter = createRateLimiter(200, 15 * 60 * 1000); // 200 requests per 15 minutes
+router.use(ratesLimiter);
 
 /**
  * @route   GET /api/rates/compare
@@ -13,7 +19,7 @@ router.get('/compare', [
   check('fromCurrency', 'From currency is required').notEmpty().isLength({ min: 3, max: 3 }),
   check('toCurrency', 'To currency is required').notEmpty().isLength({ min: 3, max: 3 }),
   check('amount', 'Amount must be a positive number').isFloat({ min: 0.01 })
-], async (req, res) => {
+], cacheApiResponse(300), async (req, res) => {
   // Validate request
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -59,6 +65,57 @@ router.get('/compare', [
 });
 
 /**
+ * @route   GET /api/rates/provider/:provider
+ * @desc    Get exchange rates from a specific provider
+ * @access  Public
+ */
+router.get('/provider/:provider', [
+  check('fromCurrency', 'From currency is required').notEmpty().isLength({ min: 3, max: 3 }),
+  check('toCurrency', 'To currency is required').notEmpty().isLength({ min: 3, max: 3 }),
+  check('amount', 'Amount must be a positive number').isFloat({ min: 0.01 })
+], cacheApiResponse(180), async (req, res) => {
+  // Validate request
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ success: false, errors: errors.array() });
+  }
+
+  const { fromCurrency, toCurrency, amount } = req.query;
+  const { provider } = req.params;
+  
+  try {
+    // Get all exchange rates first
+    const allResults = await providerService.getExchangeRates(
+      fromCurrency.toUpperCase(),
+      toCurrency.toUpperCase(),
+      parseFloat(amount)
+    );
+    
+    // Filter for the specific provider
+    const providerResult = allResults.find(r => r.providerCode.toLowerCase() === provider.toLowerCase());
+    
+    if (!providerResult) {
+      return res.status(404).json({
+        success: false,
+        message: `No data available for provider ${provider}`
+      });
+    }
+    
+    res.json({
+      success: true,
+      data: providerResult
+    });
+  } catch (error) {
+    console.error(`Error fetching rates for provider ${provider}:`, error);
+    res.status(500).json({
+      success: false,
+      message: `Could not fetch exchange rates for provider ${provider}`,
+      error: process.env.NODE_ENV === 'production' ? null : error.message
+    });
+  }
+});
+
+/**
  * @route   GET /api/rates/history
  * @desc    Get historical exchange rates for a currency pair
  * @access  Public
@@ -67,7 +124,7 @@ router.get('/history', [
   check('fromCurrency', 'From currency is required').notEmpty().isLength({ min: 3, max: 3 }),
   check('toCurrency', 'To currency is required').notEmpty().isLength({ min: 3, max: 3 }),
   check('days', 'Days must be a positive integer').optional().isInt({ min: 1, max: 365 })
-], async (req, res) => {
+], cacheApiResponse(3600), async (req, res) => {
   // Validate request
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -80,7 +137,7 @@ router.get('/history', [
   try {
     // This would typically come from a historical rate service or database
     // For this example, we'll generate mock data
-    const history = generateMockHistoricalData(fromCurrency, toCurrency, days);
+    const history = await generateHistoricalData(fromCurrency, toCurrency, days);
     
     res.json({
       success: true,
@@ -99,8 +156,51 @@ router.get('/history', [
   }
 });
 
-// Helper function to generate mock historical data
-function generateMockHistoricalData(fromCurrency, toCurrency, days) {
+/**
+ * @route   POST /api/rates/cache/clear
+ * @desc    Clear rate cache
+ * @access  Private/Admin
+ */
+router.post('/cache/clear', auth, async (req, res) => {
+  try {
+    const { fromCurrency, toCurrency } = req.body;
+    
+    // Clear specific cache or all cache
+    await providerService.clearCache(fromCurrency, toCurrency);
+    
+    res.json({
+      success: true,
+      message: 'Cache cleared successfully'
+    });
+  } catch (error) {
+    console.error('Error clearing cache:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Could not clear cache',
+      error: process.env.NODE_ENV === 'production' ? null : error.message
+    });
+  }
+});
+
+// Helper function to generate historical data for a currency pair
+async function generateHistoricalData(fromCurrency, toCurrency, days) {
+  // Try to get real historical data first
+  try {
+    // Using Wise API for historical data
+    const wiseApiService = require('../services/wiseApiService');
+    
+    // If Wise API is available, use it
+    if (process.env.WISE_API_KEY) {
+      // Call Wise API historical data endpoint
+      // Note: This is a placeholder - you'll need to implement this in wiseApiService.js
+      // based on the actual Wise API capabilities
+      return await wiseApiService.getHistoricalRates(fromCurrency, toCurrency, days);
+    }
+  } catch (error) {
+    console.warn('Failed to get real historical data, falling back to generated data');
+  }
+  
+  // Fall back to generated data
   const baseRate = getBaseMockRate(fromCurrency, toCurrency);
   const history = [];
   
