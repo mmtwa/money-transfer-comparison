@@ -1,4 +1,3 @@
-
 const mongoose = require('mongoose');
 
 const ProviderSchema = new mongoose.Schema({
@@ -37,6 +36,29 @@ const ProviderSchema = new mongoose.Schema({
     type: String,
     required: false,
     select: false
+  },
+  apiEnabled: {
+    type: Boolean,
+    default: false,
+    description: 'Whether live API integration is enabled for this provider'
+  },
+  apiHandler: {
+    type: String,
+    enum: ['wise', 'transferwise', 'xe', 'westernunion', 'ofx', 'remitly', 'generic'],
+    default: 'generic',
+    description: 'Identifies which API handler to use for this provider'
+  },
+  apiVersion: {
+    type: String,
+    default: 'v1'
+  },
+  apiLastTested: {
+    type: Date,
+    default: null
+  },
+  apiCredentialsExpiry: {
+    type: Date,
+    default: null
   },
   transferFeeStructure: {
     type: {
@@ -99,6 +121,30 @@ const ProviderSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  apiQuota: {
+    daily: {
+      type: Number,
+      default: 1000
+    },
+    monthly: {
+      type: Number,
+      default: 30000
+    }
+  },
+  apiUsage: {
+    today: {
+      type: Number,
+      default: 0
+    },
+    thisMonth: {
+      type: Number,
+      default: 0
+    },
+    lastReset: {
+      type: Date,
+      default: Date.now
+    }
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -114,5 +160,40 @@ ProviderSchema.pre('save', function(next) {
   this.updatedAt = Date.now();
   next();
 });
+
+// Method to track API usage
+ProviderSchema.methods.trackApiCall = async function() {
+  // Reset daily counter if it's a new day
+  const today = new Date();
+  const lastReset = new Date(this.apiUsage.lastReset);
+  
+  if (today.getDate() !== lastReset.getDate() || 
+      today.getMonth() !== lastReset.getMonth() ||
+      today.getFullYear() !== lastReset.getFullYear()) {
+    this.apiUsage.today = 0;
+    this.apiUsage.lastReset = today;
+  }
+  
+  // Reset monthly counter if it's a new month
+  if (today.getMonth() !== lastReset.getMonth() ||
+      today.getFullYear() !== lastReset.getFullYear()) {
+    this.apiUsage.thisMonth = 0;
+  }
+  
+  // Increment counters
+  this.apiUsage.today += 1;
+  this.apiUsage.thisMonth += 1;
+  
+  await this.save();
+  
+  // Return true if still within quota, false if exceeded
+  return this.apiUsage.today <= this.apiQuota.daily && 
+         this.apiUsage.thisMonth <= this.apiQuota.monthly;
+};
+
+// Static method to find providers with active API integration
+ProviderSchema.statics.findWithActiveApi = function() {
+  return this.find({ apiEnabled: true, active: true });
+};
 
 module.exports = mongoose.model('Provider', ProviderSchema);
