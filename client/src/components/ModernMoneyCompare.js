@@ -97,6 +97,7 @@ const currenciesList = [
   { code: 'QAR', name: 'Qatari Riyal', symbol: 'ر.ق', flag: '🇶🇦' },
   { code: 'KWD', name: 'Kuwaiti Dinar', symbol: 'د.ك', flag: '🇰🇼' },
   { code: 'NGN', name: 'Nigerian Naira', symbol: '₦', flag: '🇳🇬' },
+  // Other currencies...
 ];
 
 // Generate exchange rates for all currency pairs
@@ -150,6 +151,7 @@ const generateExchangeRates = () => {
     QAR: 3.64,
     KWD: 0.30,
     NGN: 410.50
+    // Other rates...
   };
   
   // Generate rates for all currency pairs
@@ -191,7 +193,7 @@ const CurrencyFlag = ({ currency }) => {
   );
 };
 
-const ModernMoneyCompare = () => {
+const ResponsiveMoneyCompare = () => {
   const [showResults, setShowResults] = useState(false);
   const [fromCurrency, setFromCurrency] = useState('GBP');
   const [toCurrency, setToCurrency] = useState('EUR');
@@ -306,40 +308,25 @@ const ModernMoneyCompare = () => {
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-900">
       {!showResults ? (
-        // Landing Page - Modern Design
-        <div className="relative min-h-screen overflow-hidden bg-cover bg-[center-80%] bg-no-repeat" style={{ backgroundImage: "url('/ad.jpg')" }}>
-        {/* Header */}
-          <div className="absolute top-0 left-0 w-full z-10">
-            <header className="px-8 py-6">
-              <div className="container mx-auto flex justify-between items-center">
-                <div className="flex items-center">
-                <img src="/mmtlogo.png" alt="mymoneytransfers Logo" className="h-10" />
-                </div>
-                <div className="hidden md:flex space-x-6">
-                  <button className="text-white hover:text-white/80 font-medium">Features</button>
-                  <button className="text-white hover:text-white/80 font-medium">Pricing</button>
-                  <button className="text-white hover:text-white/80 font-medium">Use cases</button>
-                  <button className="text-white hover:text-white/80 font-medium">Resources</button>
-                </div>
-                <div className="flex space-x-4">
-                  <button className="px-4 py-2 text-white hover:text-white/80 font-medium">Log in</button>
-                  <button className="px-4 py-2 bg-white text-blue-600 rounded-full font-medium hover:bg-white/90 shadow-md">Sign up</button>
-                </div>
-              </div>
-            </header>
+        // Landing Page with responsive backgrounds
+        <div className="relative h-screen overflow-hidden bg-cover bg-center bg-no-repeat 
+                        bg-[url('/mobile-ad.jpg')] sm:bg-[url('/tablet-ad.jpg')] md:bg-[url('/desktop-ad.jpg')]">
+          {/* Centered Logo */}
+          <div className="w-full flex justify-center md:justify-center lg:justify-start lg:pl-10 pt-6 md:pt-8 lg:pt-10">
+            <img src="/mmtlogo.png" alt="mymoneytransfers Logo" className="h-8 md:h-10 lg:h-12" />
           </div>
 
-          {/* Main Content */}
-          <div className="flex flex-col lg:flex-row items-center justify-left min-h-screen px-20 py-16 md:py-24">
-            {/* Left Side - Search Tool */}
-            <div className="w-full max-w-md mx-auto lg:mx-0 lg:mr-8 z-10 mb-12 lg:mb-0">
-            <div className="bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-100">
-                <div className="p-8">
-                  <h2 className="text-3xl uppercase font-bold mb-6 text-center tracking-snug leading-none text-[#1B1464]" style={{ fontFamily: 'Special Gothic Expanded One, sans-serif' }}
-                  >  
-                  FIND THE BEST<br />
-                  RATES FOR YOUR<br />
-                  MONEY TRANSFERS</h2>
+          {/* Main Content with centered search tool */}
+          <div className="flex flex-col items-center lg:items-start justify-center h-[calc(100vh-80px)] px-4 py-6 md:py-8 lg:pl-10 lg:py-12">
+            {/* Search Tool - centered on mobile and tablet */}
+            <div className="w-full max-w-md mx-auto lg:mx-0 z-10">
+              <div className="bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-100">
+                <div className="p-6 md:p-8">
+                  <h2 className="text-2xl md:text-3xl uppercase font-bold mb-6 text-center tracking-snug leading-none text-[#1B1464]" style={{ fontFamily: 'Special Gothic Expanded One, sans-serif' }}>  
+                    FIND THE BEST<br />
+                    RATES FOR YOUR<br />
+                    MONEY TRANSFERS
+                  </h2>
                   
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-black-600 mb-2 text-left">You send</label>
@@ -350,11 +337,11 @@ const ModernMoneyCompare = () => {
                             setShowFromCurrencyDropdown(!showFromCurrencyDropdown);
                             setShowToCurrencyDropdown(false);
                           }}
-                          className="h-full appearance-none border border-gray-500 bg-white-100 rounded-xl p-5 text-gray-800 focus:outline-none cursor-pointer flex items-center justify-between w-full"
+                          className="h-full appearance-none border border-gray-500 bg-white-100 rounded-xl p-4 md:p-5 text-gray-800 focus:outline-none cursor-pointer flex items-center justify-between w-full"
                         >
                           <div className="flex items-center">
                             <CurrencyFlag currency={fromCurrency} />
-                            <span className="ml-2 text-xl font-medium">{fromCurrency}</span>
+                            <span className="ml-2 text-base md:text-xl font-medium">{fromCurrency}</span>
                           </div>
                           <ChevronDown size={16} className="text-gray-600 ml-1" />
                         </button>
@@ -375,7 +362,7 @@ const ModernMoneyCompare = () => {
                                 key={currency.code} 
                                 className="p-2 hover:bg-gray-100 cursor-pointer flex items-center"
                                 onClick={() => handleFromCurrencyChange(currency.code)}
-                                >
+                              >
                                 <img 
                                   src={`/flags/${currency.code.toLowerCase()}.svg`}
                                   alt={`${currency.code} flag`}
@@ -402,7 +389,7 @@ const ModernMoneyCompare = () => {
                           const numericValue = Number(e.target.value.replace(/[^0-9.]/g, ''));
                           setAmount(Math.max(0, numericValue));
                         }}
-                        className="w-3/5 border border-gray-500 bg-white-100 rounded-xl p-5 focus:outline-none text-gray-800 font-medium text-xl text-right ml-8"
+                        className="w-3/5 border border-gray-500 bg-white-100 rounded-xl p-4 md:p-5 focus:outline-none text-gray-800 font-medium text-base md:text-xl text-right ml-4 md:ml-8"
                         inputMode="decimal"
                       />
                     </div>
@@ -416,17 +403,17 @@ const ModernMoneyCompare = () => {
                           setShowToCurrencyDropdown(!showToCurrencyDropdown);
                           setShowFromCurrencyDropdown(false);
                         }}
-                        className="w-full appearance-none border border-gray-500 rounded-xl p-5 text-gray-800 focus:outline-none mb-1 cursor-pointer flex items-center justify-between"
+                        className="w-full appearance-none border border-gray-500 rounded-xl p-4 md:p-5 text-gray-800 focus:outline-none mb-1 cursor-pointer flex items-center justify-between"
                       >
                         <div className="flex items-center">
                           <CurrencyFlag currency={toCurrency} />
-                          <span className="ml-2 text-xl font-medium">{toCurrency}</span>
+                          <span className="ml-2 text-base md:text-xl font-medium">{toCurrency}</span>
                         </div>
                         <ChevronDown size={16} className="text-gray-600 ml-1" />
                       </button>
                       
                       {showToCurrencyDropdown && (
-                        <div className="fixed z-20 w-64 bg-white border border-gray-200 mt-1 rounded-md shadow-lg max-h-[calc(40vh-50px)] overflow-y-auto">
+                        <div className="fixed max-h-[calc(40vh-50px)] z-20 w-64 bg-white border border-gray-200 mt-1 rounded-md shadow-lg max-h-60 overflow-y-auto">
                           <div className="p-2 sticky top-0 bg-white border-b border-gray-200">
                             <input
                               type="text"
@@ -442,15 +429,15 @@ const ModernMoneyCompare = () => {
                               className="p-2 hover:bg-gray-100 cursor-pointer flex items-center"
                               onClick={() => handleToCurrencyChange(currency.code)}
                             >
-                            <img 
-                              src={`/flags/${currency.code.toLowerCase()}.svg`}
-                              alt={`${currency.code} flag`}
-                              className="w-5 h-5 rounded-full object-cover mr-[16px] bg-gray-200"
-                              onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.src = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'><text x='50%' y='50%' font-size='8' text-anchor='middle' dominant-baseline='middle'>${currency.code.substring(0, 2)}</text></svg>`;
-                              }}
-                            />
+                              <img 
+                                src={`/flags/${currency.code.toLowerCase()}.svg`}
+                                alt={`${currency.code} flag`}
+                                className="w-5 h-5 rounded-full object-cover mr-4 bg-gray-200"
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.src = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'><text x='50%' y='50%' font-size='8' text-anchor='middle' dominant-baseline='middle'>${currency.code.substring(0, 2)}</text></svg>`;
+                                }}
+                              />
                               <div className="flex flex-col text-left">
                                 <div className="font-medium">{currency.code}</div>
                                 <div className="text-xs text-gray-500">{currency.name}</div>
@@ -462,10 +449,10 @@ const ModernMoneyCompare = () => {
                     </div>
                   </div>
                   
-                                    <button 
+                  <button 
                     onClick={handleSearch}
                     disabled={isLoading}
-                    className="relative overflow-hidden group w-full bg-[#1B1464] hover:bg-[#252170] text-white text-xl mt-10 py-5 px-5 rounded-xl font-medium flex items-center justify-center transition duration-200" 
+                    className="relative overflow-hidden group w-full bg-[#1B1464] hover:bg-[#252170] text-white text-lg md:text-xl mt-6 md:mt-10 py-4 md:py-5 px-4 md:px-5 rounded-xl font-medium flex items-center justify-center transition duration-200" 
                   >
                     <span className="relative z-10 flex items-center">
                       {isLoading ? (
@@ -478,7 +465,7 @@ const ModernMoneyCompare = () => {
                         </>
                       ) : (
                         <>
-                          <Search size={22} className="mr-3" />
+                          <Search size={20} className="mr-2 md:mr-3" />
                           Find Deals Now
                         </>
                       )}
@@ -488,56 +475,31 @@ const ModernMoneyCompare = () => {
                     <span className="absolute inset-0 before:content-[''] before:absolute before:top-0 before:left-[-75%] before:h-full before:w-[200%] before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent before:rotate-12 before:opacity-0 group-hover:before:opacity-100 group-hover:before:animate-shimmer" />
                   </button>
                   
-                  <div className="mt-8 text-sm text-center text-gray-800">
+                  <div className="mt-6 md:mt-8 text-xs md:text-sm text-center text-gray-800">
                     We're funded by ad partners so we don't take any cut, which enables us to truly give you the best rates available
                   </div>
                 </div>
               </div>
             </div>
-            
-            {/* Right Side - Hero Content */}
-            <div className="hidden">w-full max-w-xl text-white z-10 mx-auto lg:mx-0 lg:ml-8 text-center lg:text-left">
-      <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6">Need to send money overseas?</h1>
-      <p className="text-lg md:text-xl mb-6 md:mb-8">Find the best rates and lowest fees for international money transfers. Save up to 90% compared to banks.</p>
-      {/* Stats section - make it responsive */}
-      <div className="flex flex-wrap justify-center lg:justify-start items-center text-white/90">
-        <div className="border-r border-white/20 pr-4 mr-4 mb-4 lg:mb-0">
-          <div className="font-bold text-2xl">5+</div>
-          <div className="text-sm">Transfer providers</div>
+          </div>
         </div>
-        <div className="border-r border-white/20 pr-4 mr-4 mb-4 lg:mb-0">
-          <div className="font-bold text-2xl">160+</div>
-          <div className="text-sm">Countries supported</div>
-        </div>
-        <div className="mb-4 lg:mb-0">
-          <div className="font-bold text-2xl">$0</div>
-          <div className="text-sm">Sign-up fee</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
       ) : (
-        // Results Page
+        // Results Page with centered logo
         <div className="flex flex-col min-h-screen">
-          {/* Header */}
-          <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
-            <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-            <img src="/mmtlogo.png" alt="mymoneytransfers Logo" className="h-10 cursor-pointer hover:opacity-80 transition"  onClick={handleBackToHome}/>
-              <div className="hidden md:flex space-x-6">
-                <button className="text-gray-600 hover:text-gray-900 font-medium">Features</button>
-                <button className="text-gray-600 hover:text-gray-900 font-medium">Providers</button>
-                <button className="text-gray-600 hover:text-gray-900 font-medium">Resources</button>
-              </div>
-              <div className="flex space-x-4">
-                <button className="px-4 py-2 text-blue-600 hover:text-blue-700 font-medium">Log in</button>
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700">Sign up</button>
-              </div>
+          {/* Centered Logo Header */}
+          <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10 py-4">
+            <div className="container mx-auto px-4 flex justify-center">
+              <img 
+                src="/mmtlogo.png" 
+                alt="mymoneytransfers Logo" 
+                className="h-8 md:h-10 cursor-pointer hover:opacity-80 transition" 
+                onClick={handleBackToHome}
+              />
             </div>
           </header>
           
           {/* Results Section */}
-          <div className="container mx-auto flex-1 px-4 py-8">
+          <div className="container mx-auto flex-1 px-4 py-6 md:py-8">
             <div className="mb-6">
               <button 
                 onClick={handleBackToHome}
@@ -547,14 +509,14 @@ const ModernMoneyCompare = () => {
               </button>
             </div>
             
-            <div className="mb-8 bg-blue-50 p-6 rounded-lg shadow-sm">
+            <div className="mb-6 md:mb-8 bg-blue-50 p-4 md:p-6 rounded-lg shadow-sm">
               <h2 className="text-xl font-bold mb-4 text-gray-800">Your Results</h2>
               <div className="flex flex-col md:flex-row md:items-center">
                 <div className="mb-4 md:mb-0 md:mr-8">
                   <div className="text-sm text-gray-500 mb-1">You send</div>
                   <div className="flex items-center">
                     <CurrencyFlag currency={fromCurrency} />
-                    <span className="ml-2 text-2xl font-bold">
+                    <span className="ml-2 text-xl md:text-2xl font-bold">
                       {currenciesList.find(c => c.code === fromCurrency)?.symbol}{formatAmount(amount)} {fromCurrency}
                     </span>
                   </div>
@@ -563,7 +525,7 @@ const ModernMoneyCompare = () => {
                   <div className="text-sm text-gray-500 mb-1">They receive</div>
                   <div className="flex items-center">
                     <CurrencyFlag currency={toCurrency} />
-                    <span className="ml-2 text-2xl font-bold">
+                    <span className="ml-2 text-xl md:text-2xl font-bold">
                       {providerResults.length > 0 
                         ? `${currenciesList.find(c => c.code === toCurrency)?.symbol}${formatAmount(providerResults[0].amountReceived)} ${toCurrency}`
                         : `~ ${currenciesList.find(c => c.code === toCurrency)?.symbol}${formatAmount(amount * exchangeRates[fromCurrency][toCurrency])} ${toCurrency}`
@@ -571,7 +533,7 @@ const ModernMoneyCompare = () => {
                     </span>
                   </div>
                 </div>
-                <div className="ml-auto">
+                <div className="md:ml-auto">
                   <button 
                     onClick={handleBackToHome}
                     className="px-4 py-2 bg-white border border-blue-500 text-blue-600 rounded-md hover:bg-blue-50"
@@ -584,10 +546,10 @@ const ModernMoneyCompare = () => {
             
             {/* Sorting options */}
             <div className="mb-6">
-              <div className="flex items-center overflow-x-auto bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                <span className="font-medium text-gray-600 mr-6 whitespace-nowrap">Sort by:</span>
+              <div className="flex items-center overflow-x-auto bg-white p-3 md:p-4 rounded-lg shadow-sm border border-gray-100">
+                <span className="font-medium text-gray-600 mr-4 md:mr-6 whitespace-nowrap">Sort by:</span>
                 <button 
-                  className={`flex items-center whitespace-nowrap mr-6 ${sortBy === 'rate' ? 'text-blue-600 font-bold' : 'text-gray-600'}`}
+                  className={`flex items-center whitespace-nowrap mr-4 md:mr-6 ${sortBy === 'rate' ? 'text-blue-600 font-bold' : 'text-gray-600'}`}
                   onClick={() => { setSortBy('rate'); toggleSortDirection(); }}
                 >
                   Exchange Rate
@@ -626,9 +588,9 @@ const ModernMoneyCompare = () => {
                 >
                   <div className="flex flex-col md:flex-row">
                     {/* Provider info */}
-                    <div className="p-6 flex flex-col items-center justify-center md:w-1/4 bg-white">
-                      <div className="text-4xl mb-2">{provider.logo}</div>
-                      <div className="font-bold text-lg text-center">{provider.name}</div>
+                    <div className="p-4 md:p-6 flex flex-col items-center justify-center md:w-1/4 bg-white">
+                      <div className="text-3xl md:text-4xl mb-2">{provider.logo}</div>
+                      <div className="font-bold text-base md:text-lg text-center">{provider.name}</div>
                       <div className="text-sm text-yellow-500 mt-1">
                         {'★'.repeat(Math.floor(provider.rating))}
                         {provider.rating % 1 >= 0.5 ? '½' : ''}
@@ -638,36 +600,36 @@ const ModernMoneyCompare = () => {
                     </div>
                     
                     {/* Exchange details */}
-                    <div className="p-6 border-t md:border-t-0 md:border-l border-gray-200 md:w-2/4">
+                    <div className="p-4 md:p-6 border-t md:border-t-0 md:border-l border-gray-200 md:w-2/4">
                       <div className="flex flex-col md:flex-row justify-between mb-4">
                         <div className="mb-2 md:mb-0">
-                          <div className="text-sm text-gray-500">You Send</div>
-                          <div className="font-bold">{currenciesList.find(c => c.code === fromCurrency)?.symbol}{formatAmount(amount)} {fromCurrency}</div>
+                          <div className="text-xs md:text-sm text-gray-500">You Send</div>
+                          <div className="font-bold text-sm md:text-base">{currenciesList.find(c => c.code === fromCurrency)?.symbol}{formatAmount(amount)} {fromCurrency}</div>
                         </div>
                         <div className="mb-2 md:mb-0 md:text-center">
-                          <div className="text-sm text-gray-500">Exchange Rate</div>
-                          <div className="font-bold">1 {fromCurrency} = {provider.rate.toFixed(4)} {toCurrency}</div>
+                          <div className="text-xs md:text-sm text-gray-500">Exchange Rate</div>
+                          <div className="font-bold text-sm md:text-base">1 {fromCurrency} = {provider.rate.toFixed(4)} {toCurrency}</div>
                         </div>
                         <div className="md:text-right">
-                          <div className="text-sm text-gray-500">They Receive</div>
-                          <div className="font-bold">{currenciesList.find(c => c.code === toCurrency)?.symbol}{formatAmount(provider.amountReceived)} {toCurrency}</div>
+                          <div className="text-xs md:text-sm text-gray-500">They Receive</div>
+                          <div className="font-bold text-sm md:text-base">{currenciesList.find(c => c.code === toCurrency)?.symbol}{formatAmount(provider.amountReceived)} {toCurrency}</div>
                         </div>
                       </div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                        <div className="bg-gray-50 p-3 rounded">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-4 text-xs md:text-sm">
+                        <div className="bg-gray-50 p-2 md:p-3 rounded">
                           <span className="text-gray-500">Fee:</span> {currenciesList.find(c => c.code === fromCurrency)?.symbol}{provider.transferFee.toFixed(2)}
                         </div>
-                        <div className="bg-gray-50 p-3 rounded">
+                        <div className="bg-gray-50 p-2 md:p-3 rounded">
                           <span className="text-gray-500">Rate Margin:</span> {(provider.exchangeRateMargin * 100).toFixed(2)}%
                         </div>
-                        <div className="bg-gray-50 p-3 rounded">
+                        <div className="bg-gray-50 p-2 md:p-3 rounded">
                           <span className="text-gray-500">Delivery:</span> {provider.transferTime}
                         </div>
                       </div>
                       
                       <div className="mt-4">
-                        <div className="text-sm text-gray-600 font-medium">Features:</div>
+                        <div className="text-xs md:text-sm text-gray-600 font-medium">Features:</div>
                         <div className="flex flex-wrap mt-1">
                           {provider.features.map((feature, idx) => (
                             <span key={idx} className="text-xs bg-blue-100 text-blue-800 rounded-full px-2 py-1 mr-2 mb-2">{feature}</span>
@@ -677,14 +639,14 @@ const ModernMoneyCompare = () => {
                     </div>
                     
                     {/* CTA */}
-                    <div className="p-6 border-t md:border-t-0 md:border-l border-gray-200 flex flex-col items-center justify-center md:w-1/4 bg-white">
-                      <div className="mb-2 font-bold text-center text-2xl">
+                    <div className="p-4 md:p-6 border-t md:border-t-0 md:border-l border-gray-200 flex flex-col items-center justify-center md:w-1/4 bg-white">
+                      <div className="mb-2 font-bold text-center text-xl md:text-2xl">
                         {currenciesList.find(c => c.code === toCurrency)?.symbol}{formatAmount(provider.amountReceived)}
                       </div>
                       <div className="text-xs mb-4 text-center text-gray-500">
                         Total fees: {currenciesList.find(c => c.code === fromCurrency)?.symbol}{formatAmount(provider.totalFees)}
                       </div>
-                      <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-md flex items-center justify-center">
+                      <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 md:py-3 px-4 rounded-md flex items-center justify-center">
                         Get Deal
                         <ExternalLink size={16} className="ml-1" />
                       </button>
@@ -699,14 +661,14 @@ const ModernMoneyCompare = () => {
           </div>
           
           {/* Footer */}
-          <footer className="bg-gray-800 text-white py-8 mt-12">
+          <footer className="bg-gray-800 text-white py-6 md:py-8 mt-8 md:mt-12">
             <div className="container mx-auto px-4">
               <div className="flex flex-col md:flex-row justify-between">
                 <div className="mb-6 md:mb-0">
                   <h3 className="text-lg font-bold mb-2">MoneyCompare</h3>
                   <p className="text-gray-400 max-w-xs">Find the best rates for international money transfers.</p>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
                   <div>
                     <h4 className="font-bold mb-3 text-gray-300">Company</h4>
                     <ul className="space-y-2 text-gray-400">
@@ -733,7 +695,7 @@ const ModernMoneyCompare = () => {
                   </div>
                 </div>
               </div>
-              <div className="border-t border-gray-700 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center">
+              <div className="border-t border-gray-700 mt-6 md:mt-8 pt-6 flex flex-col md:flex-row justify-between items-center">
                 <p className="text-gray-400">© {new Date().getFullYear()} MoneyCompare. All rights reserved.</p>
                 <div className="flex space-x-4 mt-4 md:mt-0">
                   <a href="#" className="text-gray-400 hover:text-white">
@@ -761,4 +723,4 @@ const ModernMoneyCompare = () => {
   );
 };
 
-export default ModernMoneyCompare;
+export default ResponsiveMoneyCompare;
