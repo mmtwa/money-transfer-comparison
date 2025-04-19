@@ -694,7 +694,7 @@ const ResponsiveMoneyCompare = () => {
             <div className="container mx-auto px-4">
               <div className="flex flex-col md:flex-row justify-between">
                 <div className="mb-6 md:mb-0">
-                  <h3 className="text-lg font-bold mb-2">MoneyCompare</h3>
+                  <h3 className="text-lg font-bold mb-2">mymoneytransfers.com</h3>
                   <p className="text-gray-400 max-w-xs">Find the best rates for international money transfers.</p>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
@@ -725,7 +725,7 @@ const ResponsiveMoneyCompare = () => {
                 </div>
               </div>
               <div className="border-t border-gray-700 mt-6 md:mt-8 pt-6 flex flex-col md:flex-row justify-between items-center">
-                <p className="text-gray-400">© {new Date().getFullYear()} MoneyCompare. All rights reserved.</p>
+                <p className="text-gray-400">© {new Date().getFullYear()} mymoneytransfers.com. All rights reserved.</p>
                 <div className="flex space-x-4 mt-4 md:mt-0">
                   <a href="#" className="text-gray-400 hover:text-white">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
