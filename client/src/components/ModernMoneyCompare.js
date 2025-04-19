@@ -16,7 +16,7 @@ const providers = [
   {
     id: 2,
     name: 'XE Money Transfer',
-    logo: '💱',
+    logo: <img src="/XELogo.svg" alt="XE logo" width="150" height="150" />,
     exchangeRateMargin: 0.01, // 1%
     transferFee: 0,
     transferTime: '2-3 days',
@@ -26,7 +26,7 @@ const providers = [
   {
     id: 3,
     name: 'OFX',
-    logo: '🌐',
+    logo: <img src="/OFX_Logo.png" alt="OFX logo" width="150" height="150" />,
     exchangeRateMargin: 0.008, // 0.8%
     transferFee: 0,
     transferTime: '3-5 days',
@@ -36,7 +36,7 @@ const providers = [
   {
     id: 4,
     name: 'Western Union',
-    logo: '📨',
+    logo: <img src="/Western-Union-Logo.png" alt="Western union logo" width="150" height="150" />,
     exchangeRateMargin: 0.025, // 2.5%
     transferFee: 5.99,
     transferTime: 'Same day',
@@ -46,12 +46,22 @@ const providers = [
   {
     id: 5,
     name: 'Remitly',
-    logo: '💸',
+    logo: <img src="/remitlylogo.svg" alt="Remitly logo" width="150" height="150" />,
     exchangeRateMargin: 0.015, // 1.5%
     transferFee: 2.99,
     transferTime: '0-2 days',
     rating: 4.2,
     features: ['Mobile-friendly', 'Fast delivery', 'First transfer promotion'],
+  },
+  {
+    id: 6,
+    name: 'Currency Online Group',
+    logo: <img src="/coglogo.webp" alt="COG logo" width="150" height="150" />,
+    exchangeRateMargin: 0.008, // 0.8%
+    transferFee: 0,
+    transferTime: '3-5 days',
+    rating: 4.4,
+    features: ['No transfer fees', 'Specialized in large transfers', '24/7 support'],
   },
 ];
 
@@ -309,23 +319,42 @@ const ResponsiveMoneyCompare = () => {
     <div className="flex flex-col min-h-screen bg-white text-gray-900">
       {!showResults ? (
         // Landing Page with responsive backgrounds
-        <div className="relative h-screen overflow-hidden bg-cover bg-center bg-no-repeat 
-                        bg-[url('/mobile-ad.jpg')] sm:bg-[url('/tablet-ad.jpg')] md:bg-[url('/desktop-ad.jpg')]">
-          {/* Centered Logo */}
-          <div className="w-full flex justify-center md:justify-center lg:justify-start lg:pl-10 pt-6 md:pt-8 lg:pt-10">
-            <img src="/mmtlogo.png" alt="mymoneytransfers Logo" className="h-8 md:h-10 lg:h-12" />
+        <div className="relative h-screen overflow-hidden">
+        {/* Background images with better scaling - using multiple background layers */}
+        <div className="absolute inset-0">
+          {/* Mobile background (default) */}
+          <div className="absolute inset-0 bg-cover bg-center bg-no-repeat block sm:hidden"
+               style={{ backgroundImage: "url('/mobile-ad.jpg')" }}></div>
+               
+          {/* Tablet background */}
+          <div className="absolute inset-0 bg-cover bg-center bg-no-repeat hidden sm:block md:hidden"
+               style={{ backgroundImage: "url('/tablet-ad.jpg')" }}></div>
+               
+          {/* Desktop background - with object-fit approach */}
+          <div className="absolute inset-0 hidden md:block overflow-hidden">
+            <img 
+              src="/desktop-ad.jpg" 
+              alt="Background" 
+              className="w-full h-full object-top object-cover" 
+            />
           </div>
+        </div>
+    
+        {/* Centered Logo */}
+        <div className="relative z-10 w-full flex justify-center md:justify-center lg:justify-start lg:pl-10 pt-6 md:pt-8 lg:pt-10">
+          <img src="/mmtlogo.png" alt="mymoneytransfers Logo" className="h-8 md:h-10 lg:h-12" />
+        </div>
 
-          {/* Main Content with centered search tool */}
-          <div className="flex flex-col items-center lg:items-start justify-center h-[calc(100vh-80px)] px-4 py-6 md:py-8 lg:pl-10 lg:py-12">
-            {/* Search Tool - centered on mobile and tablet */}
-            <div className="w-full max-w-md mx-auto lg:mx-0 z-10">
-              <div className="bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-100">
+    {/* Main Content with centered search tool */}
+    <div className="relative z-10 flex flex-col items-center lg:items-start justify-center h-[calc(100vh-80px)] px-4 py-6 md:py-8 lg:pl-10 lg:py-12">
+      {/* Search Tool - centered on mobile and tablet */}
+      <div className="w-full max-w-md mx-auto lg:mx-0">
+        <div className="bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-100">
                 <div className="p-6 md:p-8">
-                  <h2 className="text-2xl md:text-3xl uppercase font-bold mb-6 text-center tracking-snug leading-none text-[#1B1464]" style={{ fontFamily: 'Special Gothic Expanded One, sans-serif' }}>  
-                    FIND THE BEST<br />
-                    RATES FOR YOUR<br />
-                    MONEY TRANSFERS
+                  <h2 className="text-2xl md:text-2xl font-medium mb-4 text-center tracking-snug leading-none text-[#1B1464]" style={{ fontFamily: 'Poppins, sans-serif' }}>  
+                    No fuss, <br />
+                    simply
+                    the best rates for your money transfers.
                   </h2>
                   
                   <div className="mb-4">
@@ -452,7 +481,7 @@ const ResponsiveMoneyCompare = () => {
                   <button 
                     onClick={handleSearch}
                     disabled={isLoading}
-                    className="relative overflow-hidden group w-full bg-[#1B1464] hover:bg-[#252170] text-white text-lg md:text-xl mt-6 md:mt-10 py-4 md:py-5 px-4 md:px-5 rounded-xl font-medium flex items-center justify-center transition duration-200" 
+                    className="relative overflow-hidden group w-full bg-[#1B1464] hover:bg-[#252170] text-white text-lg md:text-xl mt-6 md:mt-10 py-4 md:py-5 px-4 md:px-5 rounded-full font-medium flex items-center justify-center transition duration-200" style={{ fontFamily: 'Poppins, sans-serif' }}
                   >
                     <span className="relative z-10 flex items-center">
                       {isLoading ? (
@@ -466,7 +495,7 @@ const ResponsiveMoneyCompare = () => {
                       ) : (
                         <>
                           <Search size={20} className="mr-2 md:mr-3" />
-                          Find Deals Now
+                          Find the best rates
                         </>
                       )}
                     </span>
@@ -475,8 +504,8 @@ const ResponsiveMoneyCompare = () => {
                     <span className="absolute inset-0 before:content-[''] before:absolute before:top-0 before:left-[-75%] before:h-full before:w-[200%] before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent before:rotate-12 before:opacity-0 group-hover:before:opacity-100 group-hover:before:animate-shimmer" />
                   </button>
                   
-                  <div className="mt-6 md:mt-8 text-xs md:text-sm text-center text-gray-800">
-                    We're funded by ad partners so we don't take any cut, which enables us to truly give you the best rates available
+                  <div className="mt-6 md:mt-8 text-xs md:text-sm text-center text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                    We're funded by ad partners so we don't take any cut. This enables us to give you the best rates available.
                   </div>
                 </div>
               </div>
