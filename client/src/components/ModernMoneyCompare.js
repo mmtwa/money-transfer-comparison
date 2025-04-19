@@ -342,7 +342,7 @@ const ResponsiveMoneyCompare = () => {
     
         {/* Centered Logo */}
         <div className="relative z-10 w-full flex justify-center md:justify-center lg:justify-start lg:pl-10 pt-6 md:pt-8 lg:pt-10">
-          <img src="/mmtlogo.png" alt="mymoneytransfers Logo" className="h-8 md:h-10 lg:h-12" />
+          <img src="/mmtlogo.png" alt="mymoneytransfers Logo" className="hidden md:block h-8 md:h-10 lg:h-12" />
         </div>
 
     {/* Main Content with centered search tool */}
