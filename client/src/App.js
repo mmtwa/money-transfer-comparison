@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import MoneyCompare from './containers/MoneyCompare';
 import Analytics from './components/Analytics';
+import PreloadFlags from './components/ui/PreloadFlags';
 import './App.css';
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
   return (
     <div className="App">
       <Analytics measurementId={measurementId} />
+      <PreloadFlags />
       <MoneyCompare initialPath={initialPath} />
     </div>
   );

@@ -180,10 +180,14 @@ const SearchForm = ({ onSearch, initialData }) => {
   return (
     <div className="bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-100">
       <div className="p-6 md:p-8">
-        <h2 className="text-2xl md:text-2xl font-medium mb-4 text-center tracking-snug leading-none text-[#1B1464]" style={{ fontFamily: 'Poppins, sans-serif' }}>  
-          Find the best <br />
-          rates for
-          your money transfers.
+        <h2 className="text-center mb-4">
+          <span className="inline-block mb-2 text-2xl md:text-3xl font-bold tracking-tight leading-tight bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-800 text-transparent bg-clip-text animate-pulse" style={{ fontFamily: 'Poppins, sans-serif' }}>
+          Transfer more, pay less.
+          </span>
+          <br className="md:hidden" />
+          <span className="inline-block text-sm md:text-lg font-medium tracking-tight leading-tight bg-gradient-to-r from-indigo-800 via-purple-600 to-blue-600 text-transparent bg-clip-text" style={{ fontFamily: 'Poppins, sans-serif', animationDelay: '0.5s' }}>
+          We earn from ads, not your money.
+          </span>
         </h2>
         
         <div className="mb-4">
@@ -250,7 +254,7 @@ const SearchForm = ({ onSearch, initialData }) => {
         </Button>
         
         <div className="mt-6 md:mt-8 text-xs md:text-sm text-center text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
-          We're funded by ad partners so we don't take any cut. This enables us to give you the best rates available.
+          We're funded by ad partners so we don't take any cut. This means we give you the best rates straight.
         </div>
       </div>
     </div>
