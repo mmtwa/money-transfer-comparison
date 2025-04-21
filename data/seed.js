@@ -21,7 +21,7 @@ const providers = [
   {
     name: 'TransferWise',
     code: 'transferwise',
-    logo: 'https://example.com/logos/transferwise.png',
+    logo: '/wiselogo.png',
     description: 'International money transfer service',
     baseUrl: 'https://api.transferwise.com',
     apiKey: 'your-transferwise-api-key',
