@@ -4,7 +4,7 @@ import SearchForm from './SearchForm';
 /**
  * Home page container with background imagery and search form
  */
-const HomePage = ({ onSearch }) => {
+const HomePage = ({ onSearch, initialData }) => {
   return (
     <div className="relative h-screen overflow-hidden">
       {/* Background images with better scaling - using multiple background layers */}
@@ -36,7 +36,7 @@ const HomePage = ({ onSearch }) => {
       <div className="relative z-10 flex flex-col items-center lg:items-start justify-center h-[calc(100vh-80px)] px-4 py-6 md:py-8 lg:pl-10 lg:py-12">
         {/* Search Tool - centered on mobile and tablet */}
         <div className="w-full max-w-md mx-auto lg:mx-0">
-          <SearchForm onSearch={onSearch} />
+          <SearchForm onSearch={onSearch} initialData={initialData} />
         </div>
       </div>
     </div>

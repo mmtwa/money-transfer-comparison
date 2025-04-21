@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import CurrencySelector from '../components/ui/CurrencySelector';
 import Button from '../components/ui/Button';
@@ -7,28 +7,38 @@ import { currenciesList } from '../utils/currency';
 /**
  * Search form container for currency transfer comparison
  */
-const SearchForm = ({ onSearch }) => {
-  const [fromCurrency, setFromCurrency] = useState('GBP');
-  const [toCurrency, setToCurrency] = useState('EUR');
-  const [amount, setAmount] = useState(1000);
-  const [inputValue, setInputValue] = useState('1,000.00');
-  const [isLoading, setIsLoading] = useState(false);
-  const [activeDropdown, setActiveDropdown] = useState(null); // null, 'from', or 'to'
-  const [isInitialFocus, setIsInitialFocus] = useState(false);
-  const amountInputRef = useRef(null);
-  
-  // Get currency symbol
-  const getCurrencySymbol = (currencyCode) => {
-    const currency = currenciesList.find(c => c.code === currencyCode);
-    return currency ? currency.symbol : '';
-  };
-  
+const SearchForm = ({ onSearch, initialData }) => {
   // Format the number with commas and 2 decimal places (without currency symbol)
   const formatAmount = (num) => {
     return num.toLocaleString('en-US', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     });
+  };
+
+  const [fromCurrency, setFromCurrency] = useState(initialData?.fromCurrency || 'GBP');
+  const [toCurrency, setToCurrency] = useState(initialData?.toCurrency || 'EUR');
+  const [amount, setAmount] = useState(initialData?.amount || 1000);
+  const [inputValue, setInputValue] = useState(formatAmount(initialData?.amount || 1000));
+  const [isLoading, setIsLoading] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(null); // null, 'from', or 'to'
+  const [isInitialFocus, setIsInitialFocus] = useState(false);
+  const amountInputRef = useRef(null);
+  
+  // Update form when initialData changes (e.g., when using browser back button)
+  useEffect(() => {
+    if (initialData) {
+      setFromCurrency(initialData.fromCurrency);
+      setToCurrency(initialData.toCurrency);
+      setAmount(initialData.amount);
+      setInputValue(formatAmount(initialData.amount));
+    }
+  }, [initialData]);
+  
+  // Get currency symbol
+  const getCurrencySymbol = (currencyCode) => {
+    const currency = currenciesList.find(c => c.code === currencyCode);
+    return currency ? currency.symbol : '';
   };
   
   // Update input value when currency changes
@@ -207,7 +217,7 @@ const SearchForm = ({ onSearch }) => {
           </div>
         </div>
         
-        <div className="mb-6">
+        <div className="mb-8">
           <label className="block text-sm font-medium text-black-600 mb-2 text-left">They receive</label>
           <CurrencySelector 
             selectedCurrency={toCurrency}
