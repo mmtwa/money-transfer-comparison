@@ -5,7 +5,7 @@ import React from 'react';
  */
 const Header = ({ onLogoClick }) => {
   return (
-    <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10 py-4">
+    <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-[9999] py-4">
       <div className="container mx-auto px-4 flex justify-center">
         <img 
           src="/mmtlogo c.png" 
