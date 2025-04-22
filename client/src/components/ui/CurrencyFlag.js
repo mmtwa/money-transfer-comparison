@@ -30,10 +30,10 @@ const CurrencyFlag = ({ currency }) => {
       <img 
         src={flagUrl} 
         alt={`${currency} flag`} 
-        className={`w-6 h-6 rounded-full object-cover bg-gray-200 transition-opacity duration-200 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+        className="w-6 h-6 rounded-full object-cover bg-gray-200 transition-opacity duration-200"
         onLoad={handleLoad}
         onError={handleError}
-        style={{ opacity: isLoaded || hasError ? 1 : 0 }}
+        style={{ opacity: 1 }}
       />
     </div>
   );

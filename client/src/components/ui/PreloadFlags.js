@@ -14,9 +14,23 @@ const PreloadFlags = () => {
     document.body.appendChild(preloadContainer);
     
     // Preload all currency flag images
+    const preloadedFlags = new Set();
+    
     currenciesList.forEach(currency => {
+      const code = currency.code.toLowerCase();
+      
+      // Skip if we've already preloaded this flag
+      if (preloadedFlags.has(code)) return;
+      preloadedFlags.add(code);
+      
+      // Preload the flag image
       const img = new Image();
-      img.src = `/flags/${currency.code.toLowerCase()}.svg`;
+      img.src = `/flags/${code}.svg`;
+      
+      // Log any errors for debugging
+      img.onerror = () => {
+        console.warn(`Failed to preload flag for ${code}`);
+      };
       
       // Also preload the fallback
       const fallbackImg = new Image();

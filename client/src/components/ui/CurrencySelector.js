@@ -174,7 +174,6 @@ const CurrencySelector = ({
                 onClick={(e) => handleCurrencySelect(e, currency.code)}
                 style={{ 
                   animationDelay: `${index * 30}ms`,
-                  opacity: 0,
                   animation: isOpen ? `fadeInDown 0.2s ease-out forwards ${index * 30}ms` : 'none'
                 }}
               >

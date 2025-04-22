@@ -47,7 +47,7 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
             <div className="flex items-center">
               <CurrencyFlag currency={fromCurrency} />
               <span className="ml-2 text-xl md:text-2xl font-bold">
-                {getCurrencySymbol(fromCurrency)}{formatAmount(amount)} {fromCurrency}
+                {getCurrencySymbol(fromCurrency)} {formatAmount(amount)} {fromCurrency}
               </span>
             </div>
           </div>
@@ -57,8 +57,8 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
               <CurrencyFlag currency={toCurrency} />
               <span className="ml-2 text-xl md:text-2xl font-bold">
                 {providerResults.length > 0 
-                  ? `${getCurrencySymbol(toCurrency)}${formatAmount(providerResults[0].amountReceived)} ${toCurrency}`
-                  : `~ ${getCurrencySymbol(toCurrency)}${formatAmount(amount * exchangeRates[fromCurrency][toCurrency])} ${toCurrency}`
+                  ? `${getCurrencySymbol(toCurrency)} ${formatAmount(providerResults[0].amountReceived)} ${toCurrency}`
+                  : `~ ${getCurrencySymbol(toCurrency)} ${formatAmount(amount * exchangeRates[fromCurrency][toCurrency])} ${toCurrency}`
                 }
               </span>
             </div>
@@ -122,7 +122,7 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
         <div className="mb-4 bg-green-50 border-l-4 border-green-500 p-4 rounded-md">
           <div className="flex items-center">
             <div className="font-bold text-green-800">Best deal: {providerResults[0].name}</div>
-            <div className="ml-auto font-bold text-green-800">{getCurrencySymbol(toCurrency)}{formatAmount(providerResults[0].amountReceived)}</div>
+            <div className="ml-auto font-bold text-green-800">{getCurrencySymbol(toCurrency)} {formatAmount(providerResults[0].amountReceived)}</div>
           </div>
         </div>
       )}
