@@ -1,31 +1,31 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import SearchForm from './SearchForm';
+import AdBackground from '../components/AdBackground';
+import { selectAdPartner, trackImpression } from '../services/adService';
+import adPartners from '../config/adPartners';
 
 /**
- * Home page container with background imagery and search form
+ * Home page container with dynamic ad backgrounds and search form
  */
 const HomePage = ({ onSearch, initialData }) => {
+  // Select the appropriate ad partner based on scheduling and priority
+  const [currentAdPartner, setCurrentAdPartner] = useState('default');
+  const [adMetadata, setAdMetadata] = useState(adPartners.default);
+  
+  // Initialize the ad partner on component mount
+  useEffect(() => {
+    const partnerId = selectAdPartner();
+    setCurrentAdPartner(partnerId);
+    setAdMetadata(adPartners[partnerId] || adPartners.default);
+    
+    // Track impression for analytics
+    trackImpression(partnerId);
+  }, []);
+  
   return (
     <div className="relative h-screen overflow-hidden">
-      {/* Background images with better scaling - using multiple background layers */}
-      <div className="absolute inset-0">
-        {/* Mobile background (default) */}
-        <div className="absolute inset-0 bg-cover bg-center bg-no-repeat block sm:hidden"
-             style={{ backgroundImage: "url('/mobile-ad.jpg')" }}></div>
-             
-        {/* Tablet background */}
-        <div className="absolute inset-0 bg-cover bg-center bg-no-repeat hidden sm:block md:hidden"
-             style={{ backgroundImage: "url('/tablet-ad.jpg')" }}></div>
-             
-        {/* Desktop background - with object-fit approach */}
-        <div className="absolute inset-0 hidden md:block overflow-hidden">
-          <img 
-            src="/desktop-ad.jpg" 
-            alt="Background" 
-            className="w-full h-full object-top object-cover" 
-          />
-        </div>
-      </div>
+      {/* Dynamic Ad Background */}
+      <AdBackground currentAdPartner={currentAdPartner} adMetadata={adMetadata} />
   
       {/* Centered Logo */}
       <div className="relative z-10 w-full flex justify-center md:justify-center lg:justify-start lg:pl-10 pt-6 md:pt-8 lg:pt-10">

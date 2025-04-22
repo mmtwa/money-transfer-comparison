@@ -19,7 +19,11 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "create-ad-partner": "node src/scripts/createAdPartner.js",
+    "optimize-ads": "node src/scripts/optimizeAdAssets.js",
+    "remove-ad-partner": "node src/scripts/removeAdPartner.js",
+    "convert-webp": "node src/scripts/convertToWebP.js"
   },
   "eslintConfig": {
     "extends": [
@@ -41,7 +45,9 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.14",
+    "glob": "^10.3.3",
     "postcss": "^8.4.24",
+    "sharp": "^0.32.6",
     "tailwindcss": "^3.3.2"
   }
 }
