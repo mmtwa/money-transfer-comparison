@@ -65,7 +65,7 @@ const SearchForm = ({ onSearch, initialData }) => {
     
     animateHeadlines();
   }, [animate1, animate2, animate3]);
-  
+
   // Update form when initialData changes (e.g., when using browser back button)
   useEffect(() => {
     if (initialData) {
@@ -226,21 +226,6 @@ const SearchForm = ({ onSearch, initialData }) => {
   
   return (
     <div className="relative mx-4 sm:mx-6 my-4">
-      {/* Logo positioned at top right like a sticker, half protruding outside the form */}
-      <motion.div
-        className="absolute -top-4 -right-4 w-16 h-16 sm:-top-6 sm:-right-6 sm:w-20 sm:h-20 md:-top-8 md:-right-8 md:w-24 md:h-24 z-10"
-        initial={{ opacity: 0, rotate: -10 }}
-        animate={{ opacity: 1, rotate: 0 }}
-        transition={{ duration: 0.4, delay: 0.2 }}
-        whileHover={{ scale: 1.05 }}
-      >
-        <img 
-          src="/mmticon.png" 
-          alt="MMT Logo" 
-          className="w-full h-full object-contain"
-        />
-      </motion.div>
-
       <motion.div 
         className="bg-white rounded-3xl shadow-lg border border-gray-100"
         initial={{ opacity: 0, y: 20 }}
