@@ -192,7 +192,7 @@ const SearchForm = ({ onSearch, initialData }) => {
       const formattedValue = formatAmount(numValue);
       setInputValue(formattedValue);
       
-      // Check if the number is long (more than 7 digits before decimal)
+      // Check if the number is long (more than 6 digits before decimal)
       const digitCount = Math.floor(numValue).toString().length;
       setIsLongNumber(digitCount > 6);
       
@@ -225,7 +225,7 @@ const SearchForm = ({ onSearch, initialData }) => {
   };
   
   return (
-    <div className="relative mx-4 sm:mx-6 my-4">
+    <div className="w-full max-w-md mx-auto lg:mx-0">
       <motion.div 
         className="bg-white rounded-3xl shadow-lg border border-gray-100"
         initial={{ opacity: 0, y: 20 }}
@@ -233,33 +233,43 @@ const SearchForm = ({ onSearch, initialData }) => {
         transition={{ duration: 0.2 }}
       >
         <div className="p-6 md:p-8">
-          <h2 className="text-left mb-4">
-            <div className="flex flex-col items-start mb-2">
+          <h2 className="text-center mb-4">
+            <div className="flex flex-col items-center mb-2">
               <motion.div
                 ref={line1Ref}
-                className="text-2xl md:text-3xl font-semibold tracking-tight leading-tight bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-800 text-transparent bg-clip-text overflow-hidden"
+                className="text-2xl sm:text-2xl md:text-3xl lg:text-3xl font-semibold tracking-tight leading-tight bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-800 text-transparent bg-clip-text overflow-hidden whitespace-nowrap"
                 style={{ fontFamily: 'Poppins, sans-serif', paddingLeft: '5px', paddingRight: '5px' }}
-                initial={{ opacity: 0 }}
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ 
+                  opacity: [0, 0.7, 1], 
+                  y: [-5, -2, 0],
+                  scale: [1, 1.012, 1],
+                  textShadow: ["0px 0px 0px rgba(0,0,0,0)", "0px 0px 8px rgba(104,117,245,0.25)", "0px 0px 0px rgba(0,0,0,0)"]
+                }}
+                transition={{ 
+                  duration: 2.5,
+                  ease: [0.215, 0.61, 0.355, 1], // Revised cubic bezier for ultra-smooth motion
+                  times: [0, 0.5, 1]
+                }}
               >
-                Never wonder again
+                Transfer more, pay less.
               </motion.div>
               
               <motion.div
                 ref={line2Ref}
-                className="text-2xl md:text-3xl font-semibold tracking-tight leading-tight bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-800 text-transparent bg-clip-text overflow-hidden"
+                className="text-xs sm:text-sm md:text-base lg:text-lg font-medium tracking-tight leading-tight mt-2 text-gray-700 overflow-hidden text-center"
                 style={{ fontFamily: 'Poppins, sans-serif', paddingLeft: '5px', paddingRight: '5px' }}
                 initial={{ opacity: 0 }}
               >
-                if you could have
+                Never wonder again if you could have gotten a better deal.
               </motion.div>
               
               <motion.div
                 ref={line3Ref}
-                className="text-2xl md:text-3xl font-semibold tracking-tight mb-2 leading-tight bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-800 text-transparent bg-clip-text overflow-hidden"
-                style={{ fontFamily: 'Poppins, sans-serif', paddingLeft: '5px', paddingRight: '5px' }}
+                className="hidden"
                 initial={{ opacity: 0 }}
               >
-                gotten a better deal.
+                
               </motion.div>
             </div>
             
@@ -296,7 +306,7 @@ const SearchForm = ({ onSearch, initialData }) => {
                 />
               </div>
               <div className="relative w-3/5 ml-4 md:ml-8">
-                <div className="absolute left-2 md:left-5 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium text-lg md:text-xl">
+                <div className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium text-lg md:text-xl">
                   {getCurrencySymbol(fromCurrency)}
                 </div>
                 <input
@@ -304,7 +314,7 @@ const SearchForm = ({ onSearch, initialData }) => {
                   type="text"
                   value={inputValue}
                   onChange={handleAmountChange}
-                  className={`w-full border border-gray-500 bg-white-100 rounded-xl p-4 md:p-5 pl-8 md:pl-10 focus:outline-none text-gray-800 font-medium ${isLongNumber ? 'text-sm' : 'text-base'} md:text-xl text-right`}
+                  className={`w-full border border-gray-500 bg-white-100 rounded-xl p-4 md:p-5 pl-10 focus:outline-none text-gray-800 font-medium text-base md:text-xl text-right`}
                   inputMode="decimal"
                   placeholder="Enter amount"
                   onFocus={handleAmountFocus}

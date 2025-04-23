@@ -172,10 +172,6 @@ const CurrencySelector = ({
                 ref={el => itemRefs.current[currency.code] = el}
                 className="p-2 hover:bg-blue-50 cursor-pointer flex items-center transition-colors duration-150 relative overflow-hidden"
                 onClick={(e) => handleCurrencySelect(e, currency.code)}
-                style={{ 
-                  animationDelay: `${index * 30}ms`,
-                  animation: isOpen ? `fadeInDown 0.2s ease-out forwards ${index * 30}ms` : 'none'
-                }}
               >
                 <CurrencyFlag currency={currency.code} />
                 <div className="flex flex-col text-left ml-2">
