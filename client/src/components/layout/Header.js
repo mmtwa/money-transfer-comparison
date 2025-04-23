@@ -10,7 +10,7 @@ const Header = ({ onLogoClick }) => {
         <img 
           src="/mmtlogo c.png" 
           alt="mymoneytransfers Logo" 
-          className="h-8 md:h-10 cursor-pointer hover:opacity-80 transition" 
+          className="h-12 md:h-12 lg:h-16 cursor-pointer hover:opacity-80 transition" 
           onClick={onLogoClick}
         />
       </div>

@@ -14,7 +14,7 @@ const Button = ({
 }) => {
   const baseClasses = 'relative overflow-hidden group text-lg md:text-xl py-4 md:py-5 px-4 md:px-5 rounded-full font-medium flex items-center justify-center transition duration-200';
   
-  const primaryClasses = 'bg-[#1B1464] hover:bg-[#252170] text-white';
+  const primaryClasses = 'bg-[#4F46E5] hover:bg-[#1B1464] text-white';
   const secondaryClasses = 'bg-white border border-blue-500 text-blue-600 hover:bg-blue-50';
   
   const classes = `
