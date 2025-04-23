@@ -375,7 +375,7 @@ const SearchForm = ({ onSearch, initialData }) => {
           </motion.div>
           
           <motion.div 
-            className="mt-6 md:mt-8 text-xs md:text-sm text-center text-gray-900" 
+            className="mt-6 md:mt-6 text-xs md:text-xs text-center text-gray-900" 
             style={{ fontFamily: 'Poppins, sans-serif' }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
