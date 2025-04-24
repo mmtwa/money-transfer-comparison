@@ -23,20 +23,70 @@ const HomePage = ({ onSearch, initialData }) => {
   }, []);
   
   return (
-    <div className="relative h-screen overflow-hidden">
+    <div className="relative overflow-hidden" style={{ 
+      height: '100vh', 
+      maxHeight: '100vh',
+      width: '100%',
+      boxSizing: 'border-box',
+      position: 'relative' 
+    }}>
       {/* Dynamic Ad Background */}
       <AdBackground currentAdPartner={currentAdPartner} adMetadata={adMetadata} />
   
-      {/* Centered Logo */}
-      <div className="relative z-10 w-full flex justify-center md:justify-center lg:justify-start lg:pl-10 pt-6 md:pt-8 lg:pt-10">
-        <img src="/mmtlogo.png" alt="mymoneytransfers Logo" className="hidden md:block lg:pl-8 h-8 md:h-10 lg:h-16" />
+      {/* Centered Logo - Fixed size container */}
+      <div 
+        className="relative z-10 w-full flex justify-center md:justify-center lg:justify-start lg:pl-10 pt-6 md:pt-8 lg:pt-10" 
+        style={{ 
+          minHeight: '80px', 
+          height: '80px',
+          boxSizing: 'content-box',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0
+        }}
+      >
+        <img 
+          src="/mmtlogo.png" 
+          alt="mymoneytransfers Logo" 
+          className="hidden md:block lg:pl-8 h-8 md:h-10 lg:h-16"
+          style={{ objectFit: 'contain', width: 'auto', height: '100%' }}
+          width="160"
+          height="64"
+          loading="eager"
+        />
       </div>
 
-      {/* Main Content with centered search tool */}
-      <div className="relative z-10 flex flex-col items-center lg:items-start justify-center h-[calc(100vh-80px)] px-4 py-6 md:py-8 lg:pl-10 lg:py-12">
-        {/* Search Tool - centered on mobile and tablet */}
-        <div className="w-full max-w-md mx-auto lg:mx-0">
-          <SearchForm onSearch={onSearch} initialData={initialData} />
+      {/* Main Content with centered search tool - Fixed position */}
+      <div 
+        className="relative z-10 flex flex-col items-center lg:items-start justify-center px-4 py-6 md:py-8 lg:pl-10 lg:py-12"
+        style={{ 
+          position: 'absolute',
+          top: '80px',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: 'calc(100vh - 80px)',
+          minHeight: '600px',
+          transform: 'translateZ(0)', // Force GPU rendering
+          willChange: 'transform',  // Hint to browser about upcoming animations
+          boxSizing: 'border-box'
+        }}
+      >
+        {/* Search Tool - centered on mobile and tablet, left-aligned on desktop */}
+        <div className="w-full max-w-md mx-auto lg:mx-0"> 
+          <div 
+            style={{ 
+              transform: 'translateZ(0)',
+              width: '100%',
+              maxWidth: '28rem',
+              minHeight: '500px',
+              position: 'relative',
+              boxSizing: 'border-box'
+            }}
+          >
+            <SearchForm onSearch={onSearch} initialData={initialData} />
+          </div>
         </div>
       </div>
     </div>

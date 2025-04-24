@@ -23,6 +23,21 @@ const Button = ({
     ${fullWidth ? 'w-full' : ''}
     ${className}
   `;
+
+  // Use a ref to measure the rendered width of the content
+  const contentRef = React.useRef(null);
+  // Track the maximum width seen to avoid layout shifts
+  const [contentWidth, setContentWidth] = React.useState(0);
+
+  React.useEffect(() => {
+    if (contentRef.current) {
+      const currentWidth = contentRef.current.offsetWidth;
+      // Only increase the width, never decrease it
+      if (currentWidth > contentWidth) {
+        setContentWidth(currentWidth);
+      }
+    }
+  }, [children, contentWidth]);
   
   return (
     <button
@@ -30,14 +45,52 @@ const Button = ({
       onClick={onClick}
       disabled={disabled}
       className={classes}
-      style={{ fontFamily: 'Poppins, sans-serif' }}
+      style={{ 
+        fontFamily: 'Poppins, sans-serif',
+        height: '64px',
+        boxSizing: 'border-box',
+        transform: 'translateZ(0)',
+        willChange: 'transform'
+      }}
     >
-      <span className="relative z-10 flex items-center">
+      <span 
+        ref={contentRef}
+        className="relative z-10 flex items-center" 
+        style={{ 
+          display: 'flex', 
+          alignItems: 'center',
+          minWidth: contentWidth > 0 ? `${contentWidth}px` : 'auto',
+          transform: 'translateZ(0)',
+          willChange: 'transform'
+        }}
+      >
         {children}
       </span>
 
-      {/* shimmer overlay */}
-      <span className="absolute inset-0 before:content-[''] before:absolute before:top-0 before:left-[-75%] before:h-full before:w-[200%] before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent before:rotate-12 before:opacity-0 group-hover:before:opacity-100 group-hover:before:animate-shimmer" />
+      {/* shimmer overlay with transform instead of opacity */}
+      <span className="absolute inset-0 overflow-hidden">
+        <span 
+          className="absolute top-0 left-0 h-full w-[200%]" 
+          style={{
+            background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent)',
+            transform: 'translateX(-100%) rotate(12deg)',
+            opacity: 0,
+            transition: 'transform 1s ease, opacity 0.3s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.opacity = '1';
+            e.currentTarget.style.transform = 'translateX(100%) rotate(12deg)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.opacity = '0';
+            setTimeout(() => {
+              if (e.currentTarget) {
+                e.currentTarget.style.transform = 'translateX(-100%) rotate(12deg)';
+              }
+            }, 300);
+          }}
+        />
+      </span>
     </button>
   );
 };

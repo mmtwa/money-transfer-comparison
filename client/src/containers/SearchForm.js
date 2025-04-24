@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Search } from 'lucide-react';
-import { motion, useAnimate } from 'framer-motion';
+import { motion } from 'framer-motion';
 import CurrencySelector from '../components/ui/CurrencySelector';
 import Button from '../components/ui/Button';
 import { currenciesList } from '../utils/currency';
@@ -26,44 +26,6 @@ const SearchForm = ({ onSearch, initialData }) => {
   const [isInitialFocus, setIsInitialFocus] = useState(false);
   const [isLongNumber, setIsLongNumber] = useState(false);
   const amountInputRef = useRef(null);
-  
-  // References for headline animations
-  const [line1Ref, animate1] = useAnimate();
-  const [line2Ref, animate2] = useAnimate();
-  const [line3Ref, animate3] = useAnimate();
-  
-  // Run "bang" animation sequence on mount (with form loaded first)
-  useEffect(() => {
-    const animateHeadlines = async () => {
-      // Remove initial delay to improve LCP
-      
-      // Line 1 animation - quick bang effect (already visible)
-      await animate1(line1Ref.current, 
-        { opacity: 1 }, 
-        { duration: 0.1, ease: "circOut" }
-      );
-      
-      // Quick pause between each bang (reduced)
-      await new Promise(resolve => setTimeout(resolve, 50));
-      
-      // Line 2 animation - quick bang effect
-      await animate2(line2Ref.current, 
-        { opacity: 1 }, 
-        { duration: 0.1, ease: "circOut" }
-      );
-      
-      // Quick pause between each bang (reduced)
-      await new Promise(resolve => setTimeout(resolve, 50));
-      
-      // Line 3 animation - quick bang effect 
-      await animate3(line3Ref.current, 
-        { opacity: 1 }, 
-        { duration: 0.1, ease: "circOut" }
-      );
-    };
-    
-    animateHeadlines();
-  }, [animate1, animate2, animate3]);
 
   // Update form when initialData changes (e.g., when using browser back button)
   useEffect(() => {
@@ -352,85 +314,60 @@ const SearchForm = ({ onSearch, initialData }) => {
   };
   
   return (
-    <div className="w-full max-w-md mx-auto lg:mx-0">
+    <div className="w-full max-w-md mx-auto lg:mx-0 relative" style={{ minHeight: "600px" }}>
       <motion.div 
         className="bg-white rounded-3xl shadow-lg border border-gray-100"
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 1, y: 0 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2 }}
+        transition={{ duration: 0 }}
       >
         <div className="p-6 md:p-8">
           <h2 className="text-center mb-4">
             <div className="flex flex-col items-center mb-2">
-              <motion.div
-                ref={line1Ref}
+              <div
                 className="text-2xl sm:text-2xl md:text-3xl lg:text-3xl font-semibold tracking-tight leading-tight overflow-hidden whitespace-nowrap relative"
                 style={{ 
                   fontFamily: 'Poppins, sans-serif', 
                   paddingLeft: '5px', 
-                  paddingRight: '5px'
+                  paddingRight: '5px',
+                  minHeight: '40px' // Reserve height
                 }}
-                // Start with text fully visible for best LCP
-                initial={{ opacity: 1 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0 }}
               >
                 <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-800 text-transparent bg-clip-text">
                   Transfer more, pay less.
                 </span>
-                <motion.div 
+                <div 
                   className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-30"
-                  initial={{ left: "-100%" }}
-                  animate={{ left: "100%" }}
-                  transition={{ 
-                    repeat: Infinity, 
-                    duration: 2,
-                    ease: "linear",
-                    repeatDelay: 0.5
+                  style={{ 
+                    transform: "translateX(-100%)",
+                    animation: "shimmer 2s infinite linear",
+                    filter: "blur(5px)" 
                   }}
-                  style={{ filter: "blur(5px)" }}
                 />
-              </motion.div>
+              </div>
               
-              <motion.div
-                ref={line2Ref}
+              <div
                 className="text-xs sm:text-sm md:text-base lg:text-lg font-medium tracking-tight leading-tight mt-2 text-gray-700 overflow-hidden text-center"
-                style={{ fontFamily: 'Poppins, sans-serif', paddingLeft: '30px', paddingRight: '30px' }}
-                initial={{ opacity: 0 }}
+                style={{ 
+                  fontFamily: 'Poppins, sans-serif', 
+                  paddingLeft: '30px', 
+                  paddingRight: '30px',
+                  minHeight: '48px' // Reserve height
+                }}
               >
                 Compare money transfers with us & never wonder again if you could have gotten a better deal.
-              </motion.div>
-              
-              <motion.div
-                ref={line3Ref}
-                className="hidden"
-                initial={{ opacity: 0 }}
-              >
-                
-              </motion.div>
+              </div>
             </div>
             
-          
-            <motion.span 
-              className="inline-block hidden  text-sm md:text-lg font-medium tracking-tight leading-tight bg-gradient-to-r from-indigo-800 via-purple-600 to-blue-600 text-transparent bg-clip-text" 
+            <span 
+              className="inline-block hidden text-sm md:text-lg font-medium tracking-tight leading-tight bg-gradient-to-r from-indigo-800 via-purple-600 to-blue-600 text-transparent bg-clip-text" 
               style={{ fontFamily: 'Poppins, sans-serif' }}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ 
-                duration: 0.3
-              }}
-              whileHover={{ scale: 1.05 }}
             >
               We earn from ads, not your money.
-            </motion.span>
+            </span>
           </h2>
           
-          <motion.div 
-            className="mb-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.2 }}
-          >
+          <div className="mb-4">
             <label className="block text-sm font-medium text-black-600 mb-2 text-left">You send</label>
             <div className="flex">
               <div className="relative w-2/5">
@@ -442,7 +379,7 @@ const SearchForm = ({ onSearch, initialData }) => {
                   id="from"
                 />
               </div>
-              <div className="relative w-3/5 ml-4 md:ml-8">
+              <div className="relative w-3/5 ml-4 md:ml-8" style={{ minHeight: "60px" }}>
                 <div className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium text-lg md:text-xl">
                   {getCurrencySymbol(fromCurrency)}
                 </div>
@@ -461,14 +398,9 @@ const SearchForm = ({ onSearch, initialData }) => {
                 />
               </div>
             </div>
-          </motion.div>
+          </div>
           
-          <motion.div 
-            className="mb-6 lg:mb-8"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.2 }}
-          >
+          <div className="mb-6 lg:mb-8">
             <label className="block text-sm font-medium text-black-600 mb-2 text-left">They receive</label>
             <CurrencySelector 
               selectedCurrency={toCurrency}
@@ -477,48 +409,43 @@ const SearchForm = ({ onSearch, initialData }) => {
               onToggle={handleDropdownToggle}
               id="to"
             />
-          </motion.div>
+          </div>
           
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.2 }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
+          <div>
             <Button 
               onClick={handleSearch}
               disabled={isLoading}
               fullWidth
             >
               {isLoading ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <div className="flex items-center justify-center w-full">
+                  <svg className="animate-spin h-5 w-5 mr-3 text-white flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Searching...
-                </>
+                  <span className="inline-block">Searching...</span>
+                </div>
               ) : (
-                <>
-                  <Search size={20} className="mr-2 md:mr-3" />
-                  Find the best rates
-                </>
+                <div className="flex items-center justify-center w-full">
+                  <Search size={20} className="mr-2 flex-shrink-0" />
+                  <span className="inline-block">Find the best rates</span>
+                </div>
               )}
             </Button>
-          </motion.div>
+          </div>
           
-          <motion.div 
-            className="mt-6 md:mt-6 text-xs md:text-xs text-center text-gray-900" 
-            style={{ fontFamily: 'Poppins, sans-serif' }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.2 }}
-          >
+          <div className="mt-6 md:mt-6 text-xs md:text-xs text-center text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
             We're funded by ad partners so we don't take any cut. This means we give you the best rates straight.
-          </motion.div>
+          </div>
         </div>
       </motion.div>
+      
+      <style jsx>{`
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+      `}</style>
     </div>
   );
 };

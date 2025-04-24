@@ -136,6 +136,7 @@ const CurrencySelector = ({
           ref={buttonRef}
           onClick={handleToggleDropdown}
           className="w-full appearance-none border border-gray-500 rounded-xl p-4 md:p-5 text-gray-800 focus:outline-none mb-1 cursor-pointer flex items-center justify-between hover:border-blue-500 hover:shadow-md transition-all duration-200 relative overflow-hidden"
+          style={{ minHeight: '64px' }}
         >
           <div className="flex items-center">
             <CurrencyFlag currency={selectedCurrency} />
@@ -143,45 +144,58 @@ const CurrencySelector = ({
           </div>
           <ChevronDown 
             size={16} 
-            className={`text-gray-600 ml-8 ${isOpen ? 'animate-rotateDown' : 'animate-rotateUp'}`} 
+            className="text-gray-600 ml-8"
+            style={{ 
+              transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s ease'
+            }}
           />
         </button>
         
-        <div 
-          className={`fixed max-h-[calc(40vh-50px)] z-20 w-64 bg-white border border-gray-200 mt-1 rounded-md shadow-lg overflow-y-auto transition-all duration-200 ease-in-out ${
-            isOpen 
-              ? 'opacity-100 scale-100 translate-y-0 animate-fadeInDown' 
-              : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
-          }`}
-        >
-          <div className="dropdown-search p-2 border-b border-gray-200">
-            <input
-              type="text"
-              placeholder="Search currency..."
-              className="w-full p-2 border rounded text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              // Prevent clicks on the input from closing the dropdown
-              onClick={(e) => e.stopPropagation()}
-            />
-          </div>
-          <div>
-            {filteredCurrencies.map((currency, index) => (
-              <div 
-                key={currency.code} 
-                ref={el => itemRefs.current[currency.code] = el}
-                className="p-2 hover:bg-blue-50 cursor-pointer flex items-center transition-colors duration-150 relative overflow-hidden"
-                onClick={(e) => handleCurrencySelect(e, currency.code)}
-              >
-                <CurrencyFlag currency={currency.code} />
-                <div className="flex flex-col text-left ml-2">
-                  <div className="font-medium">{currency.code}</div>
-                  <div className="text-xs text-gray-500">{currency.name}</div>
+        {isOpen && (
+          <div 
+            className="absolute z-20 w-64 bg-white border border-gray-200 mt-1 rounded-md shadow-lg overflow-y-auto"
+            style={{ 
+              maxHeight: 'calc(40vh - 50px)',
+              transition: 'transform 0.2s ease, opacity 0.2s ease',
+            }}
+          >
+            <div className="dropdown-search p-2 border-b border-gray-200">
+              <input
+                type="text"
+                placeholder="Search currency..."
+                className="w-full p-2 border rounded text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                // Prevent clicks on the input from closing the dropdown
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+            <div>
+              {filteredCurrencies.map((currency, index) => (
+                <div 
+                  key={currency.code} 
+                  ref={el => itemRefs.current[currency.code] = el}
+                  className="p-2 cursor-pointer flex items-center relative overflow-hidden"
+                  style={{
+                    height: '40px',
+                    backgroundColor: 'transparent',
+                    transition: 'background-color 0.15s ease'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.05)'}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  onClick={(e) => handleCurrencySelect(e, currency.code)}
+                >
+                  <CurrencyFlag currency={currency.code} />
+                  <div className="flex flex-col text-left ml-2">
+                    <div className="font-medium">{currency.code}</div>
+                    <div className="text-xs text-gray-500">{currency.name}</div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

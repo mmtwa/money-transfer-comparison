@@ -16,12 +16,12 @@ module.exports = {
         },
         fadeInDown: {
           '0%': { 
+            transform: 'translateY(-10px) scale(0.95)',
             opacity: '0',
-            transform: 'translateY(-10px)'
           },
           '100%': { 
+            transform: 'translateY(0) scale(1)',
             opacity: '1',
-            transform: 'translateY(0)'
           },
         },
         rotateDown: {
@@ -40,7 +40,7 @@ module.exports = {
       },
       animation: {
         shimmer: 'shimmer 1s linear forwards',
-        fadeInDown: 'fadeInDown 0.3s ease-out forwards',
+        fadeInDown: 'fadeInDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
         rotateDown: 'rotateDown 0.3s ease-in-out forwards',
         rotateUp: 'rotateUp 0.3s ease-in-out forwards',
         ripple: 'ripple 0.6s linear',
