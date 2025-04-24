@@ -3,6 +3,7 @@ import SearchForm from './SearchForm';
 import AdBackground from '../components/AdBackground';
 import { selectAdPartner, trackImpression } from '../services/adService';
 import adPartners from '../config/adPartners';
+import { hideAddressBar } from '../utils/scrollUtils';
 
 /**
  * Home page container with dynamic ad backgrounds and search form
@@ -20,6 +21,9 @@ const HomePage = ({ onSearch, initialData }) => {
     
     // Track impression for analytics
     trackImpression(partnerId);
+    
+    // Hide address bar on homepage for maximum viewing area
+    hideAddressBar();
   }, []);
   
   return (
