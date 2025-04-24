@@ -20,7 +20,7 @@ const ProviderCard = ({
     const emptyCircles = 5 - Math.ceil(rating);
     
     return (
-      <div className="flex items-center">
+      <div className="flex  items-center">
         {[...Array(filledCircles)].map((_, i) => (
           <div key={`filled-${i}`} className="w-2 h-2 rounded-full bg-yellow-400 mr-1"></div>
         ))}
@@ -73,12 +73,12 @@ const ProviderCard = ({
       >
         {/* Card Header - Provider info and amount */}
         <div className="flex items-center justify-between p-4 border-b border-gray-100">
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-start">
             <div className="mb-1">
               <img 
                 src={provider.logo} 
                 alt={`${provider.name} logo`} 
-                className="w-24 h-24 object-contain"
+                className="h-32 w-32 object-contain"
               />
             </div>
             {renderRating(provider.rating)}
