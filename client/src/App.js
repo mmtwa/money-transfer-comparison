@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import MoneyCompare from './containers/MoneyCompare';
 import Analytics from './components/Analytics';
 import PreloadFlags from './components/ui/PreloadFlags';
-import { setupAddressBarHiding } from './utils/scrollUtils';
 import './App.css';
 
 function App() {
@@ -25,12 +24,6 @@ function App() {
     return () => {
       window.removeEventListener('popstate', handleInitialPath);
     };
-  }, []);
-  
-  // Set up address bar hiding for mobile browsers
-  useEffect(() => {
-    const cleanup = setupAddressBarHiding();
-    return cleanup;
   }, []);
   
   return (
