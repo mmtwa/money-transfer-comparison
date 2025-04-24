@@ -378,10 +378,10 @@ const SearchForm = ({ onSearch, initialData }) => {
               <motion.div
                 ref={line2Ref}
                 className="text-xs sm:text-sm md:text-base lg:text-lg font-medium tracking-tight leading-tight mt-2 text-gray-700 overflow-hidden text-center"
-                style={{ fontFamily: 'Poppins, sans-serif', paddingLeft: '5px', paddingRight: '5px' }}
+                style={{ fontFamily: 'Poppins, sans-serif', paddingLeft: '30px', paddingRight: '30px' }}
                 initial={{ opacity: 0 }}
               >
-                Never wonder again if you could have gotten a better deal.
+                Compare money transfers with us & never wonder again if you could have gotten a better deal.
               </motion.div>
               
               <motion.div
@@ -435,7 +435,7 @@ const SearchForm = ({ onSearch, initialData }) => {
                   value={inputValue}
                   onChange={handleAmountChange}
                   onKeyDown={handleKeyDown}
-                  className={`w-full border border-gray-500 bg-white-100 rounded-xl p-4 md:p-5 pl-10 focus:outline-none text-gray-800 font-medium text-base md:text-xl text-right`}
+                  className={`w-full border border-gray-500 bg-white-100 rounded-xl p-4 md:p-5 pl-10 focus:outline-none text-gray-800 font-medium text-lg md:text-xl text-right`}
                   inputMode="decimal"
                   placeholder="Enter amount"
                   onFocus={handleAmountFocus}

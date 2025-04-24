@@ -139,7 +139,7 @@ const CurrencySelector = ({
         >
           <div className="flex items-center">
             <CurrencyFlag currency={selectedCurrency} />
-            <span className="ml-2 text-base md:text-xl font-medium">{selectedCurrency}</span>
+            <span className="ml-2 text-lg md:text-xl font-medium">{selectedCurrency}</span>
           </div>
           <ChevronDown 
             size={16} 
