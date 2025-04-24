@@ -35,17 +35,16 @@ const SearchForm = ({ onSearch, initialData }) => {
   // Run "bang" animation sequence on mount (with form loaded first)
   useEffect(() => {
     const animateHeadlines = async () => {
-      // Ensure form elements are visible first
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Remove initial delay to improve LCP
       
-      // Line 1 animation - quick bang effect
+      // Line 1 animation - quick bang effect (already visible)
       await animate1(line1Ref.current, 
         { opacity: 1 }, 
         { duration: 0.1, ease: "circOut" }
       );
       
-      // Quick pause between each bang
-      await new Promise(resolve => setTimeout(resolve, 150));
+      // Quick pause between each bang (reduced)
+      await new Promise(resolve => setTimeout(resolve, 50));
       
       // Line 2 animation - quick bang effect
       await animate2(line2Ref.current, 
@@ -53,8 +52,8 @@ const SearchForm = ({ onSearch, initialData }) => {
         { duration: 0.1, ease: "circOut" }
       );
       
-      // Quick pause between each bang
-      await new Promise(resolve => setTimeout(resolve, 150));
+      // Quick pause between each bang (reduced)
+      await new Promise(resolve => setTimeout(resolve, 50));
       
       // Line 3 animation - quick bang effect 
       await animate3(line3Ref.current, 
@@ -253,6 +252,14 @@ const SearchForm = ({ onSearch, initialData }) => {
     const rawValue = e.target.value;
     const cursorPosition = e.target.selectionStart;
     
+    // Only allow numeric input
+    const numericInput = rawValue.replace(/[^0-9]/g, '');
+    
+    // If non-numeric characters were entered, prevent the update
+    if (numericInput !== rawValue.replace(/[,]/g, '')) {
+      return;
+    }
+    
     // If this is the initial focus after clicking, just set the raw value
     if (isInitialFocus) {
       // Strip non-numeric characters first
@@ -357,22 +364,32 @@ const SearchForm = ({ onSearch, initialData }) => {
             <div className="flex flex-col items-center mb-2">
               <motion.div
                 ref={line1Ref}
-                className="text-2xl sm:text-2xl md:text-3xl lg:text-3xl font-semibold tracking-tight leading-tight bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-800 text-transparent bg-clip-text overflow-hidden whitespace-nowrap"
-                style={{ fontFamily: 'Poppins, sans-serif', paddingLeft: '5px', paddingRight: '5px' }}
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ 
-                  opacity: [0, 0.7, 1], 
-                  y: [-5, -2, 0],
-                  scale: [1, 1.012, 1],
-                  textShadow: ["0px 0px 0px rgba(0,0,0,0)", "0px 0px 8px rgba(104,117,245,0.25)", "0px 0px 0px rgba(0,0,0,0)"]
+                className="text-2xl sm:text-2xl md:text-3xl lg:text-3xl font-semibold tracking-tight leading-tight overflow-hidden whitespace-nowrap relative"
+                style={{ 
+                  fontFamily: 'Poppins, sans-serif', 
+                  paddingLeft: '5px', 
+                  paddingRight: '5px'
                 }}
-                transition={{ 
-                  duration: 2.5,
-                  ease: [0.215, 0.61, 0.355, 1], // Revised cubic bezier for ultra-smooth motion
-                  times: [0, 0.5, 1]
-                }}
+                // Start with text fully visible for best LCP
+                initial={{ opacity: 1 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0 }}
               >
-                Transfer more, pay less.
+                <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-800 text-transparent bg-clip-text">
+                  Transfer more, pay less.
+                </span>
+                <motion.div 
+                  className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-30"
+                  initial={{ left: "-100%" }}
+                  animate={{ left: "100%" }}
+                  transition={{ 
+                    repeat: Infinity, 
+                    duration: 2,
+                    ease: "linear",
+                    repeatDelay: 0.5
+                  }}
+                  style={{ filter: "blur(5px)" }}
+                />
               </motion.div>
               
               <motion.div
@@ -435,8 +452,9 @@ const SearchForm = ({ onSearch, initialData }) => {
                   value={inputValue}
                   onChange={handleAmountChange}
                   onKeyDown={handleKeyDown}
-                  className={`w-full border border-gray-500 bg-white-100 rounded-xl p-4 md:p-5 pl-10 focus:outline-none text-gray-800 font-medium text-lg md:text-xl text-right`}
-                  inputMode="decimal"
+                  className={`w-full border border-gray-500 bg-white-100 rounded-xl p-4 md:p-5 pl-10 focus:outline-none text-gray-800 font-medium text-lg md:text-xl text-right placeholder:text-sm md:placeholder:text-base lg:placeholder:text-lg placeholder:text-gray-400`}
+                  inputMode="numeric"
+                  pattern="[0-9,]*"
                   placeholder="Enter amount"
                   onFocus={handleAmountFocus}
                   onBlur={handleAmountBlur}
