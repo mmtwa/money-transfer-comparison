@@ -9,11 +9,11 @@ import { currenciesList } from '../utils/currency';
  * Search form container for currency transfer comparison
  */
 const SearchForm = ({ onSearch, initialData }) => {
-  // Format the number with commas and 2 decimal places (without currency symbol)
+  // Format the number with commas and no decimal places (without currency symbol)
   const formatAmount = (num) => {
     return num.toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
     });
   };
 
@@ -131,11 +131,118 @@ const SearchForm = ({ onSearch, initialData }) => {
       setInputValue(formatAmount(1000));
     } else {
       // Get just the numbers from the input
-      const numericValue = inputValue.replace(/[^0-9.]/g, '');
+      const numericValue = inputValue.replace(/[^0-9]/g, '');
       if (numericValue) {
         const numValue = Number(numericValue);
         setAmount(numValue);
         setInputValue(formatAmount(numValue));
+      }
+    }
+  };
+  
+  // Handle keydown events for special key handling
+  const handleKeyDown = (e) => {
+    // If delete or backspace is pressed
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+      // Get current cursor position and selection
+      const cursorPosition = e.target.selectionStart;
+      const selectionEnd = e.target.selectionEnd;
+      const hasSelection = cursorPosition !== selectionEnd;
+      
+      // Get current value and numeric representation
+      const currentValue = e.target.value;
+      const numericString = currentValue.replace(/[^0-9]/g, '');
+      
+      // If everything is selected or no numeric characters would remain after deletion
+      if ((hasSelection && selectionEnd - cursorPosition === currentValue.length) || 
+          (!hasSelection && numericString.length <= 1) ||
+          (currentValue === '0')) {
+        // Clear the field when deleting the last digit, the entire field is selected, or we're at 0
+        e.preventDefault();
+        setAmount('');
+        setInputValue('');
+        setIsInitialFocus(true);
+        return;
+      }
+      
+      // If there's a selection, let the default handler work
+      if (hasSelection) return;
+      
+      // For backspace, we need to handle removing a character before the cursor
+      if (e.key === 'Backspace' && cursorPosition > 0) {
+        // If the character before cursor is a comma, move cursor back one more position
+        if (currentValue[cursorPosition - 1] === ',') {
+          e.preventDefault();
+          const newCursorPos = cursorPosition - 2;
+          setTimeout(() => {
+            if (amountInputRef.current) {
+              amountInputRef.current.setSelectionRange(newCursorPos, newCursorPos);
+              // Trigger a manual backspace at the new position
+              const newValue = currentValue.substring(0, newCursorPos) + currentValue.substring(newCursorPos + 1);
+              const syntheticEvent = {
+                target: {
+                  value: newValue,
+                  selectionStart: newCursorPos
+                }
+              };
+              handleAmountChange(syntheticEvent);
+            }
+          }, 0);
+        }
+      }
+      
+      // For delete, we need to handle removing a character after the cursor
+      if (e.key === 'Delete' && cursorPosition < currentValue.length) {
+        // Prevent default for all delete operations to handle them manually
+        e.preventDefault();
+        
+        // If the character after cursor is a comma, skip over it
+        if (currentValue[cursorPosition] === ',') {
+          const newCursorPos = cursorPosition + 1;
+          // New value is old value without the character after the new cursor position
+          const newValue = currentValue.substring(0, newCursorPos) + 
+                         (newCursorPos + 1 < currentValue.length ? currentValue.substring(newCursorPos + 1) : '');
+          
+          // Update the input value directly
+          const numericValue = newValue.replace(/[^0-9]/g, '');
+          if (numericValue) {
+            const numValue = parseInt(numericValue, 10);
+            
+            setAmount(numValue);
+            setInputValue(formatAmount(numValue));
+            
+            // Position cursor
+            setTimeout(() => {
+              if (amountInputRef.current) {
+                amountInputRef.current.setSelectionRange(newCursorPos, newCursorPos);
+              }
+            }, 0);
+          }
+        } else {
+          // For a normal character, remove it and format result
+          const newValue = currentValue.substring(0, cursorPosition) + 
+                         (cursorPosition + 1 < currentValue.length ? currentValue.substring(cursorPosition + 1) : '');
+          
+          // Update the input value directly
+          const numericValue = newValue.replace(/[^0-9]/g, '');
+          if (numericValue) {
+            const numValue = parseInt(numericValue, 10);
+            
+            setAmount(numValue);
+            setInputValue(formatAmount(numValue));
+            
+            // Position cursor
+            setTimeout(() => {
+              if (amountInputRef.current) {
+                amountInputRef.current.setSelectionRange(cursorPosition, cursorPosition);
+              }
+            }, 0);
+          } else {
+            setAmount('');
+            setInputValue('');
+            setIsInitialFocus(true);
+          }
+        }
       }
     }
   };
@@ -148,13 +255,24 @@ const SearchForm = ({ onSearch, initialData }) => {
     
     // If this is the initial focus after clicking, just set the raw value
     if (isInitialFocus) {
+      // Strip non-numeric characters first
+      const cleanValue = rawValue.replace(/[^0-9]/g, '');
+      
+      // For normal numeric input, just use the raw value (digits only)
       setInputValue(rawValue);
       
       // Only set amount if there are numbers
-      const numericValue = rawValue.replace(/[^0-9.]/g, '');
-      if (numericValue) {
-        setAmount(Number(numericValue));
-        // After the first keystroke, start formatting
+      if (cleanValue) {
+        const numValue = parseInt(cleanValue, 10);
+        setAmount(numValue);
+        
+        // If we're just typing a single digit (like 1, 2, etc.), don't format yet
+        if (cleanValue.length === 1 && !isNaN(parseInt(cleanValue, 10))) {
+          // Keep in initial focus mode to allow more digits
+          return;
+        }
+        
+        // If more than one digit, start formatting
         setIsInitialFocus(false);
       } else {
         setAmount('');
@@ -162,10 +280,13 @@ const SearchForm = ({ onSearch, initialData }) => {
       return;
     }
     
-    // For all subsequent typing, format with commas and decimals
+    // For all subsequent typing after initial focus
+    
+    // Detect if backspace or delete was used based on value length change
+    const isDeleting = rawValue.length < inputValue.length;
     
     // Strip out currency symbols and commas to get the raw numeric value
-    const numericString = rawValue.replace(/[^0-9.]/g, '');
+    const numericString = rawValue.replace(/[^0-9]/g, '');
     
     // Skip if empty after removing non-numeric characters
     if (!numericString) {
@@ -175,40 +296,39 @@ const SearchForm = ({ onSearch, initialData }) => {
       return;
     }
     
-    // Parse as a number
-    let numValue;
-    if (numericString.includes('.')) {
-      // Handle decimal input
-      numValue = parseFloat(numericString);
-    } else {
-      // For whole numbers, assume input is in main units (dollars, pounds, etc.)
-      numValue = parseInt(numericString, 10);
-    }
+    // Parse as a number (always as integer)
+    const numValue = parseInt(numericString, 10);
     
     if (!isNaN(numValue)) {
       setAmount(numValue);
       
-      // Format with commas and decimal places (no currency symbol as it's shown separately)
+      // Format with commas (no decimal places)
       const formattedValue = formatAmount(numValue);
       setInputValue(formattedValue);
       
-      // Check if the number is long (more than 6 digits before decimal)
-      const digitCount = Math.floor(numValue).toString().length;
+      // Check if the number is long (more than 6 digits)
+      const digitCount = numValue.toString().length;
       setIsLongNumber(digitCount > 6);
       
       // Keep cursor in appropriate position
       setTimeout(() => {
         if (amountInputRef.current) {
-          // Position cursor appropriately based on stripped value and formatted value
-          // This is a simple approximation and may need adjustment for specific cases
-          const strippedBefore = rawValue.substring(0, cursorPosition).replace(/[^0-9.]/g, '');
+          // If backspace/delete was used, adjust cursor position to reflect deletion
+          if (isDeleting) {
+            // For backspace/delete, maintain the cursor at the current position
+            amountInputRef.current.setSelectionRange(cursorPosition, cursorPosition);
+            return;
+          }
+          
+          // For normal typing, position cursor based on stripped value and formatted value
+          const strippedBefore = rawValue.substring(0, cursorPosition).replace(/[^0-9]/g, '');
           let newPosition = formattedValue.length;
           
           if (strippedBefore.length > 0) {
             // Find position in formatted string that corresponds to the end of the stripped part
             let count = 0;
             for (let i = 0; i < formattedValue.length; i++) {
-              if (/[0-9.]/.test(formattedValue[i])) {
+              if (/[0-9]/.test(formattedValue[i])) {
                 count++;
                 if (count === strippedBefore.length) {
                   newPosition = i + 1;
@@ -314,6 +434,7 @@ const SearchForm = ({ onSearch, initialData }) => {
                   type="text"
                   value={inputValue}
                   onChange={handleAmountChange}
+                  onKeyDown={handleKeyDown}
                   className={`w-full border border-gray-500 bg-white-100 rounded-xl p-4 md:p-5 pl-10 focus:outline-none text-gray-800 font-medium text-base md:text-xl text-right`}
                   inputMode="decimal"
                   placeholder="Enter amount"
