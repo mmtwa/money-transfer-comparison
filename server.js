@@ -58,12 +58,14 @@ app.use(helmet({
       ...helmet.contentSecurityPolicy.getDefaultDirectives(),
       "default-src": ["'self'"],
       "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://www.googletagmanager.com", "https://www.google-analytics.com"],
-      "style-src": ["'self'", "'unsafe-inline'"],
+      "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       "img-src": ["'self'", "data:", "https://www.google-analytics.com", "https://stats.g.doubleclick.net"],
-      "font-src": ["'self'", "data:"],
+      "font-src": ["'self'", "data:", "https://fonts.gstatic.com"],
       "connect-src": ["'self'", "https://www.google-analytics.com", "https://*.google-analytics.com", "https://region1.google-analytics.com", "https://stats.g.doubleclick.net"]
     }
-  }
+  },
+  crossOriginEmbedderPolicy: false,  // Allow loading resources from different origins
+  crossOriginResourcePolicy: false   // Allow resources to be shared cross-origin
 })); // Security headers
 // app.use(cors()); // Disable default CORS
 app.use(corsMiddleware); // Use our custom CORS middleware

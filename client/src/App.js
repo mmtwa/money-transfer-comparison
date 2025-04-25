@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import MoneyCompare from './containers/MoneyCompare';
 import Analytics from './components/Analytics';
 import PreloadFlags from './components/ui/PreloadFlags';
+import FontLoader from './components/FontLoader';
 import './App.css';
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
       <div className="App">
         <Analytics measurementId={measurementId} />
         <PreloadFlags />
+        <FontLoader />
         <MoneyCompare initialPath={initialPath} />
       </div>
     </div>
