@@ -25,5 +25,7 @@ services:
         sync: false
       - key: WISE_API_URL
         value: https://api.wise.com/v1
+      - key: PUBLIC_URL
+        value: /
     autoDeploy: true
     healthCheckPath: /health

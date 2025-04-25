@@ -38,8 +38,11 @@ mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
-.then(() => console.log('MongoDB connected'))
-.catch(err => console.error('MongoDB connection error:', err));
+.then(() => console.log('MongoDB connected successfully'))
+.catch(err => {
+  console.error('MongoDB connection error:', err);
+  // Continue running the app even if MongoDB fails - don't exit
+});
 
 // Middleware
 app.use(helmet({
@@ -145,7 +148,7 @@ if (process.env.NODE_ENV === 'production') {
     }
   }
   
-  // Set static folder
+  // Set static folder - Ensure the path is correct
   app.use(express.static(path.join(__dirname, 'client/build')));
   
   // Health check endpoint for Render
@@ -153,7 +156,7 @@ if (process.env.NODE_ENV === 'production') {
     res.status(200).send('OK');
   });
   
-  // Serve the index.html file for all routes not handled by the API
+  // Handle all routes not captured by API - Make sure non-API routes serve index.html
   app.get('*', (req, res) => {
     if (!req.path.startsWith('/api')) {
       res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
