@@ -1,0 +1,60 @@
+{
+  "currencyPairs": {
+    "EUR to USD": {
+      "timeEstimate": "about 2 days and 19 hours",
+      "hours": 67,
+      "examples": [
+        {
+          "amount": 1000,
+          "deliveryEstimate": "2025-04-28T16:30:00Z",
+          "formattedTime": "about 2 days and 19 hours",
+          "expectedArrival": "Monday, Apr 28, 05:30 PM"
+        },
+        {
+          "amount": 5000,
+          "deliveryEstimate": "2025-04-28T16:30:00Z",
+          "formattedTime": "about 2 days and 19 hours",
+          "expectedArrival": "Monday, Apr 28, 05:30 PM"
+        }
+      ]
+    },
+    "GBP to EUR": {
+      "timeEstimate": "about 2 days and 13 hours",
+      "hours": 61,
+      "examples": [
+        {
+          "amount": 1000,
+          "deliveryEstimate": "2025-04-28T10:13:00Z",
+          "formattedTime": "about 2 days and 13 hours",
+          "expectedArrival": "Monday, Apr 28, 11:13 AM"
+        },
+        {
+          "amount": 10000,
+          "deliveryEstimate": "2025-04-28T10:13:00Z",
+          "formattedTime": "about 2 days and 13 hours",
+          "expectedArrival": "Monday, Apr 28, 11:13 AM"
+        }
+      ]
+    },
+    "USD to GBP": {
+      "timeEstimate": "about 2 days and 17 hours",
+      "hours": 65,
+      "examples": [
+        {
+          "amount": 1000,
+          "deliveryEstimate": "2025-04-28T14:20:00Z",
+          "formattedTime": "about 2 days and 17 hours",
+          "expectedArrival": "Monday, Apr 28, 03:20 PM"
+        },
+        {
+          "amount": 3000,
+          "deliveryEstimate": "2025-04-28T14:20:00Z",
+          "formattedTime": "about 2 days and 17 hours",
+          "expectedArrival": "Monday, Apr 28, 03:20 PM"
+        }
+      ]
+    }
+  },
+  "lastUpdated": "2025-04-25T21:05:26.692Z",
+  "timeZone": "Europe/London"
+}

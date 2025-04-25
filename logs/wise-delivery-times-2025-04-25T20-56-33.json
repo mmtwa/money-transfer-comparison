@@ -1,0 +1,1112 @@
+[
+  {
+    "currencyPair": "EUR to USD",
+    "amount": 1000,
+    "timestamp": "2025-04-25T20:56:27.787Z",
+    "apiVersions": [
+      {
+        "apiVersion": "Default Endpoint",
+        "endpoint": "/quotes",
+        "paymentOptions": [
+          {
+            "method": "Bank to Bank",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error_description": "Invalid token",
+              "error": "invalid_token"
+            }
+          },
+          {
+            "method": "Card to Bank",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error": "invalid_token",
+              "error_description": "Invalid token"
+            }
+          },
+          {
+            "method": "Bank to Cash Pickup",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error": "invalid_token",
+              "error_description": "Invalid token"
+            }
+          },
+          {
+            "method": "Default (no preferences)",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error": "invalid_token",
+              "error_description": "Invalid token"
+            }
+          }
+        ]
+      },
+      {
+        "apiVersion": "V3 Endpoint",
+        "endpoint": "/v3/quotes",
+        "paymentOptions": [
+          {
+            "method": "Bank to Bank",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error": "invalid_token",
+              "error_description": "Invalid token"
+            }
+          },
+          {
+            "method": "Card to Bank",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error": "invalid_token",
+              "error_description": "Invalid token"
+            }
+          },
+          {
+            "method": "Bank to Cash Pickup",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error": "invalid_token",
+              "error_description": "Invalid token"
+            }
+          },
+          {
+            "method": "Default (no preferences)",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error_description": "Invalid token",
+              "error": "invalid_token"
+            }
+          }
+        ]
+      },
+      {
+        "apiVersion": "V1 Endpoint",
+        "endpoint": "/v1/quotes",
+        "paymentOptions": [
+          {
+            "method": "Bank to Bank",
+            "params": {
+              "payIn": "BANK_TRANSFER",
+              "payOut": "BANK_TRANSFER"
+            },
+            "deliveryEstimate": "2025-04-28T16:30:00Z",
+            "formattedDelivery": "In 3 days",
+            "timeFields": [
+              {
+                "path": "createdTime",
+                "value": "2025-04-25T20:56:28.388Z"
+              },
+              {
+                "path": "deliveryEstimate",
+                "value": "2025-04-28T16:30:00Z"
+              }
+            ],
+            "availableOptions": [],
+            "rate": 1.13605,
+            "fee": 6.21,
+            "sourceAmount": 1000,
+            "targetAmount": 1129
+          },
+          {
+            "method": "Card to Bank",
+            "params": {
+              "payIn": "CARD",
+              "payOut": "BANK_TRANSFER"
+            },
+            "deliveryEstimate": "2025-04-28T16:30:00Z",
+            "formattedDelivery": "In 3 days",
+            "timeFields": [
+              {
+                "path": "createdTime",
+                "value": "2025-04-25T20:56:28.472Z"
+              },
+              {
+                "path": "deliveryEstimate",
+                "value": "2025-04-28T16:30:00Z"
+              }
+            ],
+            "availableOptions": [],
+            "rate": 1.13605,
+            "fee": 6.21,
+            "sourceAmount": 1000,
+            "targetAmount": 1129
+          },
+          {
+            "method": "Bank to Cash Pickup",
+            "params": {
+              "payIn": "BANK_TRANSFER",
+              "payOut": "CASH_PICKUP"
+            },
+            "deliveryEstimate": "2025-04-28T16:30:00Z",
+            "formattedDelivery": "In 3 days",
+            "timeFields": [
+              {
+                "path": "createdTime",
+                "value": "2025-04-25T20:56:28.567Z"
+              },
+              {
+                "path": "deliveryEstimate",
+                "value": "2025-04-28T16:30:00Z"
+              }
+            ],
+            "availableOptions": [],
+            "rate": 1.13605,
+            "fee": 6.21,
+            "sourceAmount": 1000,
+            "targetAmount": 1129
+          },
+          {
+            "method": "Default (no preferences)",
+            "params": {
+              "payIn": "Any",
+              "payOut": "Any"
+            },
+            "deliveryEstimate": "2025-04-28T16:30:00Z",
+            "formattedDelivery": "In 3 days",
+            "timeFields": [
+              {
+                "path": "createdTime",
+                "value": "2025-04-25T20:56:28.653Z"
+              },
+              {
+                "path": "deliveryEstimate",
+                "value": "2025-04-28T16:30:00Z"
+              }
+            ],
+            "availableOptions": [],
+            "rate": 1.13605,
+            "fee": 6.21,
+            "sourceAmount": 1000,
+            "targetAmount": 1129
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "currencyPair": "EUR to USD",
+    "amount": 5000,
+    "timestamp": "2025-04-25T20:56:28.572Z",
+    "apiVersions": [
+      {
+        "apiVersion": "Default Endpoint",
+        "endpoint": "/quotes",
+        "paymentOptions": [
+          {
+            "method": "Bank to Bank",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error": "invalid_token",
+              "error_description": "Invalid token"
+            }
+          },
+          {
+            "method": "Card to Bank",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error_description": "Invalid token",
+              "error": "invalid_token"
+            }
+          },
+          {
+            "method": "Bank to Cash Pickup",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error_description": "Invalid token",
+              "error": "invalid_token"
+            }
+          },
+          {
+            "method": "Default (no preferences)",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error": "invalid_token",
+              "error_description": "Invalid token"
+            }
+          }
+        ]
+      },
+      {
+        "apiVersion": "V3 Endpoint",
+        "endpoint": "/v3/quotes",
+        "paymentOptions": [
+          {
+            "method": "Bank to Bank",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error_description": "Invalid token",
+              "error": "invalid_token"
+            }
+          },
+          {
+            "method": "Card to Bank",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error_description": "Invalid token",
+              "error": "invalid_token"
+            }
+          },
+          {
+            "method": "Bank to Cash Pickup",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error": "invalid_token",
+              "error_description": "Invalid token"
+            }
+          },
+          {
+            "method": "Default (no preferences)",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error_description": "Invalid token",
+              "error": "invalid_token"
+            }
+          }
+        ]
+      },
+      {
+        "apiVersion": "V1 Endpoint",
+        "endpoint": "/v1/quotes",
+        "paymentOptions": [
+          {
+            "method": "Bank to Bank",
+            "params": {
+              "payIn": "BANK_TRANSFER",
+              "payOut": "BANK_TRANSFER"
+            },
+            "deliveryEstimate": "2025-04-28T16:30:00Z",
+            "formattedDelivery": "In 3 days",
+            "timeFields": [
+              {
+                "path": "createdTime",
+                "value": "2025-04-25T20:56:29.390Z"
+              },
+              {
+                "path": "deliveryEstimate",
+                "value": "2025-04-28T16:30:00Z"
+              }
+            ],
+            "availableOptions": [],
+            "rate": 1.13605,
+            "fee": 24.93,
+            "sourceAmount": 5000,
+            "targetAmount": 5651.93
+          },
+          {
+            "method": "Card to Bank",
+            "params": {
+              "payIn": "CARD",
+              "payOut": "BANK_TRANSFER"
+            },
+            "deliveryEstimate": "2025-04-28T16:30:00Z",
+            "formattedDelivery": "In 3 days",
+            "timeFields": [
+              {
+                "path": "createdTime",
+                "value": "2025-04-25T20:56:29.475Z"
+              },
+              {
+                "path": "deliveryEstimate",
+                "value": "2025-04-28T16:30:00Z"
+              }
+            ],
+            "availableOptions": [],
+            "rate": 1.13605,
+            "fee": 24.93,
+            "sourceAmount": 5000,
+            "targetAmount": 5651.93
+          },
+          {
+            "method": "Bank to Cash Pickup",
+            "params": {
+              "payIn": "BANK_TRANSFER",
+              "payOut": "CASH_PICKUP"
+            },
+            "deliveryEstimate": "2025-04-28T16:30:00Z",
+            "formattedDelivery": "In 3 days",
+            "timeFields": [
+              {
+                "path": "createdTime",
+                "value": "2025-04-25T20:56:29.565Z"
+              },
+              {
+                "path": "deliveryEstimate",
+                "value": "2025-04-28T16:30:00Z"
+              }
+            ],
+            "availableOptions": [],
+            "rate": 1.13605,
+            "fee": 24.93,
+            "sourceAmount": 5000,
+            "targetAmount": 5651.93
+          },
+          {
+            "method": "Default (no preferences)",
+            "params": {
+              "payIn": "Any",
+              "payOut": "Any"
+            },
+            "deliveryEstimate": "2025-04-28T16:30:00Z",
+            "formattedDelivery": "In 3 days",
+            "timeFields": [
+              {
+                "path": "createdTime",
+                "value": "2025-04-25T20:56:29.658Z"
+              },
+              {
+                "path": "deliveryEstimate",
+                "value": "2025-04-28T16:30:00Z"
+              }
+            ],
+            "availableOptions": [],
+            "rate": 1.13605,
+            "fee": 24.93,
+            "sourceAmount": 5000,
+            "targetAmount": 5651.93
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "currencyPair": "GBP to EUR",
+    "amount": 1000,
+    "timestamp": "2025-04-25T20:56:29.603Z",
+    "apiVersions": [
+      {
+        "apiVersion": "Default Endpoint",
+        "endpoint": "/quotes",
+        "paymentOptions": [
+          {
+            "method": "Bank to Bank",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error": "invalid_token",
+              "error_description": "Invalid token"
+            }
+          },
+          {
+            "method": "Card to Bank",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error": "invalid_token",
+              "error_description": "Invalid token"
+            }
+          },
+          {
+            "method": "Bank to Cash Pickup",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error": "invalid_token",
+              "error_description": "Invalid token"
+            }
+          },
+          {
+            "method": "Default (no preferences)",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error_description": "Invalid token",
+              "error": "invalid_token"
+            }
+          }
+        ]
+      },
+      {
+        "apiVersion": "V3 Endpoint",
+        "endpoint": "/v3/quotes",
+        "paymentOptions": [
+          {
+            "method": "Bank to Bank",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error": "invalid_token",
+              "error_description": "Invalid token"
+            }
+          },
+          {
+            "method": "Card to Bank",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error": "invalid_token",
+              "error_description": "Invalid token"
+            }
+          },
+          {
+            "method": "Bank to Cash Pickup",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error": "invalid_token",
+              "error_description": "Invalid token"
+            }
+          },
+          {
+            "method": "Default (no preferences)",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error": "invalid_token",
+              "error_description": "Invalid token"
+            }
+          }
+        ]
+      },
+      {
+        "apiVersion": "V1 Endpoint",
+        "endpoint": "/v1/quotes",
+        "paymentOptions": [
+          {
+            "method": "Bank to Bank",
+            "params": {
+              "payIn": "BANK_TRANSFER",
+              "payOut": "BANK_TRANSFER"
+            },
+            "deliveryEstimate": "2025-04-28T10:13:00Z",
+            "formattedDelivery": "In 3 days",
+            "timeFields": [
+              {
+                "path": "createdTime",
+                "value": "2025-04-25T20:56:30.183Z"
+              },
+              {
+                "path": "deliveryEstimate",
+                "value": "2025-04-28T10:13:00Z"
+              }
+            ],
+            "availableOptions": [],
+            "rate": 1.17192,
+            "fee": 3.88,
+            "sourceAmount": 1000,
+            "targetAmount": 1167.37
+          },
+          {
+            "method": "Card to Bank",
+            "params": {
+              "payIn": "CARD",
+              "payOut": "BANK_TRANSFER"
+            },
+            "deliveryEstimate": "2025-04-28T10:13:00Z",
+            "formattedDelivery": "In 3 days",
+            "timeFields": [
+              {
+                "path": "createdTime",
+                "value": "2025-04-25T20:56:30.288Z"
+              },
+              {
+                "path": "deliveryEstimate",
+                "value": "2025-04-28T10:13:00Z"
+              }
+            ],
+            "availableOptions": [],
+            "rate": 1.17192,
+            "fee": 3.88,
+            "sourceAmount": 1000,
+            "targetAmount": 1167.37
+          },
+          {
+            "method": "Bank to Cash Pickup",
+            "params": {
+              "payIn": "BANK_TRANSFER",
+              "payOut": "CASH_PICKUP"
+            },
+            "deliveryEstimate": "2025-04-28T10:13:00Z",
+            "formattedDelivery": "In 3 days",
+            "timeFields": [
+              {
+                "path": "createdTime",
+                "value": "2025-04-25T20:56:30.385Z"
+              },
+              {
+                "path": "deliveryEstimate",
+                "value": "2025-04-28T10:13:00Z"
+              }
+            ],
+            "availableOptions": [],
+            "rate": 1.17192,
+            "fee": 3.88,
+            "sourceAmount": 1000,
+            "targetAmount": 1167.37
+          },
+          {
+            "method": "Default (no preferences)",
+            "params": {
+              "payIn": "Any",
+              "payOut": "Any"
+            },
+            "deliveryEstimate": "2025-04-28T10:13:00Z",
+            "formattedDelivery": "In 3 days",
+            "timeFields": [
+              {
+                "path": "createdTime",
+                "value": "2025-04-25T20:56:30.478Z"
+              },
+              {
+                "path": "deliveryEstimate",
+                "value": "2025-04-28T10:13:00Z"
+              }
+            ],
+            "availableOptions": [],
+            "rate": 1.17192,
+            "fee": 3.88,
+            "sourceAmount": 1000,
+            "targetAmount": 1167.37
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "currencyPair": "GBP to EUR",
+    "amount": 10000,
+    "timestamp": "2025-04-25T20:56:30.409Z",
+    "apiVersions": [
+      {
+        "apiVersion": "Default Endpoint",
+        "endpoint": "/quotes",
+        "paymentOptions": [
+          {
+            "method": "Bank to Bank",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error": "invalid_token",
+              "error_description": "Invalid token"
+            }
+          },
+          {
+            "method": "Card to Bank",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error_description": "Invalid token",
+              "error": "invalid_token"
+            }
+          },
+          {
+            "method": "Bank to Cash Pickup",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error_description": "Invalid token",
+              "error": "invalid_token"
+            }
+          },
+          {
+            "method": "Default (no preferences)",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error": "invalid_token",
+              "error_description": "Invalid token"
+            }
+          }
+        ]
+      },
+      {
+        "apiVersion": "V3 Endpoint",
+        "endpoint": "/v3/quotes",
+        "paymentOptions": [
+          {
+            "method": "Bank to Bank",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error": "invalid_token",
+              "error_description": "Invalid token"
+            }
+          },
+          {
+            "method": "Card to Bank",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error_description": "Invalid token",
+              "error": "invalid_token"
+            }
+          },
+          {
+            "method": "Bank to Cash Pickup",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error_description": "Invalid token",
+              "error": "invalid_token"
+            }
+          },
+          {
+            "method": "Default (no preferences)",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error_description": "Invalid token",
+              "error": "invalid_token"
+            }
+          }
+        ]
+      },
+      {
+        "apiVersion": "V1 Endpoint",
+        "endpoint": "/v1/quotes",
+        "paymentOptions": [
+          {
+            "method": "Bank to Bank",
+            "params": {
+              "payIn": "BANK_TRANSFER",
+              "payOut": "BANK_TRANSFER"
+            },
+            "deliveryEstimate": "2025-04-28T10:13:00Z",
+            "formattedDelivery": "In 3 days",
+            "timeFields": [
+              {
+                "path": "createdTime",
+                "value": "2025-04-25T20:56:31.217Z"
+              },
+              {
+                "path": "deliveryEstimate",
+                "value": "2025-04-28T10:13:00Z"
+              }
+            ],
+            "availableOptions": [],
+            "rate": 1.17192,
+            "fee": 33.48,
+            "sourceAmount": 10000,
+            "targetAmount": 11679.96
+          },
+          {
+            "method": "Card to Bank",
+            "params": {
+              "payIn": "CARD",
+              "payOut": "BANK_TRANSFER"
+            },
+            "deliveryEstimate": "2025-04-28T10:13:00Z",
+            "formattedDelivery": "In 3 days",
+            "timeFields": [
+              {
+                "path": "createdTime",
+                "value": "2025-04-25T20:56:31.319Z"
+              },
+              {
+                "path": "deliveryEstimate",
+                "value": "2025-04-28T10:13:00Z"
+              }
+            ],
+            "availableOptions": [],
+            "rate": 1.17192,
+            "fee": 33.48,
+            "sourceAmount": 10000,
+            "targetAmount": 11679.96
+          },
+          {
+            "method": "Bank to Cash Pickup",
+            "params": {
+              "payIn": "BANK_TRANSFER",
+              "payOut": "CASH_PICKUP"
+            },
+            "deliveryEstimate": "2025-04-28T10:13:00Z",
+            "formattedDelivery": "In 3 days",
+            "timeFields": [
+              {
+                "path": "createdTime",
+                "value": "2025-04-25T20:56:31.419Z"
+              },
+              {
+                "path": "deliveryEstimate",
+                "value": "2025-04-28T10:13:00Z"
+              }
+            ],
+            "availableOptions": [],
+            "rate": 1.17192,
+            "fee": 33.48,
+            "sourceAmount": 10000,
+            "targetAmount": 11679.96
+          },
+          {
+            "method": "Default (no preferences)",
+            "params": {
+              "payIn": "Any",
+              "payOut": "Any"
+            },
+            "deliveryEstimate": "2025-04-28T10:13:00Z",
+            "formattedDelivery": "In 3 days",
+            "timeFields": [
+              {
+                "path": "createdTime",
+                "value": "2025-04-25T20:56:31.517Z"
+              },
+              {
+                "path": "deliveryEstimate",
+                "value": "2025-04-28T10:13:00Z"
+              }
+            ],
+            "availableOptions": [],
+            "rate": 1.17192,
+            "fee": 33.48,
+            "sourceAmount": 10000,
+            "targetAmount": 11679.96
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "currencyPair": "USD to GBP",
+    "amount": 1000,
+    "timestamp": "2025-04-25T20:56:31.447Z",
+    "apiVersions": [
+      {
+        "apiVersion": "Default Endpoint",
+        "endpoint": "/quotes",
+        "paymentOptions": [
+          {
+            "method": "Bank to Bank",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error_description": "Invalid token",
+              "error": "invalid_token"
+            }
+          },
+          {
+            "method": "Card to Bank",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error_description": "Invalid token",
+              "error": "invalid_token"
+            }
+          },
+          {
+            "method": "Bank to Cash Pickup",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error": "invalid_token",
+              "error_description": "Invalid token"
+            }
+          },
+          {
+            "method": "Default (no preferences)",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error": "invalid_token",
+              "error_description": "Invalid token"
+            }
+          }
+        ]
+      },
+      {
+        "apiVersion": "V3 Endpoint",
+        "endpoint": "/v3/quotes",
+        "paymentOptions": [
+          {
+            "method": "Bank to Bank",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error_description": "Invalid token",
+              "error": "invalid_token"
+            }
+          },
+          {
+            "method": "Card to Bank",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error": "invalid_token",
+              "error_description": "Invalid token"
+            }
+          },
+          {
+            "method": "Bank to Cash Pickup",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error_description": "Invalid token",
+              "error": "invalid_token"
+            }
+          },
+          {
+            "method": "Default (no preferences)",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error": "invalid_token",
+              "error_description": "Invalid token"
+            }
+          }
+        ]
+      },
+      {
+        "apiVersion": "V1 Endpoint",
+        "endpoint": "/v1/quotes",
+        "paymentOptions": [
+          {
+            "method": "Bank to Bank",
+            "params": {
+              "payIn": "BANK_TRANSFER",
+              "payOut": "BANK_TRANSFER"
+            },
+            "deliveryEstimate": "2025-04-28T14:20:00Z",
+            "formattedDelivery": "In 3 days",
+            "timeFields": [
+              {
+                "path": "createdTime",
+                "value": "2025-04-25T20:56:32.028Z"
+              },
+              {
+                "path": "deliveryEstimate",
+                "value": "2025-04-28T14:20:00Z"
+              }
+            ],
+            "availableOptions": [],
+            "rate": 0.751117,
+            "fee": 10.29,
+            "sourceAmount": 1000,
+            "targetAmount": 743.39
+          },
+          {
+            "method": "Card to Bank",
+            "params": {
+              "payIn": "CARD",
+              "payOut": "BANK_TRANSFER"
+            },
+            "deliveryEstimate": "2025-04-28T14:20:00Z",
+            "formattedDelivery": "In 3 days",
+            "timeFields": [
+              {
+                "path": "createdTime",
+                "value": "2025-04-25T20:56:32.151Z"
+              },
+              {
+                "path": "deliveryEstimate",
+                "value": "2025-04-28T14:20:00Z"
+              }
+            ],
+            "availableOptions": [],
+            "rate": 0.751117,
+            "fee": 10.29,
+            "sourceAmount": 1000,
+            "targetAmount": 743.39
+          },
+          {
+            "method": "Bank to Cash Pickup",
+            "params": {
+              "payIn": "BANK_TRANSFER",
+              "payOut": "CASH_PICKUP"
+            },
+            "deliveryEstimate": "2025-04-28T14:20:00Z",
+            "formattedDelivery": "In 3 days",
+            "timeFields": [
+              {
+                "path": "createdTime",
+                "value": "2025-04-25T20:56:32.249Z"
+              },
+              {
+                "path": "deliveryEstimate",
+                "value": "2025-04-28T14:20:00Z"
+              }
+            ],
+            "availableOptions": [],
+            "rate": 0.751117,
+            "fee": 10.29,
+            "sourceAmount": 1000,
+            "targetAmount": 743.39
+          },
+          {
+            "method": "Default (no preferences)",
+            "params": {
+              "payIn": "Any",
+              "payOut": "Any"
+            },
+            "deliveryEstimate": "2025-04-28T14:20:00Z",
+            "formattedDelivery": "In 3 days",
+            "timeFields": [
+              {
+                "path": "createdTime",
+                "value": "2025-04-25T20:56:32.343Z"
+              },
+              {
+                "path": "deliveryEstimate",
+                "value": "2025-04-28T14:20:00Z"
+              }
+            ],
+            "availableOptions": [],
+            "rate": 0.751117,
+            "fee": 10.29,
+            "sourceAmount": 1000,
+            "targetAmount": 743.39
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "currencyPair": "USD to GBP",
+    "amount": 3000,
+    "timestamp": "2025-04-25T20:56:32.274Z",
+    "apiVersions": [
+      {
+        "apiVersion": "Default Endpoint",
+        "endpoint": "/quotes",
+        "paymentOptions": [
+          {
+            "method": "Bank to Bank",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error": "invalid_token",
+              "error_description": "Invalid token"
+            }
+          },
+          {
+            "method": "Card to Bank",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error_description": "Invalid token",
+              "error": "invalid_token"
+            }
+          },
+          {
+            "method": "Bank to Cash Pickup",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error": "invalid_token",
+              "error_description": "Invalid token"
+            }
+          },
+          {
+            "method": "Default (no preferences)",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error_description": "Invalid token",
+              "error": "invalid_token"
+            }
+          }
+        ]
+      },
+      {
+        "apiVersion": "V3 Endpoint",
+        "endpoint": "/v3/quotes",
+        "paymentOptions": [
+          {
+            "method": "Bank to Bank",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error_description": "Invalid token",
+              "error": "invalid_token"
+            }
+          },
+          {
+            "method": "Card to Bank",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error_description": "Invalid token",
+              "error": "invalid_token"
+            }
+          },
+          {
+            "method": "Bank to Cash Pickup",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error": "invalid_token",
+              "error_description": "Invalid token"
+            }
+          },
+          {
+            "method": "Default (no preferences)",
+            "error": "Request failed with status code 401",
+            "errorDetails": {
+              "error": "invalid_token",
+              "error_description": "Invalid token"
+            }
+          }
+        ]
+      },
+      {
+        "apiVersion": "V1 Endpoint",
+        "endpoint": "/v1/quotes",
+        "paymentOptions": [
+          {
+            "method": "Bank to Bank",
+            "params": {
+              "payIn": "BANK_TRANSFER",
+              "payOut": "BANK_TRANSFER"
+            },
+            "deliveryEstimate": "2025-04-28T14:20:00Z",
+            "formattedDelivery": "In 3 days",
+            "timeFields": [
+              {
+                "path": "createdTime",
+                "value": "2025-04-25T20:56:32.832Z"
+              },
+              {
+                "path": "deliveryEstimate",
+                "value": "2025-04-28T14:20:00Z"
+              }
+            ],
+            "availableOptions": [],
+            "rate": 0.751117,
+            "fee": 16.88,
+            "sourceAmount": 3000,
+            "targetAmount": 2240.67
+          },
+          {
+            "method": "Card to Bank",
+            "params": {
+              "payIn": "CARD",
+              "payOut": "BANK_TRANSFER"
+            },
+            "deliveryEstimate": "2025-04-28T14:20:00Z",
+            "formattedDelivery": "In 3 days",
+            "timeFields": [
+              {
+                "path": "createdTime",
+                "value": "2025-04-25T20:56:32.930Z"
+              },
+              {
+                "path": "deliveryEstimate",
+                "value": "2025-04-28T14:20:00Z"
+              }
+            ],
+            "availableOptions": [],
+            "rate": 0.751117,
+            "fee": 16.88,
+            "sourceAmount": 3000,
+            "targetAmount": 2240.67
+          },
+          {
+            "method": "Bank to Cash Pickup",
+            "params": {
+              "payIn": "BANK_TRANSFER",
+              "payOut": "CASH_PICKUP"
+            },
+            "deliveryEstimate": "2025-04-28T14:20:00Z",
+            "formattedDelivery": "In 3 days",
+            "timeFields": [
+              {
+                "path": "createdTime",
+                "value": "2025-04-25T20:56:33.031Z"
+              },
+              {
+                "path": "deliveryEstimate",
+                "value": "2025-04-28T14:20:00Z"
+              }
+            ],
+            "availableOptions": [],
+            "rate": 0.751117,
+            "fee": 16.88,
+            "sourceAmount": 3000,
+            "targetAmount": 2240.67
+          },
+          {
+            "method": "Default (no preferences)",
+            "params": {
+              "payIn": "Any",
+              "payOut": "Any"
+            },
+            "deliveryEstimate": "2025-04-28T14:20:00Z",
+            "formattedDelivery": "In 3 days",
+            "timeFields": [
+              {
+                "path": "createdTime",
+                "value": "2025-04-25T20:56:33.150Z"
+              },
+              {
+                "path": "deliveryEstimate",
+                "value": "2025-04-28T14:20:00Z"
+              }
+            ],
+            "availableOptions": [],
+            "rate": 0.751117,
+            "fee": 16.88,
+            "sourceAmount": 3000,
+            "targetAmount": 2240.67
+          }
+        ]
+      }
+    ]
+  }
+]

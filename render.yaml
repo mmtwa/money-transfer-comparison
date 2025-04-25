@@ -2,7 +2,7 @@ services:
   - type: web
     name: money-transfer-comparison
     env: node
-    buildCommand: chmod +x ./build.sh && ./build.sh
+    buildCommand: chmod +x ./render-build.sh && ./render-build.sh
     startCommand: chmod +x ./start.sh && ./start.sh
     envVars:
       - key: NODE_ENV
@@ -17,4 +17,13 @@ services:
         value: 30d
       - key: JWT_COOKIE_EXPIRE
         value: 30
+      - key: WISE_CLIENT_ID
+        sync: false
+      - key: WISE_CLIENT_KEY
+        sync: false
+      - key: WISE_CLIENT_SECRET
+        sync: false
+      - key: WISE_API_URL
+        value: https://api.wise.com/v1
     autoDeploy: true
+    healthCheckPath: /health

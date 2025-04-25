@@ -11,16 +11,26 @@ const ProviderCard = ({
   fromCurrency, 
   toCurrency, 
   amount,
-  id
+  id,
+  name,
+  logo,
+  rating,
+  receiveAmount,
+  totalFees,
+  rate,
+  transferTime,
+  transferFee,
+  exchangeRateMargin,
+  features = []
 }) => {
   // Generate rating visualization elements
-  const renderRating = (rating) => {
-    const filledCircles = Math.floor(rating);
-    const hasHalf = rating % 1 >= 0.5;
-    const emptyCircles = 5 - Math.ceil(rating);
+  const renderRating = (ratingValue) => {
+    const filledCircles = Math.floor(ratingValue);
+    const hasHalf = ratingValue % 1 >= 0.5;
+    const emptyCircles = 5 - Math.ceil(ratingValue);
     
     return (
-      <div className="flex  items-center">
+      <div className="flex items-center">
         {[...Array(filledCircles)].map((_, i) => (
           <div key={`filled-${i}`} className="w-2 h-2 rounded-full bg-yellow-400 mr-1"></div>
         ))}
@@ -31,16 +41,79 @@ const ProviderCard = ({
           <div key={`empty-${i}`} className="w-2 h-2 rounded-full bg-gray-200 mr-1"></div>
         ))}
         <div className="ml-1 flex items-center text-xs text-gray-500">
-          <ThumbsUp size={10} className="mr-1" /> {provider.rating}
+          <ThumbsUp size={10} className="mr-1" /> {provider?.rating || rating || 0}
         </div>
       </div>
     );
   };
 
+  // Format transfer time for display
+  const formatTransferTime = () => {
+    // First check if we have a formatted transferTime string
+    if (provider?.transferTime || transferTime) {
+      const timeValue = provider?.transferTime || transferTime;
+      
+      // Check if this is an ISO date string (delivered from the Wise API)
+      if (timeValue && typeof timeValue === 'string' && timeValue.includes('T') && timeValue.includes('Z')) {
+        try {
+          // Try to parse the ISO date string
+          const deliveryDate = new Date(timeValue);
+          const now = new Date();
+          
+          // Calculate hours difference
+          const diffHours = Math.round((deliveryDate - now) / (1000 * 60 * 60));
+          
+          // If it's the same day
+          if (diffHours < 24 && deliveryDate.getDate() === now.getDate()) {
+            if (diffHours <= 1) {
+              return 'Within 1 hour';
+            }
+            return `Within ${diffHours} hours`;
+          }
+          
+          // If it's tomorrow
+          const tomorrow = new Date(now);
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          if (deliveryDate.getDate() === tomorrow.getDate() && 
+              deliveryDate.getMonth() === tomorrow.getMonth() && 
+              deliveryDate.getFullYear() === tomorrow.getFullYear()) {
+            return 'Tomorrow';
+          }
+          
+          // If it's within a week
+          const daysDiff = Math.round((deliveryDate - now) / (1000 * 60 * 60 * 24));
+          if (daysDiff <= 7) {
+            return `${daysDiff} days`;
+          }
+          
+          // Format as date
+          return deliveryDate.toLocaleDateString();
+        } catch (e) {
+          // If parsing fails, just return the string
+          return timeValue;
+        }
+      }
+      
+      return timeValue;
+    }
+    
+    // Fall back to hours format
+    const timeHours = provider?.transferTimeHours || provider?.timeHours || { min: null, max: null };
+    
+    if (timeHours.min !== null && timeHours.max !== null) {
+      if (timeHours.min === timeHours.max) {
+        return `${timeHours.min} hours`;
+      }
+      return `${timeHours.min}-${timeHours.max} hours`;
+    }
+    
+    return 'Unknown';
+  };
+
   return (
     <>
       {/* Shimmer animation style - only rendered if not already present from ResultsView */}
-      <style jsx global>{`
+      <style jsx="true" global="true">{`
         .text-shimmer {
           background: linear-gradient(
             to right,
@@ -76,23 +149,44 @@ const ProviderCard = ({
           <div className="flex flex-col items-start">
             <div className="mb-1">
               <img 
-                src={provider.logo} 
-                alt={`${provider.name} logo`} 
+                src={provider?.logo || logo || '/images/providers/default.png'} 
+                alt={`${provider?.name || name || 'Provider'} logo`} 
                 className="h-32 w-32 object-contain"
+                onError={(e) => {
+                  // Try to fix the path if it starts with "/"
+                  if ((provider?.logo || logo || '').startsWith('/')) {
+                    const imgSrc = provider?.logo || logo;
+                    // Try without the leading slash
+                    e.target.src = imgSrc.substring(1);
+                  } else {
+                    // Fall back to a default provider logo based on provider name
+                    const providerName = (provider?.name || name || '').toLowerCase();
+                    if (providerName.includes('wise')) {
+                      e.target.src = 'images/providers/wise.png';
+                    } else if (providerName.includes('xe')) {
+                      e.target.src = 'images/providers/xe.png';
+                    } else if (providerName.includes('western') || providerName.includes('union')) {
+                      e.target.src = 'images/providers/westernunion.png';
+                    } else {
+                      // Default fallback
+                      e.target.src = 'images/providers/default.png';
+                    }
+                  }
+                }}
               />
             </div>
-            {renderRating(provider.rating)}
+            {renderRating(provider?.rating || rating || 0)}
           </div>
           
           <div className="text-right">
             <div className="text-xs uppercase font-medium text-indigo-600">They receive</div>
             <div className="text-2xl font-bold">
               <span className="text-shimmer">
-                {getCurrencySymbol(toCurrency)} {formatAmount(provider.amountReceived)}
+                {getCurrencySymbol(toCurrency)} {formatAmount(provider?.amountReceived || receiveAmount || 0)}
               </span>
             </div>
             <div className="text-xs text-gray-500 mt-1 bg-indigo-50 py-0.5 px-2 rounded-full inline-block">
-              Fees: {getCurrencySymbol(fromCurrency)} {formatAmount(provider.totalFees)}
+              Fees: {getCurrencySymbol(fromCurrency)} {formatAmount(provider?.transferFee || transferFee || 0)}
             </div>
           </div>
         </div>
@@ -105,7 +199,7 @@ const ProviderCard = ({
               <div className="w-1 h-full min-h-[40px] bg-indigo-400 mr-3 self-stretch rounded-full"></div>
               <div className="text-left">
                 <div className="text-xs text-gray-500 font-medium mb-1">Exchange Rate</div>
-                <div className="font-bold text-left">{`1 ${fromCurrency} = ${provider.rate.toFixed(4)} ${toCurrency}`}</div>
+                <div className="font-bold text-left">{`1 ${fromCurrency} = ${(provider?.rate || rate || 0).toFixed(4)} ${toCurrency}`}</div>
               </div>
             </div>
             
@@ -114,7 +208,7 @@ const ProviderCard = ({
               <div className="w-1 h-full min-h-[40px] bg-indigo-400 mr-3 self-stretch rounded-full"></div>
               <div className="text-left">
                 <div className="text-xs text-gray-500 font-medium mb-1">Delivery Time</div>
-                <div>{provider.transferTime}</div>
+                <div>{formatTransferTime()}</div>
               </div>
             </div>
             
@@ -123,16 +217,22 @@ const ProviderCard = ({
               <div className="w-1 h-full min-h-[40px] bg-indigo-400 mr-3 self-stretch rounded-full"></div>
               <div className="text-left">
                 <div className="text-xs text-gray-500 font-medium mb-1">Fee</div>
-                <div>{getCurrencySymbol(fromCurrency)} {provider.transferFee.toFixed(2)}</div>
+                <div>{getCurrencySymbol(fromCurrency)} {formatAmount(provider?.transferFee || transferFee || 0)}</div>
               </div>
             </div>
             
-            {/* Rate Margin */}
+            {/* Rate Margin or Mid Market Rate for Wise */}
             <div className="flex items-start">
               <div className="w-1 h-full min-h-[40px] bg-indigo-400 mr-3 self-stretch rounded-full"></div>
               <div className="text-left">
-                <div className="text-xs text-gray-500 font-medium mb-1">Rate Margin</div>
-                <div>{(provider.exchangeRateMargin * 100).toFixed(2)}%</div>
+                <div className="text-xs text-gray-500 font-medium mb-1">
+                  {provider.providerCode === 'wise' ? 'Mid Market Rate' : 'Rate Margin'}
+                </div>
+                <div>
+                  {provider.providerCode === 'wise'
+                    ? `1 ${fromCurrency} = ${(provider.baseRate || 0).toFixed(4)} ${toCurrency}`
+                    : `${((provider?.exchangeRateMargin || exchangeRateMargin || 0) * 100).toFixed(2)}%`}
+                </div>
               </div>
             </div>
           </div>
@@ -141,7 +241,7 @@ const ProviderCard = ({
           <div className="mt-5 flex flex-wrap items-center">
             <div className="text-xs text-gray-500 font-medium mr-2">Features:</div>
             <div className="flex flex-wrap">
-              {provider.features.map((feature, idx) => (
+              {(provider?.features || features).map((feature, idx) => (
                 <span key={idx} className="flex items-center text-xs text-indigo-700 mr-3 mb-1">
                   <Check size={12} className="mr-1 text-green-500" />
                   {feature}

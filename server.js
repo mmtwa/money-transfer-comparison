@@ -1,5 +1,5 @@
 const express = require('express');
-const cors = require('cors');
+// const cors = require('cors'); // Comment out default cors
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const mongoose = require('mongoose');
@@ -7,18 +7,27 @@ const dotenv = require('dotenv');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('./middleware/logger');
+const corsMiddleware = require('./middleware/cors'); // Add our custom CORS middleware
+const fs = require('fs');
 
 // Load environment variables
 dotenv.config();
+
+// Run the logo copying script to ensure logos are available
+try {
+  console.log('Running logo copying script...');
+  require('./copyLogos');
+} catch (err) {
+  console.error('Error running logo copying script:', err);
+}
 
 // Import routes
 const authRoutes = require('./routes/auth');
 const providerRoutes = require('./routes/providers');
 const rateRoutes = require('./routes/rates');
 const userRoutes = require('./routes/users');
-
-// Import admin routes
 const apiKeyRoutes = require('./routes/admin/apiKeys');
+const wiseRoutes = require('./routes/wiseRates');
 
 // Initialize Express app
 const app = express();
@@ -27,9 +36,7 @@ const PORT = process.env.PORT || 5000;
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useCreateIndex: true,
-  useFindAndModify: false
+  useUnifiedTopology: true
 })
 .then(() => console.log('MongoDB connected'))
 .catch(err => console.error('MongoDB connection error:', err));
@@ -45,11 +52,56 @@ app.use(helmet({
     }
   }
 })); // Security headers
-app.use(cors()); // Enable CORS
+// app.use(cors()); // Disable default CORS
+app.use(corsMiddleware); // Use our custom CORS middleware
 app.use(express.json()); // Parse JSON request body
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 app.use(cookieParser()); // Parse cookies
 app.use(logger); // Request logging
+
+// After middleware setup, add static middleware for images and logos
+// Create directory structure for provider images if it doesn't exist
+const providersDir = path.join(__dirname, 'client', 'public', 'images', 'providers');
+if (!fs.existsSync(providersDir)) {
+  fs.mkdirSync(providersDir, { recursive: true });
+  console.log('Created providers directory');
+}
+
+// Always copy provider logos from client/public to client/public/images/providers to ensure they exist
+const sourceDir = path.join(__dirname, 'client', 'public');
+const logoFiles = [
+  { source: 'wiselogo.png', dest: 'wise.png' },
+  { source: 'XELogo.svg', dest: 'xe.png' },
+  { source: 'Western-Union-Logo.png', dest: 'westernunion.png' }
+];
+
+logoFiles.forEach(logo => {
+  const source = path.join(sourceDir, logo.source);
+  const dest = path.join(providersDir, logo.dest);
+  
+  if (fs.existsSync(source)) {
+    try {
+      fs.copyFileSync(source, dest);
+      console.log(`Copied ${logo.source} to ${dest}`);
+    } catch (err) {
+      console.error(`Error copying ${logo.source} to ${dest}:`, err);
+    }
+  } else {
+    console.log(`Source file ${logo.source} does not exist at ${source}`);
+  }
+});
+
+// Copy also the existing files in /client/public with logo names
+if (fs.existsSync(path.join(sourceDir, 'wiselogo.png'))) {
+  fs.copyFileSync(
+    path.join(sourceDir, 'wiselogo.png'), 
+    path.join(providersDir, 'wise.png')
+  );
+}
+
+// Serve static assets
+app.use('/images', express.static(path.join(__dirname, 'client/public/images')));
+app.use(express.static(path.join(__dirname, 'client/public')));
 
 // Rate limiting
 const apiLimiter = rateLimit({
@@ -67,19 +119,45 @@ app.use('/api/auth', authRoutes);
 app.use('/api/providers', providerRoutes);
 app.use('/api/rates', rateRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/wise', wiseRoutes);
 
 // Admin routes
 app.use('/api/admin/apikeys', apiKeyRoutes);
 
 // Serve static assets in production
 if (process.env.NODE_ENV === 'production') {
+  // Make sure we have provider images in the build directory
+  const buildProvidersDir = path.join(__dirname, 'client', 'build', 'images', 'providers');
+  if (!fs.existsSync(buildProvidersDir)) {
+    fs.mkdirSync(buildProvidersDir, { recursive: true });
+    console.log('Created build providers directory');
+    
+    // Copy provider logos to build directory if needed
+    const sourceProvidersDir = path.join(__dirname, 'client', 'public', 'images', 'providers');
+    if (fs.existsSync(sourceProvidersDir)) {
+      fs.readdirSync(sourceProvidersDir).forEach(file => {
+        const source = path.join(sourceProvidersDir, file);
+        const dest = path.join(buildProvidersDir, file);
+        
+        fs.copyFileSync(source, dest);
+        console.log(`Copied ${file} to build directory`);
+      });
+    }
+  }
+  
+  // Set static folder
   app.use(express.static(path.join(__dirname, 'client/build')));
   
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
-  });
+  // Health check endpoint for Render
   app.get('/health', (req, res) => {
     res.status(200).send('OK');
+  });
+  
+  // Serve the index.html file for all routes not handled by the API
+  app.get('*', (req, res) => {
+    if (!req.path.startsWith('/api')) {
+      res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+    }
   });
 }
 

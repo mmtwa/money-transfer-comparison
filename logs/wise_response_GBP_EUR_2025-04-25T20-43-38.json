@@ -1,0 +1,69 @@
+{
+  "request": {
+    "params": {
+      "source": "GBP",
+      "target": "EUR",
+      "sourceAmount": 1000,
+      "rateType": "FIXED",
+      "preferredPayIn": "BANK_TRANSFER",
+      "preferredPayOut": "BANK_TRANSFER"
+    },
+    "url": "/quotes",
+    "method": "GET"
+  },
+  "response": {
+    "status": 200,
+    "statusText": "OK",
+    "headers": {
+      "date": "Fri, 25 Apr 2025 20:43:38 GMT",
+      "content-type": "application/json",
+      "transfer-encoding": "chunked",
+      "connection": "keep-alive",
+      "expires": "0",
+      "cache-control": "no-cache, no-store, max-age=0, must-revalidate",
+      "pragma": "no-cache",
+      "x-content-type-options": "nosniff",
+      "x-xss-protection": "0",
+      "x-frame-options": "DENY",
+      "x-trace-id": "f52ca2931d2a087a",
+      "access-control-allow-origin": "https://www.eqbank.ca",
+      "x-envoy-upstream-service-time": "54",
+      "x-envoy-attempt-count": "1",
+      "vary": "origin,access-control-request-method,access-control-request-headers,accept-encoding",
+      "cf-cache-status": "DYNAMIC",
+      "set-cookie": [
+        "__cf_bm=jK0ORKQmce.VE1tO3exaV9_Gf3n11rbsU4d9D0Rjweg-1745613818-1.0.1.1-5s1kWPL3l8Ok1wVvnQnFFy8nxOGnvnpSthTSrhXOHlvvSmRknqahpEVqTCEH7PPQ5ZmY5z7gfwMlAbnMGdQyOhVSLA1TSQY8BLclByBiVy2Af1gvwPXaP9TpvnfN0b0G; path=/; expires=Fri, 25-Apr-25 21:13:38 GMT; domain=.wise.com; HttpOnly; Secure; SameSite=None"
+      ],
+      "strict-transport-security": "max-age=31536000",
+      "accept-ch": "Sec-CH-UA-Platform-Version, Sec-CH-UA-Arch, Sec-CH-UA-Model, Sec-CH-UA-Bitness",
+      "server": "cloudflare",
+      "cf-ray": "9360ac7e3b9dedeb-LHR",
+      "alt-svc": "h3=\":443\"; ma=86400"
+    },
+    "data": {
+      "source": "GBP",
+      "target": "EUR",
+      "sourceAmount": 1000,
+      "targetAmount": 1167.3,
+      "type": "REGULAR",
+      "rate": 1.17185,
+      "createdTime": "2025-04-25T20:43:38.629Z",
+      "rateType": "FIXED",
+      "deliveryEstimate": "2025-04-28T10:13:00Z",
+      "fee": 3.88,
+      "feeDetails": {
+        "transferwise": 3.88,
+        "payIn": 0,
+        "discount": 0,
+        "priceSetId": 4054,
+        "partner": 0
+      },
+      "allowedProfileTypes": [
+        "PERSONAL",
+        "BUSINESS"
+      ],
+      "guaranteedTargetAmount": false,
+      "ofSourceAmount": true
+    }
+  }
+}

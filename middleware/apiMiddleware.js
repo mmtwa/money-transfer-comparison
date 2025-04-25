@@ -49,8 +49,15 @@ const cacheApiResponse = (duration = 300) => {
     // Override the send method to cache the response
     res.json = function(body) {
       // Only cache successful responses
-      if (res.statusCode === 200 && body.success !== false) {
-        apiCache.set(cacheKey, body, duration);
+      if (res.statusCode === 200 && body && body.success !== false) {
+        try {
+          // Ensure we're caching a plain object, not a MongoDB document
+          const cacheableBody = JSON.parse(JSON.stringify(body));
+          apiCache.set(cacheKey, cacheableBody, duration);
+        } catch (err) {
+          console.error('Error caching API response:', err);
+          // Continue without caching
+        }
       }
       
       // Call the original send method

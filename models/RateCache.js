@@ -1,4 +1,3 @@
-
 const mongoose = require('mongoose');
 
 const RateCacheSchema = new mongoose.Schema({
@@ -25,5 +24,25 @@ const RateCacheSchema = new mongoose.Schema({
 
 // Compound index for faster lookups
 RateCacheSchema.index({ fromCurrency: 1, toCurrency: 1, createdAt: -1 });
+
+// Add a toJSON method to convert Map to regular object
+RateCacheSchema.set('toJSON', {
+  transform: function(doc, ret) {
+    if (ret.rates instanceof Map) {
+      ret.rates = Object.fromEntries(ret.rates);
+    }
+    return ret;
+  }
+});
+
+// Add a toObject method to ensure correct serialization
+RateCacheSchema.set('toObject', {
+  transform: function(doc, ret) {
+    if (ret.rates instanceof Map) {
+      ret.rates = Object.fromEntries(ret.rates);
+    }
+    return ret;
+  }
+});
 
 module.exports = mongoose.model('RateCache', RateCacheSchema);

@@ -31,7 +31,7 @@ router.get('/rate', [
   const { fromCurrency, toCurrency, amount } = req.query;
   
   try {
-    const quoteData = await wiseApiService.getWiseQuote(
+    const rateData = await wiseApiService.getExchangeRate(
       fromCurrency.toUpperCase(),
       toCurrency.toUpperCase(),
       parseFloat(amount)
@@ -39,14 +39,13 @@ router.get('/rate', [
     
     res.json({
       success: true,
-      data: quoteData,
-      isMockData: quoteData.isMockData || false
+      data: rateData
     });
   } catch (error) {
-    console.error('Error fetching Wise quote:', error);
+    console.error('Error fetching Wise rate:', error);
     res.status(500).json({
       success: false,
-      message: 'Could not fetch quote from Wise',
+      message: 'Could not fetch rate from Wise',
       error: process.env.NODE_ENV === 'production' ? null : error.message
     });
   }
@@ -75,7 +74,7 @@ router.get('/fee', [
   const { fromCurrency, toCurrency, amount } = req.query;
   
   try {
-    const feeData = await wiseApiService.getTransferFee(
+    const feeData = await wiseApiService.getTransferPricing(
       fromCurrency.toUpperCase(),
       toCurrency.toUpperCase(),
       parseFloat(amount)
@@ -83,8 +82,7 @@ router.get('/fee', [
     
     res.json({
       success: true,
-      data: feeData,
-      isMockData: feeData.isMockData || false
+      data: feeData
     });
   } catch (error) {
     console.error('Error fetching Wise fees:', error);
@@ -103,13 +101,19 @@ router.get('/fee', [
  */
 router.get('/currencies', cacheApiResponse(86400), async (req, res) => {
   try {
-    const currencies = await wiseApiService.getAvailableCurrencies();
+    // Use the supportedCurrencyPairs array from wiseApiService
+    const currencies = wiseApiService.supportedCurrencyPairs;
+    
+    // Extract unique currencies from the pairs
+    const uniqueCurrencies = [...new Set([
+      ...currencies.map(pair => pair.source),
+      ...currencies.map(pair => pair.target)
+    ])];
     
     res.json({
       success: true,
-      count: currencies.length,
-      data: currencies,
-      isMockData: currencies[0]?.isMockData || false
+      count: uniqueCurrencies.length,
+      data: uniqueCurrencies.map(code => ({ code }))
     });
   } catch (error) {
     console.error('Error fetching Wise currencies:', error);

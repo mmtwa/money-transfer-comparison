@@ -1,0 +1,131 @@
+[
+  {
+    "currencyPair": "EUR to USD",
+    "amount": 1000,
+    "profileId": null,
+    "timestamp": "2025-04-25T20:58:15.119Z",
+    "standardQuotes": [],
+    "profileQuotes": [],
+    "temporaryQuotes": [],
+    "paymentOptions": [
+      {
+        "method": "Bank to Bank",
+        "error": "Request failed with status code 401",
+        "errorDetails": {
+          "error_description": "Invalid token",
+          "error": "invalid_token"
+        }
+      },
+      {
+        "method": "Card to Bank",
+        "error": "Request failed with status code 401",
+        "errorDetails": {
+          "error_description": "Invalid token",
+          "error": "invalid_token"
+        }
+      },
+      {
+        "method": "Bank to Cash Pickup",
+        "error": "Request failed with status code 401",
+        "errorDetails": {
+          "error": "invalid_token",
+          "error_description": "Invalid token"
+        }
+      },
+      {
+        "method": "Default (no preferences)",
+        "error": "Request failed with status code 401",
+        "errorDetails": {
+          "error_description": "Invalid token",
+          "error": "invalid_token"
+        }
+      }
+    ]
+  },
+  {
+    "currencyPair": "EUR to USD",
+    "amount": 5000,
+    "profileId": null,
+    "timestamp": "2025-04-25T20:58:15.392Z",
+    "standardQuotes": [],
+    "profileQuotes": [],
+    "temporaryQuotes": [],
+    "paymentOptions": [
+      {
+        "method": "Bank to Bank",
+        "error": "Request failed with status code 401",
+        "errorDetails": {
+          "error_description": "Invalid token",
+          "error": "invalid_token"
+        }
+      },
+      {
+        "method": "Card to Bank",
+        "error": "Request failed with status code 401",
+        "errorDetails": {
+          "error_description": "Invalid token",
+          "error": "invalid_token"
+        }
+      },
+      {
+        "method": "Bank to Cash Pickup",
+        "error": "Request failed with status code 401",
+        "errorDetails": {
+          "error": "invalid_token",
+          "error_description": "Invalid token"
+        }
+      },
+      {
+        "method": "Default (no preferences)",
+        "error": "Request failed with status code 401",
+        "errorDetails": {
+          "error": "invalid_token",
+          "error_description": "Invalid token"
+        }
+      }
+    ]
+  },
+  {
+    "currencyPair": "GBP to EUR",
+    "amount": 1000,
+    "profileId": null,
+    "timestamp": "2025-04-25T20:58:15.693Z",
+    "standardQuotes": [],
+    "profileQuotes": [],
+    "temporaryQuotes": [],
+    "paymentOptions": [
+      {
+        "method": "Bank to Bank",
+        "error": "Request failed with status code 401",
+        "errorDetails": {
+          "error": "invalid_token",
+          "error_description": "Invalid token"
+        }
+      },
+      {
+        "method": "Card to Bank",
+        "error": "Request failed with status code 401",
+        "errorDetails": {
+          "error": "invalid_token",
+          "error_description": "Invalid token"
+        }
+      },
+      {
+        "method": "Bank to Cash Pickup",
+        "error": "Request failed with status code 401",
+        "errorDetails": {
+          "error": "invalid_token",
+          "error_description": "Invalid token"
+        }
+      },
+      {
+        "method": "Default (no preferences)",
+        "error": "Request failed with status code 401",
+        "errorDetails": {
+          "error": "invalid_token",
+          "error_description": "Invalid token"
+        }
+      }
+    ]
+  }
+]

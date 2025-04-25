@@ -1,0 +1,644 @@
+[
+  {
+    "currencyPair": "EUR to USD",
+    "amount": 1000,
+    "timestamp": "2025-04-25T21:01:07.656Z",
+    "paymentOptions": [
+      {
+        "method": "Bank to Bank",
+        "params": {
+          "payIn": "BANK_TRANSFER",
+          "payOut": "BANK_TRANSFER"
+        },
+        "deliveryEstimate": "2025-04-28T16:30:00Z",
+        "formattedDelivery": "In 3 days",
+        "deliveryHours": 67,
+        "timeFields": [
+          {
+            "path": "createdTime",
+            "value": "2025-04-25T21:01:07.835Z"
+          },
+          {
+            "path": "deliveryEstimate",
+            "value": "2025-04-28T16:30:00Z"
+          }
+        ],
+        "availableOptions": [],
+        "rate": 1.13625,
+        "fee": 6.21,
+        "sourceAmount": 1000,
+        "targetAmount": 1129.19
+      },
+      {
+        "method": "Card to Bank",
+        "params": {
+          "payIn": "CARD",
+          "payOut": "BANK_TRANSFER"
+        },
+        "deliveryEstimate": "2025-04-28T16:30:00Z",
+        "formattedDelivery": "In 3 days",
+        "deliveryHours": 67,
+        "timeFields": [
+          {
+            "path": "createdTime",
+            "value": "2025-04-25T21:01:07.947Z"
+          },
+          {
+            "path": "deliveryEstimate",
+            "value": "2025-04-28T16:30:00Z"
+          }
+        ],
+        "availableOptions": [],
+        "rate": 1.13625,
+        "fee": 6.21,
+        "sourceAmount": 1000,
+        "targetAmount": 1129.19
+      },
+      {
+        "method": "Bank to Cash Pickup",
+        "params": {
+          "payIn": "BANK_TRANSFER",
+          "payOut": "CASH_PICKUP"
+        },
+        "deliveryEstimate": "2025-04-28T16:30:00Z",
+        "formattedDelivery": "In 3 days",
+        "deliveryHours": 67,
+        "timeFields": [
+          {
+            "path": "createdTime",
+            "value": "2025-04-25T21:01:08.046Z"
+          },
+          {
+            "path": "deliveryEstimate",
+            "value": "2025-04-28T16:30:00Z"
+          }
+        ],
+        "availableOptions": [],
+        "rate": 1.13625,
+        "fee": 6.21,
+        "sourceAmount": 1000,
+        "targetAmount": 1129.19
+      },
+      {
+        "method": "Default (no preferences)",
+        "params": {
+          "payIn": "Any",
+          "payOut": "Any"
+        },
+        "deliveryEstimate": "2025-04-28T16:30:00Z",
+        "formattedDelivery": "In 3 days",
+        "deliveryHours": 67,
+        "timeFields": [
+          {
+            "path": "createdTime",
+            "value": "2025-04-25T21:01:08.147Z"
+          },
+          {
+            "path": "deliveryEstimate",
+            "value": "2025-04-28T16:30:00Z"
+          }
+        ],
+        "availableOptions": [],
+        "rate": 1.13625,
+        "fee": 6.21,
+        "sourceAmount": 1000,
+        "targetAmount": 1129.19
+      }
+    ]
+  },
+  {
+    "currencyPair": "EUR to USD",
+    "amount": 5000,
+    "timestamp": "2025-04-25T21:01:08.071Z",
+    "paymentOptions": [
+      {
+        "method": "Bank to Bank",
+        "params": {
+          "payIn": "BANK_TRANSFER",
+          "payOut": "BANK_TRANSFER"
+        },
+        "deliveryEstimate": "2025-04-28T16:30:00Z",
+        "formattedDelivery": "In 3 days",
+        "deliveryHours": 67,
+        "timeFields": [
+          {
+            "path": "createdTime",
+            "value": "2025-04-25T21:01:08.248Z"
+          },
+          {
+            "path": "deliveryEstimate",
+            "value": "2025-04-28T16:30:00Z"
+          }
+        ],
+        "availableOptions": [],
+        "rate": 1.13625,
+        "fee": 24.93,
+        "sourceAmount": 5000,
+        "targetAmount": 5652.92
+      },
+      {
+        "method": "Card to Bank",
+        "params": {
+          "payIn": "CARD",
+          "payOut": "BANK_TRANSFER"
+        },
+        "deliveryEstimate": "2025-04-28T16:30:00Z",
+        "formattedDelivery": "In 3 days",
+        "deliveryHours": 67,
+        "timeFields": [
+          {
+            "path": "createdTime",
+            "value": "2025-04-25T21:01:08.345Z"
+          },
+          {
+            "path": "deliveryEstimate",
+            "value": "2025-04-28T16:30:00Z"
+          }
+        ],
+        "availableOptions": [],
+        "rate": 1.13625,
+        "fee": 24.93,
+        "sourceAmount": 5000,
+        "targetAmount": 5652.92
+      },
+      {
+        "method": "Bank to Cash Pickup",
+        "params": {
+          "payIn": "BANK_TRANSFER",
+          "payOut": "CASH_PICKUP"
+        },
+        "deliveryEstimate": "2025-04-28T16:30:00Z",
+        "formattedDelivery": "In 3 days",
+        "deliveryHours": 67,
+        "timeFields": [
+          {
+            "path": "createdTime",
+            "value": "2025-04-25T21:01:08.446Z"
+          },
+          {
+            "path": "deliveryEstimate",
+            "value": "2025-04-28T16:30:00Z"
+          }
+        ],
+        "availableOptions": [],
+        "rate": 1.13625,
+        "fee": 24.93,
+        "sourceAmount": 5000,
+        "targetAmount": 5652.92
+      },
+      {
+        "method": "Default (no preferences)",
+        "params": {
+          "payIn": "Any",
+          "payOut": "Any"
+        },
+        "deliveryEstimate": "2025-04-28T16:30:00Z",
+        "formattedDelivery": "In 3 days",
+        "deliveryHours": 67,
+        "timeFields": [
+          {
+            "path": "createdTime",
+            "value": "2025-04-25T21:01:08.534Z"
+          },
+          {
+            "path": "deliveryEstimate",
+            "value": "2025-04-28T16:30:00Z"
+          }
+        ],
+        "availableOptions": [],
+        "rate": 1.13625,
+        "fee": 24.93,
+        "sourceAmount": 5000,
+        "targetAmount": 5652.92
+      }
+    ]
+  },
+  {
+    "currencyPair": "GBP to EUR",
+    "amount": 1000,
+    "timestamp": "2025-04-25T21:01:08.467Z",
+    "paymentOptions": [
+      {
+        "method": "Bank to Bank",
+        "params": {
+          "payIn": "BANK_TRANSFER",
+          "payOut": "BANK_TRANSFER"
+        },
+        "deliveryEstimate": "2025-04-28T10:13:00Z",
+        "formattedDelivery": "In 3 days",
+        "deliveryHours": 61,
+        "timeFields": [
+          {
+            "path": "createdTime",
+            "value": "2025-04-25T21:01:08.645Z"
+          },
+          {
+            "path": "deliveryEstimate",
+            "value": "2025-04-28T10:13:00Z"
+          }
+        ],
+        "availableOptions": [],
+        "rate": 1.17141,
+        "fee": 3.88,
+        "sourceAmount": 1000,
+        "targetAmount": 1166.86
+      },
+      {
+        "method": "Card to Bank",
+        "params": {
+          "payIn": "CARD",
+          "payOut": "BANK_TRANSFER"
+        },
+        "deliveryEstimate": "2025-04-28T10:13:00Z",
+        "formattedDelivery": "In 3 days",
+        "deliveryHours": 61,
+        "timeFields": [
+          {
+            "path": "createdTime",
+            "value": "2025-04-25T21:01:08.760Z"
+          },
+          {
+            "path": "deliveryEstimate",
+            "value": "2025-04-28T10:13:00Z"
+          }
+        ],
+        "availableOptions": [],
+        "rate": 1.17141,
+        "fee": 3.88,
+        "sourceAmount": 1000,
+        "targetAmount": 1166.86
+      },
+      {
+        "method": "Bank to Cash Pickup",
+        "params": {
+          "payIn": "BANK_TRANSFER",
+          "payOut": "CASH_PICKUP"
+        },
+        "deliveryEstimate": "2025-04-28T10:13:00Z",
+        "formattedDelivery": "In 3 days",
+        "deliveryHours": 61,
+        "timeFields": [
+          {
+            "path": "createdTime",
+            "value": "2025-04-25T21:01:08.862Z"
+          },
+          {
+            "path": "deliveryEstimate",
+            "value": "2025-04-28T10:13:00Z"
+          }
+        ],
+        "availableOptions": [],
+        "rate": 1.17141,
+        "fee": 3.88,
+        "sourceAmount": 1000,
+        "targetAmount": 1166.86
+      },
+      {
+        "method": "Default (no preferences)",
+        "params": {
+          "payIn": "Any",
+          "payOut": "Any"
+        },
+        "deliveryEstimate": "2025-04-28T10:13:00Z",
+        "formattedDelivery": "In 3 days",
+        "deliveryHours": 61,
+        "timeFields": [
+          {
+            "path": "createdTime",
+            "value": "2025-04-25T21:01:08.974Z"
+          },
+          {
+            "path": "deliveryEstimate",
+            "value": "2025-04-28T10:13:00Z"
+          }
+        ],
+        "availableOptions": [],
+        "rate": 1.17141,
+        "fee": 3.88,
+        "sourceAmount": 1000,
+        "targetAmount": 1166.86
+      }
+    ]
+  },
+  {
+    "currencyPair": "GBP to EUR",
+    "amount": 10000,
+    "timestamp": "2025-04-25T21:01:08.908Z",
+    "paymentOptions": [
+      {
+        "method": "Bank to Bank",
+        "params": {
+          "payIn": "BANK_TRANSFER",
+          "payOut": "BANK_TRANSFER"
+        },
+        "deliveryEstimate": "2025-04-28T10:13:00Z",
+        "formattedDelivery": "In 3 days",
+        "deliveryHours": 61,
+        "timeFields": [
+          {
+            "path": "createdTime",
+            "value": "2025-04-25T21:01:09.077Z"
+          },
+          {
+            "path": "deliveryEstimate",
+            "value": "2025-04-28T10:13:00Z"
+          }
+        ],
+        "availableOptions": [],
+        "rate": 1.17141,
+        "fee": 33.48,
+        "sourceAmount": 10000,
+        "targetAmount": 11674.88
+      },
+      {
+        "method": "Card to Bank",
+        "params": {
+          "payIn": "CARD",
+          "payOut": "BANK_TRANSFER"
+        },
+        "deliveryEstimate": "2025-04-28T10:13:00Z",
+        "formattedDelivery": "In 3 days",
+        "deliveryHours": 61,
+        "timeFields": [
+          {
+            "path": "createdTime",
+            "value": "2025-04-25T21:01:09.180Z"
+          },
+          {
+            "path": "deliveryEstimate",
+            "value": "2025-04-28T10:13:00Z"
+          }
+        ],
+        "availableOptions": [],
+        "rate": 1.17141,
+        "fee": 33.48,
+        "sourceAmount": 10000,
+        "targetAmount": 11674.88
+      },
+      {
+        "method": "Bank to Cash Pickup",
+        "params": {
+          "payIn": "BANK_TRANSFER",
+          "payOut": "CASH_PICKUP"
+        },
+        "deliveryEstimate": "2025-04-28T10:13:00Z",
+        "formattedDelivery": "In 3 days",
+        "deliveryHours": 61,
+        "timeFields": [
+          {
+            "path": "createdTime",
+            "value": "2025-04-25T21:01:09.279Z"
+          },
+          {
+            "path": "deliveryEstimate",
+            "value": "2025-04-28T10:13:00Z"
+          }
+        ],
+        "availableOptions": [],
+        "rate": 1.17141,
+        "fee": 33.48,
+        "sourceAmount": 10000,
+        "targetAmount": 11674.88
+      },
+      {
+        "method": "Default (no preferences)",
+        "params": {
+          "payIn": "Any",
+          "payOut": "Any"
+        },
+        "deliveryEstimate": "2025-04-28T10:13:00Z",
+        "formattedDelivery": "In 3 days",
+        "deliveryHours": 61,
+        "timeFields": [
+          {
+            "path": "createdTime",
+            "value": "2025-04-25T21:01:09.390Z"
+          },
+          {
+            "path": "deliveryEstimate",
+            "value": "2025-04-28T10:13:00Z"
+          }
+        ],
+        "availableOptions": [],
+        "rate": 1.17141,
+        "fee": 33.48,
+        "sourceAmount": 10000,
+        "targetAmount": 11674.88
+      }
+    ]
+  },
+  {
+    "currencyPair": "USD to GBP",
+    "amount": 1000,
+    "timestamp": "2025-04-25T21:01:09.316Z",
+    "paymentOptions": [
+      {
+        "method": "Bank to Bank",
+        "params": {
+          "payIn": "BANK_TRANSFER",
+          "payOut": "BANK_TRANSFER"
+        },
+        "deliveryEstimate": "2025-04-28T14:20:00Z",
+        "formattedDelivery": "In 3 days",
+        "deliveryHours": 65,
+        "timeFields": [
+          {
+            "path": "createdTime",
+            "value": "2025-04-25T21:01:09.485Z"
+          },
+          {
+            "path": "deliveryEstimate",
+            "value": "2025-04-28T14:20:00Z"
+          }
+        ],
+        "availableOptions": [],
+        "rate": 0.75123,
+        "fee": 10.29,
+        "sourceAmount": 1000,
+        "targetAmount": 743.5
+      },
+      {
+        "method": "Card to Bank",
+        "params": {
+          "payIn": "CARD",
+          "payOut": "BANK_TRANSFER"
+        },
+        "deliveryEstimate": "2025-04-28T14:20:00Z",
+        "formattedDelivery": "In 3 days",
+        "deliveryHours": 65,
+        "timeFields": [
+          {
+            "path": "createdTime",
+            "value": "2025-04-25T21:01:09.583Z"
+          },
+          {
+            "path": "deliveryEstimate",
+            "value": "2025-04-28T14:20:00Z"
+          }
+        ],
+        "availableOptions": [],
+        "rate": 0.75123,
+        "fee": 10.29,
+        "sourceAmount": 1000,
+        "targetAmount": 743.5
+      },
+      {
+        "method": "Bank to Cash Pickup",
+        "params": {
+          "payIn": "BANK_TRANSFER",
+          "payOut": "CASH_PICKUP"
+        },
+        "deliveryEstimate": "2025-04-28T14:20:00Z",
+        "formattedDelivery": "In 3 days",
+        "deliveryHours": 65,
+        "timeFields": [
+          {
+            "path": "createdTime",
+            "value": "2025-04-25T21:01:09.691Z"
+          },
+          {
+            "path": "deliveryEstimate",
+            "value": "2025-04-28T14:20:00Z"
+          }
+        ],
+        "availableOptions": [],
+        "rate": 0.75123,
+        "fee": 10.29,
+        "sourceAmount": 1000,
+        "targetAmount": 743.5
+      },
+      {
+        "method": "Default (no preferences)",
+        "params": {
+          "payIn": "Any",
+          "payOut": "Any"
+        },
+        "deliveryEstimate": "2025-04-28T14:20:00Z",
+        "formattedDelivery": "In 3 days",
+        "deliveryHours": 65,
+        "timeFields": [
+          {
+            "path": "createdTime",
+            "value": "2025-04-25T21:01:09.785Z"
+          },
+          {
+            "path": "deliveryEstimate",
+            "value": "2025-04-28T14:20:00Z"
+          }
+        ],
+        "availableOptions": [],
+        "rate": 0.75123,
+        "fee": 10.29,
+        "sourceAmount": 1000,
+        "targetAmount": 743.5
+      }
+    ]
+  },
+  {
+    "currencyPair": "USD to GBP",
+    "amount": 3000,
+    "timestamp": "2025-04-25T21:01:09.715Z",
+    "paymentOptions": [
+      {
+        "method": "Bank to Bank",
+        "params": {
+          "payIn": "BANK_TRANSFER",
+          "payOut": "BANK_TRANSFER"
+        },
+        "deliveryEstimate": "2025-04-28T14:20:00Z",
+        "formattedDelivery": "In 3 days",
+        "deliveryHours": 65,
+        "timeFields": [
+          {
+            "path": "createdTime",
+            "value": "2025-04-25T21:01:09.885Z"
+          },
+          {
+            "path": "deliveryEstimate",
+            "value": "2025-04-28T14:20:00Z"
+          }
+        ],
+        "availableOptions": [],
+        "rate": 0.75123,
+        "fee": 16.88,
+        "sourceAmount": 3000,
+        "targetAmount": 2241.01
+      },
+      {
+        "method": "Card to Bank",
+        "params": {
+          "payIn": "CARD",
+          "payOut": "BANK_TRANSFER"
+        },
+        "deliveryEstimate": "2025-04-28T14:20:00Z",
+        "formattedDelivery": "In 3 days",
+        "deliveryHours": 65,
+        "timeFields": [
+          {
+            "path": "createdTime",
+            "value": "2025-04-25T21:01:09.985Z"
+          },
+          {
+            "path": "deliveryEstimate",
+            "value": "2025-04-28T14:20:00Z"
+          }
+        ],
+        "availableOptions": [],
+        "rate": 0.75123,
+        "fee": 16.88,
+        "sourceAmount": 3000,
+        "targetAmount": 2241.01
+      },
+      {
+        "method": "Bank to Cash Pickup",
+        "params": {
+          "payIn": "BANK_TRANSFER",
+          "payOut": "CASH_PICKUP"
+        },
+        "deliveryEstimate": "2025-04-28T14:20:00Z",
+        "formattedDelivery": "In 3 days",
+        "deliveryHours": 65,
+        "timeFields": [
+          {
+            "path": "createdTime",
+            "value": "2025-04-25T21:01:10.085Z"
+          },
+          {
+            "path": "deliveryEstimate",
+            "value": "2025-04-28T14:20:00Z"
+          }
+        ],
+        "availableOptions": [],
+        "rate": 0.75123,
+        "fee": 16.88,
+        "sourceAmount": 3000,
+        "targetAmount": 2241.01
+      },
+      {
+        "method": "Default (no preferences)",
+        "params": {
+          "payIn": "Any",
+          "payOut": "Any"
+        },
+        "deliveryEstimate": "2025-04-28T14:20:00Z",
+        "formattedDelivery": "In 3 days",
+        "deliveryHours": 65,
+        "timeFields": [
+          {
+            "path": "createdTime",
+            "value": "2025-04-25T21:01:10.186Z"
+          },
+          {
+            "path": "deliveryEstimate",
+            "value": "2025-04-28T14:20:00Z"
+          }
+        ],
+        "availableOptions": [],
+        "rate": 0.75123,
+        "fee": 16.88,
+        "sourceAmount": 3000,
+        "targetAmount": 2241.01
+      }
+    ]
+  }
+]

@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowUpDown, ChevronLeft, SlidersHorizontal, ArrowRight, Award } from 'lucide-react';
 import ProviderCard from '../components/ui/ProviderCard';
 import CurrencyFlag from '../components/ui/CurrencyFlag';
 import { formatAmount, getCurrencySymbol } from '../utils/currency';
-import { calculateProviderResults } from '../utils/providers';
-import { exchangeRates } from '../utils/currency';
+import apiService from '../services/apiService';
 
 /**
  * Container for displaying money transfer comparison results
@@ -14,20 +13,79 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
   const [sortBy, setSortBy] = useState('amount');
   const [sortDirection, setSortDirection] = useState('desc');
   const [showSortOptions, setShowSortOptions] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [providerResults, setProviderResults] = useState([]);
+  const [error, setError] = useState(null);
+  
+  // Fetch data from API on component mount or when search parameters change
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        console.log('Fetching exchange rates for:', { fromCurrency, toCurrency, amount });
+        const response = await apiService.getExchangeRates(fromCurrency, toCurrency, amount);
+        console.log('API Response:', response.data);
+        
+        if (response.data && response.data.success) {
+          const results = response.data.data;
+          console.log('Provider results:', results);
+          console.log('Results length:', results.length);
+          
+          // Set the provider results and then sort them
+          setProviderResults(results);
+          sortResults(results, sortBy, sortDirection);
+        } else {
+          setError('Failed to fetch exchange rates');
+        }
+      } catch (err) {
+        console.error('Error fetching exchange rates:', err);
+        setError('An error occurred while fetching exchange rates');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [fromCurrency, toCurrency, amount]);
+  
+  // Handle sorting
+  useEffect(() => {
+    if (providerResults.length > 0) {
+      const sorted = [...providerResults];
+      sortResults(sorted, sortBy, sortDirection);
+    }
+  }, [sortBy, sortDirection]);
+  
+  const sortResults = (results, sortKey, direction) => {
+    const sorted = [...results].sort((a, b) => {
+      let comparison = 0;
+      
+      switch (sortKey) {
+        case 'rate':
+          comparison = a.effectiveRate - b.effectiveRate;
+          break;
+        case 'fees':
+          comparison = a.totalCost - b.totalCost;
+          break;
+        case 'amount':
+          comparison = a.amountReceived - b.amountReceived;
+          break;
+        case 'rating':
+          comparison = a.rating - b.rating;
+          break;
+        default:
+          comparison = a.amountReceived - b.amountReceived;
+      }
+      
+      return direction === 'asc' ? comparison : -comparison;
+    });
+    
+    setProviderResults(sorted);
+  };
   
   const toggleSortDirection = () => {
     setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
   };
-  
-  // Calculate provider results based on sort criteria
-  const providerResults = calculateProviderResults(
-    fromCurrency, 
-    toCurrency, 
-    amount, 
-    exchangeRates, 
-    sortBy, 
-    sortDirection
-  );
   
   // Scroll to provider card when clicking best deal
   const scrollToProvider = (id) => {
@@ -37,10 +95,47 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
     }
   };
   
+  // Show loading state or error
+  if (loading) {
+    return (
+      <div className="container mx-auto flex-1 px-4 py-5 max-w-6xl flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-pulse rounded-full bg-indigo-200 h-24 w-24 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading exchange rates...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <div className="container mx-auto flex-1 px-4 py-5 max-w-6xl">
+        <div className="mb-4">
+          <button 
+            onClick={onBackToSearch}
+            className="text-indigo-600 hover:text-indigo-800 flex items-center transition-colors font-medium"
+          >
+            <ChevronLeft size={18} className="mr-1" /> Back to search
+          </button>
+        </div>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+          <h3 className="font-bold mb-2">Error</h3>
+          <p>{error}</p>
+          <button 
+            onClick={onBackToSearch}
+            className="mt-3 px-4 py-2 bg-red-100 text-red-800 rounded-md hover:bg-red-200"
+          >
+            Try again
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <>
       {/* Custom animations */}
-      <style jsx global>{`
+      <style jsx="true" global="true">{`
         @keyframes shimmer {
           0% {
             background-position: -100% 0;
@@ -164,7 +259,7 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
                   <span className="ml-2 font-semibold">
                     {providerResults.length > 0 
                       ? `${getCurrencySymbol(toCurrency)} ${formatAmount(providerResults[0].amountReceived)} ${toCurrency}`
-                      : `~ ${getCurrencySymbol(toCurrency)} ${formatAmount(amount * exchangeRates[fromCurrency][toCurrency])} ${toCurrency}`
+                      : `Loading...`
                     }
                   </span>
                 </div>
@@ -183,7 +278,7 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
         {/* Best Deal Card - visual and clickable */}
         {providerResults.length > 0 && (
           <div 
-            onClick={() => scrollToProvider(providerResults[0].id)}
+            onClick={() => scrollToProvider(providerResults[0].providerId)}
             className="mb-5 rounded-lg shadow-sm border border-indigo-200 p-4 cursor-pointer hover:shadow-md transition-all metal-shimmer gradient-bg relative z-10"
           >
             <div className="flex flex-col md:flex-row items-center justify-between relative z-10">
@@ -194,9 +289,29 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
               
               <div className="flex flex-col md:flex-row items-center justify-center md:flex-1">
                 <img 
-                  src={providerResults[0].logo} 
-                  alt={`${providerResults[0].name} logo`} 
+                  src={providerResults[0].providerLogo} 
+                  alt={`${providerResults[0].providerName} logo`} 
                   className="w-16 h-16 object-contain mb-3 md:mb-0 md:mr-4"
+                  onError={(e) => {
+                    // Try to fix the path if it starts with "/"
+                    if ((providerResults[0].providerLogo || '').startsWith('/')) {
+                      const imgSrc = providerResults[0].providerLogo;
+                      e.target.src = imgSrc.substring(1);
+                    } else {
+                      // Fall back to a direct provider logo based on provider name
+                      const providerName = (providerResults[0].providerName || '').toLowerCase();
+                      if (providerName.includes('wise')) {
+                        e.target.src = 'images/providers/wise.png';
+                      } else if (providerName.includes('xe')) {
+                        e.target.src = 'images/providers/xe.png';
+                      } else if (providerName.includes('western') || providerName.includes('union')) {
+                        e.target.src = 'images/providers/westernunion.png';
+                      } else {
+                        // Default fallback
+                        e.target.src = 'images/providers/default.png';
+                      }
+                    }
+                  }}
                 />
                 
                 <div className="text-center">
@@ -248,53 +363,52 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
             
             {showSortOptions && (
               <div className="p-3 pt-0 border-t border-gray-100">
-                <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   <button 
-                    className={`px-3 py-1.5 rounded-md flex items-center whitespace-nowrap 
-                      ${sortBy === 'amount' 
-                        ? 'bg-indigo-100 text-indigo-700 font-medium' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-                    onClick={() => { setSortBy('amount'); toggleSortDirection(); }}
+                    onClick={() => setSortBy('amount')}
+                    className={`px-3 py-2 rounded text-sm flex justify-between items-center ${sortBy === 'amount' ? 'bg-indigo-50 text-indigo-700' : 'hover:bg-gray-50'}`}
                   >
                     Amount Received
                     {sortBy === 'amount' && (
-                      <ArrowUpDown size={14} className="ml-1.5" />
+                      <span onClick={toggleSortDirection} className="ml-1">
+                        <ArrowUpDown size={14} />
+                      </span>
                     )}
                   </button>
+                  
                   <button 
-                    className={`px-3 py-1.5 rounded-md flex items-center whitespace-nowrap 
-                      ${sortBy === 'rate' 
-                        ? 'bg-indigo-100 text-indigo-700 font-medium' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-                    onClick={() => { setSortBy('rate'); toggleSortDirection(); }}
+                    onClick={() => setSortBy('rate')}
+                    className={`px-3 py-2 rounded text-sm flex justify-between items-center ${sortBy === 'rate' ? 'bg-indigo-50 text-indigo-700' : 'hover:bg-gray-50'}`}
                   >
                     Exchange Rate
                     {sortBy === 'rate' && (
-                      <ArrowUpDown size={14} className="ml-1.5" />
+                      <span onClick={toggleSortDirection} className="ml-1">
+                        <ArrowUpDown size={14} />
+                      </span>
                     )}
                   </button>
+                  
                   <button 
-                    className={`px-3 py-1.5 rounded-md flex items-center whitespace-nowrap 
-                      ${sortBy === 'fees' 
-                        ? 'bg-indigo-100 text-indigo-700 font-medium' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-                    onClick={() => { setSortBy('fees'); toggleSortDirection(); }}
+                    onClick={() => setSortBy('fees')}
+                    className={`px-3 py-2 rounded text-sm flex justify-between items-center ${sortBy === 'fees' ? 'bg-indigo-50 text-indigo-700' : 'hover:bg-gray-50'}`}
                   >
                     Fees
                     {sortBy === 'fees' && (
-                      <ArrowUpDown size={14} className="ml-1.5" />
+                      <span onClick={toggleSortDirection} className="ml-1">
+                        <ArrowUpDown size={14} />
+                      </span>
                     )}
                   </button>
+                  
                   <button 
-                    className={`px-3 py-1.5 rounded-md flex items-center whitespace-nowrap 
-                      ${sortBy === 'rating' 
-                        ? 'bg-indigo-100 text-indigo-700 font-medium' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-                    onClick={() => { setSortBy('rating'); toggleSortDirection(); }}
+                    onClick={() => setSortBy('rating')}
+                    className={`px-3 py-2 rounded text-sm flex justify-between items-center ${sortBy === 'rating' ? 'bg-indigo-50 text-indigo-700' : 'hover:bg-gray-50'}`}
                   >
                     User Rating
                     {sortBy === 'rating' && (
-                      <ArrowUpDown size={14} className="ml-1.5" />
+                      <span onClick={toggleSortDirection} className="ml-1">
+                        <ArrowUpDown size={14} />
+                      </span>
                     )}
                   </button>
                 </div>
@@ -303,36 +417,42 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
           </div>
         </div>
         
-        {/* Results list */}
-        <div className="space-y-5 relative z-10">
-          {providerResults.map((provider, index) => (
-            <ProviderCard 
-              key={provider.id}
+        {/* Provider Cards */}
+        <div className="space-y-4">
+          {providerResults.map((provider) => (
+            <ProviderCard
+              key={provider.providerId}
+              id={provider.providerId}
               provider={provider}
-              index={index}
+              name={provider.providerName}
+              logo={provider.providerLogo}
               fromCurrency={fromCurrency}
               toCurrency={toCurrency}
               amount={amount}
-              id={`provider-${provider.id}`}
+              rate={provider.effectiveRate}
+              sendAmount={amount}
+              receiveAmount={provider.amountReceived}
+              fee={provider.transferFee}
+              marginCost={provider.marginCost}
+              totalCost={provider.totalCost}
+              timeHours={provider.transferTimeHours}
+              transferTime={provider.transferTime}
+              rating={provider.rating}
+              isBestDeal={provider === providerResults[0]}
+              isRealTimeApi={provider.realTimeApi}
             />
           ))}
+          
+          {providerResults.length === 0 && !loading && (
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
+              <h3 className="font-medium text-gray-700 mb-2">No results found</h3>
+              <p className="text-gray-500">We couldn't find any providers for this currency pair. Please try a different currency pair.</p>
+            </div>
+          )}
         </div>
-        
-        {/* Missing results info */}
-        {providerResults.length === 0 && (
-          <div className="mt-6 text-center p-6 bg-white rounded-lg border border-gray-200 shadow-sm relative z-10">
-            <div className="text-gray-600 font-medium">No results found for your search criteria.</div>
-            <button 
-              onClick={onBackToSearch}
-              className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
-            >
-              Modify Search
-            </button>
-          </div>
-        )}
       </div>
     </>
   );
-};
+}
 
 export default ResultsView; 

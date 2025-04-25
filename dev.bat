@@ -1,0 +1,13 @@
+@echo off
+echo Starting Money Transfer Comparison app...
+
+echo Checking for existing Node.js processes...
+taskkill /F /IM node.exe /T 2>nul
+timeout /t 2
+
+echo Starting backend server...
+start cmd /k npm run server
+echo Starting frontend client...
+timeout /t 5
+start cmd /k cd client && npm start
+echo Both services started. Access the app at http://localhost:3000 

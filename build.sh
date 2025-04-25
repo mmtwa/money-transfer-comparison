@@ -1,20 +1,30 @@
 #!/bin/bash
 
-# Install dependencies for the main app
-echo "Installing main dependencies..."
-npm install
+echo "Starting build..."
 
-# Install and build client app
-echo "Moving to client directory..."
-cd client
+# Clean up previous build
+echo "Cleaning up previous build..."
+rm -rf ./client/build
 
-echo "Installing client dependencies..."
-npm install
+# Build client
+echo "Building React client..."
+cd client && npm run build && cd ..
 
-echo "Building React app..."
-npx @craco/craco build
+# Ensure provider logos are copied properly
+echo "Ensuring provider logos are properly copied..."
+mkdir -p ./client/build/images/providers
 
-# Return to project root
-cd ..
+# Copy provider logos from public to build
+echo "Copying provider logos..."
+cp -f ./client/public/wiselogo.png ./client/build/images/providers/wise.png
+cp -f ./client/public/XELogo.svg ./client/build/images/providers/xe.png
+cp -f ./client/public/Western-Union-Logo.png ./client/build/images/providers/westernunion.png
 
-echo "Build completed successfully!"
+# Also copy them to the client public images/providers directory
+mkdir -p ./client/public/images/providers
+cp -f ./client/public/wiselogo.png ./client/public/images/providers/wise.png
+cp -f ./client/public/XELogo.svg ./client/public/images/providers/xe.png
+cp -f ./client/public/Western-Union-Logo.png ./client/public/images/providers/westernunion.png
+
+echo "Logo files copied successfully."
+echo "Build completed."

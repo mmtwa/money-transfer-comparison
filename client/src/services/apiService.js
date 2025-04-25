@@ -2,10 +2,12 @@ import axios from 'axios';
 
 // Create an axios instance with base URL for API calls
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
+  baseURL: process.env.REACT_APP_API_URL || '/api',
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  // Add withCredentials to handle CORS with credentials
+  withCredentials: false
 });
 
 // Add authorization header to every request if token exists
@@ -79,6 +81,15 @@ const apiService = {
   
   deleteComparisonFromHistory: async (comparisonId) => {
     return api.delete(`/users/history/${comparisonId}`);
+  },
+  
+  /**
+   * Submit feedback
+   * @param {object} feedbackData - Feedback data
+   * @returns {Promise} - API response
+   */
+  submitFeedback: (feedbackData) => {
+    return api.post('/feedback', feedbackData);
   }
 };
 

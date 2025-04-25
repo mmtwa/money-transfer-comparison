@@ -347,7 +347,7 @@ const SearchForm = ({ onSearch, initialData }) => {
               </div>
               
               <div
-                className="text-xs sm:text-sm md:text-base lg:text-lg font-medium tracking-tight leading-tight mt-2 text-gray-700 overflow-hidden text-center"
+                className="text-xs sm:text-sm md:text-base lg:text-lg font-medium tracking-tight leading-tight mt-2 text-gray-900 overflow-hidden text-center"
                 style={{ 
                   fontFamily: 'Poppins, sans-serif', 
                   paddingLeft: '30px', 
@@ -440,7 +440,7 @@ const SearchForm = ({ onSearch, initialData }) => {
         </div>
       </motion.div>
       
-      <style jsx>{`
+      <style jsx="true">{`
         @keyframes shimmer {
           0% { transform: translateX(-100%); }
           100% { transform: translateX(100%); }

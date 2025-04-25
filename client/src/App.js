@@ -25,12 +25,14 @@ function App() {
       window.removeEventListener('popstate', handleInitialPath);
     };
   }, []);
-  
+
   return (
-    <div className="App">
-      <Analytics measurementId={measurementId} />
-      <PreloadFlags />
-      <MoneyCompare initialPath={initialPath} />
+    <div className="min-h-screen bg-gray-50">
+      <div className="App">
+        <Analytics measurementId={measurementId} />
+        <PreloadFlags />
+        <MoneyCompare initialPath={initialPath} />
+      </div>
     </div>
   );
 }

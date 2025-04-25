@@ -20,46 +20,221 @@ router.get('/compare', [
   check('toCurrency', 'To currency is required').notEmpty().isLength({ min: 3, max: 3 }),
   check('amount', 'Amount must be a positive number').isFloat({ min: 0.01 })
 ], cacheApiResponse(300), async (req, res) => {
+  console.log('==== RATES COMPARE ENDPOINT CALLED ====');
+  console.log('Request query params:', req.query);
+  
   // Validate request
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.log('Validation errors:', errors.array());
     return res.status(400).json({ success: false, errors: errors.array() });
   }
 
   const { fromCurrency, toCurrency, amount } = req.query;
+  console.log(`Processing request for ${fromCurrency} to ${toCurrency}, amount: ${amount}`);
   
   try {
-    const results = await providerService.getExchangeRates(
-      fromCurrency.toUpperCase(),
-      toCurrency.toUpperCase(),
-      parseFloat(amount)
-    );
+    console.log(`[Rates Compare] Requesting rates for ${fromCurrency} to ${toCurrency}, amount: ${amount}`);
     
-    // Save the comparison to user's history if authenticated
-    if (req.user) {
-      await User.findByIdAndUpdate(req.user.id, {
-        $push: {
-          savedComparisons: {
-            fromCurrency: fromCurrency.toUpperCase(),
-            toCurrency: toCurrency.toUpperCase(),
-            amount: parseFloat(amount),
-            date: new Date()
+    // Ensure providerService is initialized
+    if (!await providerService.isInitialized()) {
+      console.log('[Rates Compare] Initializing provider service...');
+      try {
+        await providerService.initialize();
+      } catch (initError) {
+        console.error('[Rates Compare] Provider service initialization error:', initError);
+        // Continue even if initialization fails
+      }
+    }
+    
+    // If DB connection has issues, make sure we have the standard providers
+    const providerKeys = Object.keys(providerService.providers);
+    console.log('[Rates Compare] Available providers:', providerKeys);
+    
+    if (providerKeys.length < 2) {
+      console.log('[Rates Compare] Adding standard providers directly...');
+      
+      // Add XE provider if not exists
+      if (!providerService.providers['xe']) {
+        providerService.providers['xe'] = {
+          id: 'xe-test-id',
+          name: 'XE',
+          logo: '/images/providers/xe.png',
+          apiKey: 'test-key',
+          baseUrl: 'https://api.xe.com',
+          transferFeeStructure: { type: 'flat', amount: 3.5 },
+          exchangeRateMargin: 0.02,
+          transferTimeHours: { min: 24, max: 48 },
+          rating: 4.2,
+          methods: ['bank_transfer'],
+          apiEnabled: true,
+          apiHandler: 'xe'
+        };
+      }
+      
+      // Add Western Union provider if not exists
+      if (!providerService.providers['westernunion']) {
+        providerService.providers['westernunion'] = {
+          id: 'wu-test-id',
+          name: 'Western Union',
+          logo: '/images/providers/westernunion.png',
+          apiKey: 'test-key',
+          baseUrl: 'https://api.westernunion.com',
+          transferFeeStructure: { type: 'percentage', percentage: 1, minimum: 5, maximum: 25 },
+          exchangeRateMargin: 0.03,
+          transferTimeHours: { min: 0, max: 1 },
+          rating: 3.9,
+          methods: ['bank_transfer', 'cash_pickup'],
+          apiEnabled: true,
+          apiHandler: 'westernunion'
+        };
+      }
+      
+      // Add Wise provider if not exists
+      if (!providerService.providers['wise']) {
+        providerService.providers['wise'] = {
+          id: 'wise-test-id',
+          name: 'Wise',
+          logo: '/images/providers/wise.png',
+          apiKey: process.env.WISE_CLIENT_ID || 'test-key',
+          apiSecret: process.env.WISE_CLIENT_SECRET || 'test-secret',
+          baseUrl: 'https://api.wise.com',
+          transferFeeStructure: { type: 'percentage', percentage: 0.5, minimum: 2, maximum: 15 },
+          exchangeRateMargin: 0.005,
+          transferTimeHours: { min: 1, max: 24 },
+          rating: 4.8,
+          methods: ['bank_transfer', 'debit_card'],
+          apiEnabled: true,
+          apiHandler: 'wise'
+        };
+      }
+      
+      console.log('[Rates Compare] Providers after adding:', Object.keys(providerService.providers));
+    }
+    
+    console.log('[Rates Compare] Getting exchange rates...');
+    let results = [];
+    
+    try {
+      // Force a fresh fetch from the API instead of using cached data
+      await providerService.clearCache(fromCurrency.toUpperCase(), toCurrency.toUpperCase());
+      
+      results = await providerService.getExchangeRates(
+        fromCurrency.toUpperCase(),
+        toCurrency.toUpperCase(),
+        parseFloat(amount)
+      );
+      
+      if (results && results.length > 0) {
+        console.log(`[Rates Compare] Successfully received ${results.length} provider results`);
+      } else {
+        console.warn('[Rates Compare] No results returned from providerService, will try direct Wise API fetch');
+        
+        // Try direct fetch from Wise API
+        try {
+          const wiseApiService = require('../services/wiseApiService');
+          
+          // Get both exchange rate and fee from the same API call
+          const wiseRateData = await wiseApiService.getExchangeRate(
+            fromCurrency.toUpperCase(),
+            toCurrency.toUpperCase(),
+            parseFloat(amount)
+          );
+          
+          if (wiseRateData && wiseRateData.rate) {
+            console.log(`[Rates Compare] Successfully fetched Wise rate data: rate=${wiseRateData.rate}, fee=${wiseRateData.fee}`);
+            
+            // Create a Wise result with the real rate and fee from the API
+            const effectiveRate = wiseRateData.rate;
+            const baseRate = effectiveRate * 1.005; // Add 0.5% margin
+            const transferFee = wiseRateData.fee || 0; // Use the fee from the API or default to 0
+            const marginCost = parseFloat(amount) * (baseRate - effectiveRate);
+            
+            // Get targetAmount from API or calculate
+            const targetAmount = wiseRateData.targetAmount || (parseFloat(amount) * effectiveRate);
+            
+            // Based on our testing, the targetAmount from Wise API already accounts for the exchange rate
+            // but does not subtract the fee. The fee is a separate value in source currency.
+            const amountReceived = targetAmount;
+            
+            // Get the delivery time from the API response
+            let deliveryTime = '1-24 hours'; // Default fallback
+            if (wiseRateData.deliveryTime) {
+              deliveryTime = wiseRateData.deliveryTime;
+            } else if (wiseRateData.estimatedDelivery) {
+              deliveryTime = wiseRateData.estimatedDelivery;
+            }
+            
+            console.log(`[Rates Compare] Using delivery time: ${deliveryTime}`);
+            
+            results = [{
+              providerId: 'wise-direct-id',
+              providerCode: 'wise',
+              providerName: 'Wise',
+              providerLogo: '/images/providers/wise.png',
+              baseRate: baseRate,
+              effectiveRate: effectiveRate,
+              transferFee: transferFee,
+              marginPercentage: 0.5,
+              marginCost: marginCost,
+              totalCost: transferFee + marginCost,
+              amountReceived: amountReceived,
+              transferTimeHours: { min: 1, max: 24 },
+              transferTime: deliveryTime,
+              rating: 4.8,
+              methods: ['bank_transfer', 'debit_card'],
+              realTimeApi: true,
+              timestamp: new Date().toISOString()
+            }];
+          } else {
+            throw new Error('Could not get rate data from Wise API');
           }
+        } catch (wiseError) {
+          console.error('[Rates Compare] Direct Wise API fetch failed:', wiseError);
+          throw new Error(`Could not fetch exchange rates: ${wiseError.message}`);
         }
+      }
+    } catch (ratesError) {
+      console.error('[Rates Compare] Error fetching exchange rates from providers:', ratesError);
+      return res.status(500).json({
+        success: false,
+        message: 'Could not fetch exchange rates',
+        error: ratesError.message
       });
     }
     
+    // Save the comparison to user's history if authenticated
+    if (req.user) {
+      try {
+        await User.findByIdAndUpdate(req.user.id, {
+          $push: {
+            savedComparisons: {
+              fromCurrency: fromCurrency.toUpperCase(),
+              toCurrency: toCurrency.toUpperCase(),
+              amount: parseFloat(amount),
+              date: new Date()
+            }
+          }
+        });
+      } catch (saveError) {
+        console.error('[Rates Compare] Error saving to user history:', saveError.message);
+      }
+    }
+    
+    console.log('[Rates Compare] Sending response with', results.length, 'results');
     res.json({
       success: true,
       count: results.length,
       data: results
     });
+    console.log('[Rates Compare] Response sent successfully');
+    
   } catch (error) {
     console.error('Error fetching rates:', error);
     res.status(500).json({
       success: false,
       message: 'Could not fetch exchange rates',
-      error: process.env.NODE_ENV === 'production' ? null : error.message
+      error: error.message
     });
   }
 });
@@ -135,23 +310,22 @@ router.get('/history', [
   const days = parseInt(req.query.days || 30);
   
   try {
-    // This would typically come from a historical rate service or database
-    // For this example, we'll generate mock data
-    const history = await generateHistoricalData(fromCurrency, toCurrency, days);
+    // Try to get historical data from a real API or database
+    // This would need to be implemented with a historical rate service or database
+    const error = new Error(`Historical exchange rate data is not available. Please implement a rate storage solution.`);
+    console.error('Historical rate data requested but unavailable:', error);
     
-    res.json({
-      success: true,
-      fromCurrency,
-      toCurrency,
-      days,
-      data: history
+    return res.status(501).json({
+      success: false,
+      message: 'Historical exchange rate data is not available',
+      error: error.message
     });
   } catch (error) {
     console.error('Error fetching historical rates:', error);
     res.status(500).json({
       success: false,
       message: 'Could not fetch historical exchange rates',
-      error: process.env.NODE_ENV === 'production' ? null : error.message
+      error: error.message
     });
   }
 });
@@ -177,67 +351,22 @@ router.post('/cache/clear', auth, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Could not clear cache',
-      error: process.env.NODE_ENV === 'production' ? null : error.message
+      error: error.message
     });
   }
 });
 
-// Helper function to generate historical data for a currency pair
-async function generateHistoricalData(fromCurrency, toCurrency, days) {
-  // Try to get real historical data first
-  try {
-    // Using Wise API for historical data
-    const wiseApiService = require('../services/wiseApiService');
-    
-    // If Wise API is available, use it
-    if (process.env.WISE_API_KEY) {
-      // Call Wise API historical data endpoint
-      // Note: This is a placeholder - you'll need to implement this in wiseApiService.js
-      // based on the actual Wise API capabilities
-      return await wiseApiService.getHistoricalRates(fromCurrency, toCurrency, days);
-    }
-  } catch (error) {
-    console.warn('Failed to get real historical data, falling back to generated data');
-  }
-  
-  // Fall back to generated data
-  const baseRate = getBaseMockRate(fromCurrency, toCurrency);
-  const history = [];
-  
-  for (let i = days; i >= 0; i--) {
-    const date = new Date();
-    date.setDate(date.getDate() - i);
-    
-    // Generate a rate with some random fluctuation
-    const fluctuation = (Math.random() - 0.5) * 0.02; // +/- 1%
-    const rate = baseRate * (1 + fluctuation);
-    
-    history.push({
-      date: date.toISOString().split('T')[0],
-      rate: parseFloat(rate.toFixed(6))
-    });
-  }
-  
-  return history;
-}
-
-// Helper function to get a base mock rate for a currency pair
-function getBaseMockRate(fromCurrency, toCurrency) {
-  const mockRates = {
-    'USD': { 'EUR': 0.91, 'GBP': 0.78, 'JPY': 110.23, 'CAD': 1.35 },
-    'EUR': { 'USD': 1.10, 'GBP': 0.86, 'JPY': 121.34, 'CAD': 1.48 },
-    'GBP': { 'USD': 1.28, 'EUR': 1.16, 'JPY': 140.87, 'CAD': 1.72 },
-    'JPY': { 'USD': 0.0091, 'EUR': 0.0082, 'GBP': 0.0071, 'CAD': 0.012 },
-    'CAD': { 'USD': 0.74, 'EUR': 0.67, 'GBP': 0.58, 'JPY': 81.65 }
-  };
-  
-  if (mockRates[fromCurrency] && mockRates[fromCurrency][toCurrency]) {
-    return mockRates[fromCurrency][toCurrency];
-  } else if (mockRates[toCurrency] && mockRates[toCurrency][fromCurrency]) {
-    return 1 / mockRates[toCurrency][fromCurrency];
-  } else {
-    return 1; // Default fallback
-  }
-}
+/**
+ * @route   GET /api/rates/test
+ * @desc    Simple test endpoint to verify API connectivity
+ * @access  Public
+ */
+router.get('/test', (req, res) => {
+  res.json({
+    success: true,
+    message: 'API connection successful',
+    timestamp: new Date().toISOString()
+  });
+});
 
 module.exports = router;
