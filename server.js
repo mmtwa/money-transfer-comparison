@@ -13,6 +13,11 @@ const fs = require('fs');
 // Load environment variables
 dotenv.config();
 
+// Log environment for debugging
+console.log(`Environment: ${process.env.NODE_ENV}`);
+console.log(`Port: ${process.env.PORT}`);
+console.log(`Using Wise ${process.env.WISE_CLIENT_ID ? 'Basic Auth' : 'API Key'} authentication`);
+
 // Run the logo copying script to ensure logos are available
 try {
   console.log('Running logo copying script...');
@@ -36,7 +41,9 @@ const PORT = process.env.PORT || 5000;
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
+  useCreateIndex: true,
+  useFindAndModify: false
 })
 .then(() => console.log('MongoDB connected successfully'))
 .catch(err => {
@@ -49,8 +56,11 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-      "script-src": ["'self'", "https://www.googletagmanager.com", "https://www.google-analytics.com"],
-      "img-src": ["'self'", "https://www.google-analytics.com", "https://stats.g.doubleclick.net"],
+      "default-src": ["'self'"],
+      "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://www.googletagmanager.com", "https://www.google-analytics.com"],
+      "style-src": ["'self'", "'unsafe-inline'"],
+      "img-src": ["'self'", "data:", "https://www.google-analytics.com", "https://stats.g.doubleclick.net"],
+      "font-src": ["'self'", "data:"],
       "connect-src": ["'self'", "https://www.google-analytics.com", "https://*.google-analytics.com", "https://region1.google-analytics.com", "https://stats.g.doubleclick.net"]
     }
   }
@@ -102,9 +112,11 @@ if (fs.existsSync(path.join(sourceDir, 'wiselogo.png'))) {
   );
 }
 
-// Serve static assets
-app.use('/images', express.static(path.join(__dirname, 'client/public/images')));
-app.use(express.static(path.join(__dirname, 'client/public')));
+// Serve static assets - FOR DEVELOPMENT ONLY
+if (process.env.NODE_ENV !== 'production') {
+  app.use('/images', express.static(path.join(__dirname, 'client/public/images')));
+  app.use(express.static(path.join(__dirname, 'client/public')));
+}
 
 // Rate limiting
 const apiLimiter = rateLimit({
@@ -149,7 +161,8 @@ if (process.env.NODE_ENV === 'production') {
   }
   
   // Set static folder - Ensure the path is correct
-  app.use(express.static(path.join(__dirname, 'client/build')));
+  app.use(express.static(path.join(__dirname, 'client', 'build')));
+  app.use('/images', express.static(path.join(__dirname, 'client', 'build', 'images')));
   
   // Health check endpoint for Render
   app.get('/health', (req, res) => {
@@ -159,7 +172,13 @@ if (process.env.NODE_ENV === 'production') {
   // Handle all routes not captured by API - Make sure non-API routes serve index.html
   app.get('*', (req, res) => {
     if (!req.path.startsWith('/api')) {
-      res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+      res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
+    } else {
+      // Handle 404 for API routes that don't exist
+      res.status(404).json({
+        success: false,
+        message: 'API endpoint not found'
+      });
     }
   });
 }
