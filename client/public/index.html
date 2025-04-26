@@ -26,6 +26,17 @@
     -->
     <title>mymoneytransfers - Compare Money Transfers</title>
     
+    <!-- Preconnect to domains early -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Preload critical font files -->
+    <link rel="preload" as="font" href="https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJfecg.woff2" crossorigin>
+    <link rel="preload" as="font" href="https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLGT9Z1xlFQ.woff2" crossorigin>
+    
+    <!-- Load Google Fonts with font-display:swap -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap&display=swap" rel="stylesheet">
+    
     <!-- Critical CSS inlined for immediate rendering -->
     <style>
       /* Critical CSS - Only what's needed for LCP */
@@ -34,6 +45,18 @@
         font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+      }
+      
+      /* Fallback font to prevent layout shifts while Poppins loads */
+      @font-face {
+        font-family: 'Poppins Fallback';
+        size-adjust: 105%;
+        ascent-override: 95%;
+        src: local('Arial');
+      }
+      
+      body {
+        font-family: 'Poppins', 'Poppins Fallback', -apple-system, BlinkMacSystemFont, sans-serif;
       }
       
       /* Basic container styles for the form */
@@ -72,14 +95,6 @@
       .text-transparent { color: transparent; }
       .bg-clip-text { -webkit-background-clip: text; background-clip: text; }
     </style>
-    
-    <!-- Preconnect to domains early -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    
-    <!-- Direct loading of Google Fonts instead of preload/media print approach -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

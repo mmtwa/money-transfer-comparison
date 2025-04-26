@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import MoneyCompare from './containers/MoneyCompare';
 import Analytics from './components/Analytics';
-import PreloadFlags from './components/ui/PreloadFlags';
 import FontLoader from './components/FontLoader';
 import './App.css';
+
+// Lazy load non-critical components
+const PreloadFlags = lazy(() => import('./components/ui/PreloadFlags'));
 
 function App() {
   const measurementId = 'G-90Q0L28ZF4';
@@ -31,9 +33,13 @@ function App() {
     <div className="min-h-screen bg-gray-50">
       <div className="App">
         <Analytics measurementId={measurementId} />
-        <PreloadFlags />
         <FontLoader />
         <MoneyCompare initialPath={initialPath} />
+        
+        {/* Lazy load non-critical components */}
+        <Suspense fallback={null}>
+          <PreloadFlags />
+        </Suspense>
       </div>
     </div>
   );

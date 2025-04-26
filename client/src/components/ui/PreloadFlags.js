@@ -2,9 +2,8 @@ import React, { useEffect } from 'react';
 import { currenciesList } from '../../utils/currency';
 
 /**
- * Component that preloads all currency flag images
- * This component doesn't render anything visible but loads all flag images
- * in the background when the application starts
+ * Component that preloads common currency flag images
+ * and progressively loads the rest after initial render
  */
 const PreloadFlags = () => {
   useEffect(() => {
@@ -13,32 +12,53 @@ const PreloadFlags = () => {
     preloadContainer.style.display = 'none';
     document.body.appendChild(preloadContainer);
     
-    // Preload all currency flag images
+    // Get list of common currencies to preload first
+    const commonCurrencies = ['usd', 'eur', 'gbp', 'aud', 'cad'];
     const preloadedFlags = new Set();
     
-    currenciesList.forEach(currency => {
-      const code = currency.code.toLowerCase();
-      
-      // Skip if we've already preloaded this flag
+    // Function to preload a single flag
+    const preloadFlag = (code) => {
       if (preloadedFlags.has(code)) return;
       preloadedFlags.add(code);
       
-      // Preload the flag image
       const img = new Image();
       img.src = `/flags/${code}.svg`;
       
-      // Log any errors for debugging
-      img.onerror = () => {
-        console.warn(`Failed to preload flag for ${code}`);
-      };
-      
-      // Also preload the fallback
-      const fallbackImg = new Image();
-      fallbackImg.src = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><text x='50%' y='50%' font-size='10' text-anchor='middle' dominant-baseline='middle'>${currency.code.substring(0, 2)}</text></svg>`;
-      
+      // Add to container
       preloadContainer.appendChild(img);
-      preloadContainer.appendChild(fallbackImg);
+    };
+    
+    // 1. First preload the most common currencies immediately
+    commonCurrencies.forEach(code => {
+      preloadFlag(code);
     });
+    
+    // 2. Then load the remaining flags progressively after initial render
+    let index = 0;
+    const remainingCurrencies = currenciesList
+      .map(currency => currency.code.toLowerCase())
+      .filter(code => !commonCurrencies.includes(code));
+    
+    // Use requestIdleCallback if available, otherwise setTimeout
+    const scheduleNextFlag = () => {
+      if (index >= remainingCurrencies.length) return;
+      
+      const code = remainingCurrencies[index++];
+      preloadFlag(code);
+      
+      // Schedule next flag with lower priority
+      if (window.requestIdleCallback) {
+        window.requestIdleCallback(() => scheduleNextFlag());
+      } else {
+        setTimeout(() => scheduleNextFlag(), 50);
+      }
+    };
+    
+    // Schedule first batch of remaining flags after a delay
+    // to allow initial render to complete
+    setTimeout(() => {
+      scheduleNextFlag();
+    }, 2000);
     
     // Cleanup
     return () => {
