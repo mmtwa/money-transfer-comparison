@@ -65,6 +65,19 @@ const apiService = {
     });
   },
   
+  // Wise specific API methods
+  getWiseComparison: async (fromCurrency, toCurrency, amount, sourceCountry = null, targetCountry = null) => {
+    return api.get('/wise/compare', {
+      params: { 
+        fromCurrency, 
+        toCurrency, 
+        amount,
+        sourceCountry,
+        targetCountry
+      }
+    });
+  },
+  
   // Provider information
   getProviders: async () => {
     return api.get('/providers');

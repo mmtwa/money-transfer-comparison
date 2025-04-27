@@ -257,14 +257,49 @@ const ProviderCard = ({
             See full details
           </button>
           
-          <button className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center justify-center font-medium transition-colors">
+          <a 
+            href={getProviderWebsite(provider?.providerCode || provider?.code || '')} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center justify-center font-medium transition-colors"
+          >
             Get Deal
             <ExternalLink size={14} className="ml-1.5" />
-          </button>
+          </a>
         </div>
       </div>
     </>
   );
+};
+
+// Function to generate provider website URL based on provider code
+const getProviderWebsite = (providerCode) => {
+  // Convert to lowercase for consistent matching
+  const code = providerCode.toLowerCase();
+  
+  // Map of provider codes to their website URLs
+  const websiteMap = {
+    'wise': 'https://www.wise.com',
+    'transferwise': 'https://www.wise.com',
+    'xe': 'https://www.xe.com',
+    'westernunion': 'https://www.westernunion.com',
+    'moneygram': 'https://www.moneygram.com',
+    'paypal': 'https://www.paypal.com',
+    'ofx': 'https://www.ofx.com',
+    'remitly': 'https://www.remitly.com',
+    'currencyfair': 'https://www.currencyfair.com',
+    'worldremit': 'https://www.worldremit.com',
+    'ria': 'https://www.riamoneytransfer.com',
+    'azimo': 'https://www.azimo.com',
+    'transfergo': 'https://www.transfergo.com',
+    'worldfirst': 'https://www.worldfirst.com',
+    'instarem': 'https://www.instarem.com',
+    'skrill': 'https://www.skrill.com',
+    'revolut': 'https://www.revolut.com'
+  };
+  
+  // Return website URL if it exists in the map, otherwise default to a search
+  return websiteMap[code] || `https://www.google.com/search?q=${encodeURIComponent(providerCode)}+money+transfer`;
 };
 
 export default ProviderCard; 

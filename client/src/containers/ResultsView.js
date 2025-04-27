@@ -27,13 +27,150 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
         console.log('API Response:', response.data);
         
         if (response.data && response.data.success) {
-          const results = response.data.data;
-          console.log('Provider results:', results);
+          // Filter out any duplicate wise providers from regular results if we'll be adding them from comparison data
+          const results = response.data.data.filter(provider => 
+            !(provider.providerCode?.toLowerCase() === 'wise' || 
+              provider.providerCode?.toLowerCase() === 'transferwise'));
+          
+          console.log('Provider results after filtering:', results);
           console.log('Results length:', results.length);
           
           // Set the provider results and then sort them
           setProviderResults(results);
           sortResults(results, sortBy, sortDirection);
+          
+          // Now also fetch Wise comparison data
+          try {
+            const comparisonResponse = await apiService.getWiseComparison(
+              fromCurrency, 
+              toCurrency, 
+              amount,
+              // Get source and target countries based on currency if needed
+              fromCurrency === 'GBP' ? 'GB' : null,
+              toCurrency === 'EUR' ? 'DE' : null
+            );
+            
+            if (comparisonResponse.data && comparisonResponse.data.success) {
+              console.log('Wise Comparison Data:', comparisonResponse.data.data);
+              
+              // Parse the comparison data and add to provider results
+              if (comparisonResponse.data.data && comparisonResponse.data.data.providers) {
+                const wiseProviders = comparisonResponse.data.data.providers;
+                
+                // Process ALL providers from comparison API
+                const newProviders = wiseProviders
+                  .filter(p => p.quotes && p.quotes.length > 0)
+                  .map(provider => {
+                    // Find the best quote for this provider
+                    const quote = provider.quotes.reduce((best, current) => 
+                      (current.receivedAmount > best.receivedAmount) ? current : best, provider.quotes[0]);
+                    
+                    // Format delivery time
+                    let transferTime = 'Unknown';
+                    let transferTimeHours = { min: 24, max: 72 };
+                    
+                    if (quote.deliveryEstimation) {
+                      if (quote.deliveryEstimation.duration) {
+                        const duration = quote.deliveryEstimation.duration;
+                        
+                        // Parse min and max durations, handling null values
+                        let minHours = 24;
+                        let maxHours = 72; 
+                        
+                        try {
+                          if (duration.min) {
+                            // Try to extract hours from PT24H format or similar
+                            const minMatch = duration.min.match(/PT(\d+)H/);
+                            if (minMatch && minMatch[1]) {
+                              minHours = parseInt(minMatch[1]);
+                            }
+                          }
+                          
+                          if (duration.max) {
+                            // Try to extract hours from PT24H format or similar
+                            const maxMatch = duration.max.match(/PT(\d+)H/);
+                            if (maxMatch && maxMatch[1]) {
+                              maxHours = parseInt(maxMatch[1]);
+                            }
+                          }
+                        } catch (err) {
+                          console.warn('Error parsing delivery duration:', err);
+                        }
+                        
+                        transferTime = minHours === maxHours 
+                          ? `${minHours} hours` 
+                          : `${minHours}-${maxHours} hours`;
+                        
+                        transferTimeHours = { min: minHours, max: maxHours };
+                      } else if (quote.deliveryEstimation.deliveryDate) {
+                        // Use delivery date if available instead of duration
+                        const deliveryDate = quote.deliveryEstimation.deliveryDate;
+                        if (deliveryDate.min || deliveryDate.max) {
+                          // Format based on dates
+                          const now = new Date();
+                          const minDate = deliveryDate.min ? new Date(deliveryDate.min) : null;
+                          const maxDate = deliveryDate.max ? new Date(deliveryDate.max) : null;
+                          
+                          if (maxDate && !minDate) {
+                            const daysDiff = Math.ceil((maxDate - now) / (1000 * 60 * 60 * 24));
+                            transferTime = daysDiff <= 1 ? "Within 24 hours" : `Within ${daysDiff} days`;
+                            transferTimeHours = { min: 1, max: daysDiff * 24 };
+                          } else if (minDate && maxDate) {
+                            const minDaysDiff = Math.ceil((minDate - now) / (1000 * 60 * 60 * 24));
+                            const maxDaysDiff = Math.ceil((maxDate - now) / (1000 * 60 * 60 * 24));
+                            transferTime = `${minDaysDiff}-${maxDaysDiff} days`;
+                            transferTimeHours = { min: minDaysDiff * 24, max: maxDaysDiff * 24 };
+                          }
+                        }
+                      } else if (quote.deliveryEstimation.durationType) {
+                        // Use duration type if specific times aren't available
+                        if (quote.deliveryEstimation.durationType === 'SAME_DAY') {
+                          transferTime = 'Same day';
+                          transferTimeHours = { min: 1, max: 24 };
+                        } else if (quote.deliveryEstimation.durationType === 'CALENDAR') {
+                          transferTime = '1-3 business days';
+                          transferTimeHours = { min: 24, max: 72 };
+                        }
+                      }
+                    }
+                    
+                    // Return in the format expected by ProviderCard
+                    return {
+                      providerId: `wise-comparison-${provider.id}`,
+                      providerCode: provider.alias,
+                      providerName: provider.name,
+                      providerLogo: provider.logo,
+                      baseRate: quote.rate * 1.005, // Add 0.5% to estimate base rate
+                      effectiveRate: quote.rate,
+                      transferFee: quote.fee,
+                      marginPercentage: quote.markup ? quote.markup * 100 : 0.5,
+                      marginCost: (quote.markup ? quote.markup : 0.005) * parseFloat(amount),
+                      totalCost: quote.fee + ((quote.markup ? quote.markup : 0.005) * parseFloat(amount)),
+                      amountReceived: quote.receivedAmount,
+                      transferTimeHours: transferTimeHours,
+                      transferTime: transferTime,
+                      rating: 4.0, // Default rating when not available
+                      methods: ['bank_transfer'],
+                      realTimeApi: true,
+                      timestamp: new Date().toISOString(),
+                      comparisonProvider: true // Mark as coming from comparison API
+                    };
+                  });
+                
+                console.log('Adding comparison providers:', newProviders);
+                
+                // Add the new providers to results and re-sort
+                if (newProviders.length > 0) {
+                  const allProviders = [...results, ...newProviders];
+                  setProviderResults(allProviders);
+                  sortResults(allProviders, sortBy, sortDirection);
+                }
+              }
+            }
+          } catch (comparisonError) {
+            console.error('Error fetching Wise comparison data:', comparisonError);
+            // Not setting error state for this as it's supplementary data
+          }
         } else {
           setError('Failed to fetch exchange rates');
         }
@@ -440,10 +577,11 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
               rating={provider.rating}
               isBestDeal={provider === providerResults[0]}
               isRealTimeApi={provider.realTimeApi}
+              code={provider.providerCode}
             />
           ))}
           
-          {providerResults.length === 0 && !loading && (
+          {providerResults.length === 0 && (
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
               <h3 className="font-medium text-gray-700 mb-2">No results found</h3>
               <p className="text-gray-500">We couldn't find any providers for this currency pair. Please try a different currency pair.</p>

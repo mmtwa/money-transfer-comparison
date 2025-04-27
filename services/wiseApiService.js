@@ -2,6 +2,7 @@ const axios = require('axios');
 const axiosRateLimit = require('axios-rate-limit');
 const { default: axiosRetry } = require('axios-retry');
 const NodeCache = require('node-cache');
+const WISE_API_URL = process.env.WISE_API_URL || 'https://api.wise.com';
 
 // Cache configuration - items expire after 1 hour (3600 seconds)
 const cache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
@@ -59,6 +60,52 @@ axiosRetry(http, {
 });
 
 /**
+ * Utility function to retry axios requests
+ * @param {Function} requestFunction - Async function that returns an axios request
+ * @param {number} maxRetries - Maximum number of retries
+ * @param {number} retryDelay - Base delay between retries in ms
+ * @returns {Promise<Object>} - The axios response
+ */
+const retryAxiosRequest = async (requestFunction, maxRetries = 3, retryDelay = 1000) => {
+  let lastError;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await requestFunction();
+    } catch (error) {
+      lastError = error;
+      console.warn(`Request failed (attempt ${attempt}/${maxRetries}):`, error.message);
+      
+      // Don't wait after the last attempt
+      if (attempt < maxRetries) {
+        // Exponential backoff - wait longer with each retry
+        const delay = retryDelay * Math.pow(2, attempt - 1);
+        console.log(`Retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+  
+  throw lastError; // If we get here, all retries failed
+};
+
+/**
+ * Check if we have a Wise auth token
+ * @returns {boolean} - Whether we have a token
+ */
+const hasAuthToken = () => {
+  return !!process.env.WISE_API_TOKEN;
+};
+
+/**
+ * Get the Wise auth token
+ * @returns {string} - The auth token
+ */
+const getWiseAuthToken = () => {
+  return process.env.WISE_API_TOKEN;
+};
+
+/**
  * Test if the Wise API credentials are valid
  * @returns {Promise<Object>} - Object containing success status and message
  */
@@ -107,8 +154,13 @@ async function getExchangeRate(sourceCurrency, targetCurrency, amount = 1000) {
       preferredPayOut: 'BANK_TRANSFER'
     };
 
+    // Log the request URL for debugging
+    const queryString = new URLSearchParams(params).toString();
+    const requestUrl = `${WISE_API_URL}/v1/quotes?${queryString}`;
+    console.log(`[WiseAPI] Making request to: ${requestUrl}`);
+
     // Make the API request to get the quote
-    const response = await http.get('/quotes', { params });
+    const response = await http.get('/v1/quotes', { params });
 
     // Extract the exchange rate
     const rate = response.data.rate;
@@ -458,6 +510,208 @@ async function getHistoricalRates(sourceCurrency, targetCurrency, days = 30) {
   }
 }
 
+/**
+ * Get price comparison data from Wise API
+ * @param {string} sourceCurrency - Source currency code (3 letter ISO code)
+ * @param {string} targetCurrency - Target currency code (3 letter ISO code)
+ * @param {number} amount - Amount to convert
+ * @param {string|null} sourceCountry - Source country code (2 letter ISO code)
+ * @param {string|null} targetCountry - Target country code (2 letter ISO code)
+ * @param {string|null} providerType - Provider type to filter by
+ * @returns {Promise<Object>} - Wise price comparison data
+ */
+const getPriceComparison = async (
+  sourceCurrency,
+  targetCurrency,
+  amount,
+  sourceCountry = null,
+  targetCountry = null,
+  providerType = null
+) => {
+  // Parameter validation
+  if (!sourceCurrency || !targetCurrency || !amount) {
+    throw new Error('Missing required parameters: sourceCurrency, targetCurrency, and amount are required');
+  }
+  
+  // Ensure amount is a number and positive
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+  if (isNaN(numAmount) || numAmount <= 0) {
+    throw new Error('Amount must be a positive number');
+  }
+  
+  // Normalize currency codes to uppercase
+  const fromCurrency = sourceCurrency.toUpperCase();
+  const toCurrency = targetCurrency.toUpperCase();
+  
+  // Log request details (useful for debugging)
+  console.log('Wise price comparison request:', {
+    sourceCurrency: fromCurrency, 
+    targetCurrency: toCurrency, 
+    amount: numAmount,
+    sourceCountry,
+    targetCountry,
+    providerType
+  });
+  
+  // Build query parameters
+  const queryParams = new URLSearchParams({
+    sourceCurrency: fromCurrency,
+    targetCurrency: toCurrency,
+    sendAmount: numAmount
+  });
+  
+  // Add optional parameters if provided
+  if (sourceCountry) queryParams.append('sourceCountry', sourceCountry.toUpperCase());
+  if (targetCountry) queryParams.append('targetCountry', targetCountry.toUpperCase());
+  if (providerType) queryParams.append('providerType', providerType);
+  
+  // Build the URL - using the correct v3/comparisons endpoint
+  const url = `${WISE_API_URL}/v3/comparisons/?${queryParams.toString()}`;
+  
+  console.log(`[WiseAPI] Using URL: ${url}`);
+  
+  // Create request headers
+  const headers = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  };
+  
+  // First try authenticated API
+  if (hasAuthToken()) {
+    console.log('Trying authenticated Wise API request');
+    try {
+      const authHeaders = {
+        ...headers,
+        Authorization: `Bearer ${getWiseAuthToken()}`
+      };
+      
+      // Make the request with retry logic
+      const response = await retryAxiosRequest(async () => {
+        console.log(`Making authenticated request to ${url}`);
+        return await axios.get(url, {
+          headers: authHeaders,
+          timeout: 15000, // 15 second timeout
+        });
+      }, 3); // 3 retries
+      
+      if (!response || !response.data) {
+        throw new Error('Empty response from Wise API');
+      }
+      
+      // Check for HTML response (which indicates an error)
+      if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE html>')) {
+        throw new Error('Received HTML instead of JSON from Wise API');
+      }
+      
+      const validatedData = validateComparisonData(response.data, fromCurrency, toCurrency, numAmount);
+      console.log(`Successfully retrieved ${validatedData.providers.length} providers from Wise authenticated API`);
+      
+      return validatedData;
+    } catch (error) {
+      console.error('Error in authenticated Wise price comparison request:', error.message);
+      // Continue to public API fallback
+    }
+  }
+  
+  // Fallback to public API if authenticated request fails or no auth token
+  console.log('Falling back to public Wise API request');
+  try {
+    // Make the request with retry logic
+    const response = await retryAxiosRequest(async () => {
+      console.log(`Making public request to ${url}`);
+      return await axios.get(url, {
+        headers,
+        timeout: 15000, // 15 second timeout
+      });
+    }, 3); // 3 retries
+    
+    if (!response || !response.data) {
+      throw new Error('Empty response from Wise public API');
+    }
+    
+    // Check for HTML response (which indicates an error)
+    if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE html>')) {
+      throw new Error('Received HTML instead of JSON from Wise public API');
+    }
+    
+    const validatedData = validateComparisonData(response.data, fromCurrency, toCurrency, numAmount);
+    console.log(`Successfully retrieved ${validatedData.providers.length} providers from Wise public API`);
+    
+    return validatedData;
+  } catch (error) {
+    console.error('Error in public Wise price comparison request:', error.message);
+    
+    // Add contextual information to error
+    const enhancedError = new Error(`Failed to get Wise price comparison: ${error.message}`);
+    enhancedError.originalError = error;
+    enhancedError.statusCode = error.response?.status || 500;
+    enhancedError.requestParams = {
+      sourceCurrency: fromCurrency,
+      targetCurrency: toCurrency,
+      amount: numAmount,
+      sourceCountry,
+      targetCountry,
+      providerType
+    };
+    
+    throw enhancedError;
+  }
+};
+
+/**
+ * Helper function to validate comparison data
+ * @param {Object} data - Response data from Wise API
+ * @param {string} sourceCurrency - Expected source currency
+ * @param {string} targetCurrency - Expected target currency
+ * @param {number} amount - Expected amount
+ * @returns {Object} - Validated data
+ * @throws {Error} - If data is invalid
+ */
+const validateComparisonData = (data, sourceCurrency, targetCurrency, amount) => {
+  // Basic validation
+  if (!data) {
+    throw new Error('Empty data received from Wise API');
+  }
+  
+  // Ensure providers array exists
+  if (!Array.isArray(data.providers)) {
+    console.error('Invalid Wise API response structure:', data);
+    throw new Error('Wise API response missing providers array');
+  }
+  
+  // Transform the provider data to match the expected client format while preserving quotes array
+  // We don't create a new quotes array since the API already returns one
+  const transformedProviders = data.providers.map(provider => {
+    // Create a standard provider object that works with our client app
+    // Preserve quotes array if it already exists, otherwise use empty array
+    return {
+      id: provider.id || 'unknown',
+      name: provider.name || 'Unknown Provider',
+      alias: provider.alias || provider.name?.toLowerCase().replace(/\s+/g, '') || 'unknown',
+      logo: (provider.logos?.normal?.pngUrl || provider.logos?.normal?.svgUrl || provider.logo || null),
+      type: provider.type || 'Money Transfer',
+      quotes: provider.quotes || [],
+      // Keep these fields for compatibility with older client code
+      quote: provider.quote || null,
+      fee: provider.fee || null,
+      receivedAmount: provider.receivedAmount || null,
+      estimatedDelivery: provider.estimatedDelivery || null,
+      rate: (provider.quotes && provider.quotes[0]?.rate) || provider.quote?.rate || null,
+      logoUrl: (provider.logos?.normal?.pngUrl || provider.logos?.normal?.svgUrl || provider.logoUrl || null),
+      companySlug: provider.alias || provider.companySlug || null
+    };
+  });
+
+  // Create standardized response structure
+  return {
+    sourceCurrency: data.sourceCurrency || sourceCurrency,
+    targetCurrency: data.targetCurrency || targetCurrency,
+    sendAmount: data.sendAmount || amount,
+    providers: transformedProviders,
+    timestamp: new Date().toISOString()
+  };
+};
+
 module.exports = {
   getExchangeRate,
   getTransferPricing,
@@ -467,5 +721,6 @@ module.exports = {
   isCurrencyPairSupported,
   getHistoricalRates,
   calculateWiseFee,
-  getEstimatedDeliveryTime
+  getEstimatedDeliveryTime,
+  getPriceComparison
 };

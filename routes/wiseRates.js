@@ -184,4 +184,149 @@ router.get('/test-credentials', async (req, res) => {
   }
 });
 
+/**
+ * @route   GET /api/wise/compare
+ * @desc    Get price comparison data from Wise API showing all providers
+ * @access  Public
+ */
+router.get('/compare', [
+  check('fromCurrency', 'Source currency is required').notEmpty().isLength({ min: 3, max: 3 }),
+  check('toCurrency', 'Target currency is required').notEmpty().isLength({ min: 3, max: 3 }),
+  check('amount', 'Amount must be a positive number').isFloat({ min: 0.01 }),
+  check('sourceCountry', 'Source country must be a 2-letter code').optional().isLength({ min: 2, max: 2 }),
+  check('targetCountry', 'Target country must be a 2-letter code').optional().isLength({ min: 2, max: 2 }),
+  check('providerType', 'Provider type must be a string').optional().isString()
+], cacheApiResponse(300), async (req, res) => {
+  console.log('[API] /api/wise/compare endpoint called');
+  
+  try {
+    // Check validation results
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      console.error('[API] Validation errors:', errors.array());
+      return res.status(400).json({
+        success: false,
+        error: 'Validation failed',
+        details: errors.array()
+      });
+    }
+    
+    // Extract parameters
+    const { fromCurrency, toCurrency, amount, sourceCountry, targetCountry, providerType } = req.query;
+    
+    // Validate required parameters (belt and suspenders approach)
+    if (!fromCurrency || !toCurrency || !amount) {
+      console.error('[API] Missing required parameters:', { fromCurrency, toCurrency, amount });
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Missing required parameters. Please provide fromCurrency, toCurrency, and amount.' 
+      });
+    }
+    
+    // Validate amount is a number and positive
+    const numericAmount = parseFloat(amount);
+    if (isNaN(numericAmount) || numericAmount <= 0) {
+      console.error('[API] Invalid amount parameter:', amount);
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Invalid amount. Please provide a positive number.' 
+      });
+    }
+    
+    // Log request details for debugging
+    console.log('[API] Wise comparison request:', {
+      fromCurrency,
+      toCurrency,
+      amount: numericAmount,
+      sourceCountry: sourceCountry || 'not specified',
+      targetCountry: targetCountry || 'not specified',
+      providerType: providerType || 'all providers'
+    });
+    
+    // Get comparison data from Wise API service
+    const comparisonData = await wiseApiService.getPriceComparison(
+      fromCurrency,
+      toCurrency,
+      numericAmount,
+      sourceCountry || null,
+      targetCountry || null,
+      providerType || null
+    );
+    
+    // Validate response data structure
+    if (!comparisonData) {
+      console.error('[API] No data returned from Wise API service');
+      throw new Error('No data returned from Wise API service');
+    }
+    
+    if (!comparisonData.providers) {
+      console.error('[API] Invalid response structure from Wise API service - missing providers array');
+      throw new Error('Invalid response structure from Wise API - missing providers array');
+    }
+    
+    // Return successful response
+    console.log(`[API] Successfully retrieved ${comparisonData.providers.length} providers for comparison`);
+    return res.json({
+      success: true,
+      data: comparisonData
+    });
+    
+  } catch (error) {
+    console.error('[API] Error in /api/wise/compare endpoint:', error.message);
+    console.error('[API] Error stack:', error.stack);
+    
+    // Handle specific error types with appropriate status codes
+    if (error.message.includes('Invalid response') || error.message.includes('Received HTML')) {
+      return res.status(502).json({
+        success: false,
+        error: 'Unable to process the request due to an issue with the Wise API service.',
+        message: 'The Wise comparison API returned an invalid response format.',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+    
+    if (error.message.includes('No data returned')) {
+      return res.status(504).json({
+        success: false,
+        error: 'No data returned from the Wise API service.',
+        message: 'The request to the Wise API timed out or returned empty data.',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+    
+    // Fallback error handler
+    const statusCode = error.statusCode || 500;
+    const errorResponse = {
+      success: false,
+      error: 'Failed to get comparison data from Wise API',
+      message: 'An unexpected error occurred while processing your request.'
+    };
+    
+    // Only in development, include more error details
+    if (process.env.NODE_ENV === 'development') {
+      errorResponse.details = error.message;
+      errorResponse.stack = error.stack;
+      
+      // For development only: provide a fallback for testing
+      if (process.env.NODE_ENV === 'development' && process.env.ENABLE_FALLBACK_RESPONSES === 'true') {
+        console.log('[API] Development environment - returning fallback comparison data');
+        return res.json({
+          success: true,
+          fallback: true,
+          data: {
+            sourceCurrency: fromCurrency,
+            targetCurrency: toCurrency,
+            sendAmount: numericAmount,
+            providers: [],
+            timestamp: new Date().toISOString()
+          },
+          message: 'Returning empty fallback data for development. Enable the real API in production.'
+        });
+      }
+    }
+    
+    return res.status(statusCode).json(errorResponse);
+  }
+});
+
 module.exports = router;
