@@ -355,7 +355,8 @@ const SearchForm = ({ onSearch, initialData }) => {
                   minHeight: '48px' // Reserve height
                 }}
               >
-                Compare money transfers with us & never wonder again if you could have gotten a better deal.
+                Compare money transfers with us <br />
+                & never wonder again if you could have gotten a better deal.
               </div>
             </div>
             
