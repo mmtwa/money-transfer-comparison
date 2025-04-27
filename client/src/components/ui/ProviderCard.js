@@ -286,7 +286,7 @@ const getProviderWebsite = (providerCode) => {
   const code = providerCode.toLowerCase();
   
   // Map of provider codes to their website URLs
-  const websiteMap = {
+  let websiteMap = {
     'wise': 'https://www.wise.com',
     'transferwise': 'https://www.wise.com',
     'xe': 'https://www.xe.com',
@@ -305,6 +305,39 @@ const getProviderWebsite = (providerCode) => {
     'skrill': 'https://www.skrill.com',
     'revolut': 'https://www.revolut.com'
   };
+  
+  // Try to load any saved providers from localStorage
+  try {
+    const savedProviders = localStorage.getItem('providerWebsites');
+    if (savedProviders) {
+      websiteMap = { ...websiteMap, ...JSON.parse(savedProviders) };
+    }
+  } catch (error) {
+    console.error('Error loading saved provider websites:', error);
+  }
+  
+  // If the provider is not in our map, try to generate a website URL based on the code
+  if (!websiteMap[code] && code) {
+    // Generate a likely website URL
+    const generatedUrl = `https://www.${code}.com`;
+    
+    // Add it to both the current map and localStorage for future use
+    websiteMap[code] = generatedUrl;
+    
+    try {
+      // Get existing saved providers
+      const savedProviders = localStorage.getItem('providerWebsites') || '{}';
+      const updatedProviders = JSON.parse(savedProviders);
+      
+      // Add the new provider
+      updatedProviders[code] = generatedUrl;
+      
+      // Save back to localStorage
+      localStorage.setItem('providerWebsites', JSON.stringify(updatedProviders));
+    } catch (error) {
+      console.error('Error saving provider website:', error);
+    }
+  }
   
   // Return website URL if it exists in the map, otherwise default to a search
   return websiteMap[code] || `https://www.google.com/search?q=${encodeURIComponent(providerCode)}+money+transfer`;
