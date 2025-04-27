@@ -166,6 +166,9 @@ if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, 'client', 'build')));
   app.use('/images', express.static(path.join(__dirname, 'client', 'build', 'images')));
   
+  // Add explicit route for provider images to ensure they're properly served
+  app.use('/images/providers', express.static(path.join(__dirname, 'client', 'build', 'images', 'providers')));
+  
   // Health check endpoint for Render
   app.get('/health', (req, res) => {
     res.status(200).send('OK');

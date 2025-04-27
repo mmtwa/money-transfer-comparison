@@ -438,14 +438,22 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
                       // Fall back to a direct provider logo based on provider name
                       const providerName = (providerResults[0].providerName || '').toLowerCase();
                       if (providerName.includes('wise')) {
-                        e.target.src = 'images/providers/wise.png';
+                        e.target.src = '/images/providers/wise.png';
+                        // If that fails, try without the leading slash
+                        e.target.onerror = () => { e.target.src = 'images/providers/wise.png'; };
                       } else if (providerName.includes('xe')) {
-                        e.target.src = 'images/providers/xe.png';
+                        e.target.src = '/images/providers/xe.png';
+                        // If that fails, try without the leading slash
+                        e.target.onerror = () => { e.target.src = 'images/providers/xe.png'; };
                       } else if (providerName.includes('western') || providerName.includes('union')) {
-                        e.target.src = 'images/providers/westernunion.png';
+                        e.target.src = '/images/providers/westernunion.png';
+                        // If that fails, try without the leading slash
+                        e.target.onerror = () => { e.target.src = 'images/providers/westernunion.png'; };
                       } else {
                         // Default fallback
-                        e.target.src = 'images/providers/default.png';
+                        e.target.src = '/images/providers/default.png';
+                        // If that fails, try without the leading slash
+                        e.target.onerror = () => { e.target.src = 'images/providers/default.png'; };
                       }
                     }
                   }}

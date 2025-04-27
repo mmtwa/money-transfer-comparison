@@ -31,6 +31,7 @@
         "mongoose": "^5.13.7",
         "morgan": "^1.10.0",
         "node-cache": "^5.1.2",
+        "node-fetch": "^3.3.2",
         "querystring": "^0.2.1"
     },
     "devDependencies": {
