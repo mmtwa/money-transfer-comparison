@@ -389,7 +389,7 @@ const SearchForm = ({ onSearch, initialData }) => {
                   value={inputValue}
                   onChange={handleAmountChange}
                   onKeyDown={handleKeyDown}
-                  className={`w-full border border-gray-500 bg-white-100 rounded-xl p-4 md:p-5 pl-10 focus:outline-none text-gray-800 font-medium text-lg md:text-xl text-right placeholder:text-sm md:placeholder:text-base lg:placeholder:text-lg placeholder:text-gray-400`}
+                  className={`w-full border ${isInitialFocus ? 'border-indigo-500 pulse-border' : 'border-gray-500 hover:border-indigo-400'} bg-white-100 rounded-xl p-4 md:p-5 pl-10 focus:outline-none text-gray-800 font-medium text-lg md:text-xl text-right placeholder:text-sm md:placeholder:text-base lg:placeholder:text-lg placeholder:text-gray-400 transition-all duration-200`}
                   inputMode="numeric"
                   pattern="[0-9,]*"
                   placeholder="Enter amount"
@@ -435,7 +435,7 @@ const SearchForm = ({ onSearch, initialData }) => {
           </div>
           
           <div className="mt-6 md:mt-6 text-xs md:text-xs text-center text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            We're funded by ad partners so we don't take any cut. This means we give you the best rates straight.
+          We're funded by ad partners, so we don't take any fees or have preferred or sponsored providers, giving you the best rates straight.
           </div>
         </div>
       </motion.div>
@@ -444,6 +444,23 @@ const SearchForm = ({ onSearch, initialData }) => {
         @keyframes shimmer {
           0% { transform: translateX(-100%); }
           100% { transform: translateX(100%); }
+        }
+        
+        @keyframes pulse-border {
+          0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+          70% { box-shadow: 0 0 0 6px rgba(99, 102, 241, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+        }
+        
+        .pulse-border {
+          animation: pulse-border 2s infinite;
+          box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
+        }
+        
+        input:focus {
+          border-color: #6366F1 !important;
+          box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+          transform: translateY(-1px);
         }
       `}</style>
     </div>

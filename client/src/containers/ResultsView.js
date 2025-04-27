@@ -15,6 +15,7 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
   const [showSortOptions, setShowSortOptions] = useState(false);
   const [loading, setLoading] = useState(true);
   const [providerResults, setProviderResults] = useState([]);
+  const [bestDealProvider, setBestDealProvider] = useState(null);
   const [error, setError] = useState(null);
   
   // Fetch data from API on component mount or when search parameters change
@@ -140,7 +141,8 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
                       providerCode: provider.alias,
                       providerName: provider.name,
                       providerLogo: provider.logo,
-                      baseRate: quote.rate * 1.005, // Add 0.5% to estimate base rate
+                      // Use the actual rate as both base and effective rate to indicate it's at the mid-market rate
+                      baseRate: quote.rate,
                       effectiveRate: quote.rate,
                       transferFee: quote.fee,
                       marginPercentage: quote.markup ? quote.markup * 100 : 0.5,
@@ -159,8 +161,32 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
                 
                 console.log('Adding comparison providers:', newProviders);
                 
-                // Add the new providers to results and re-sort
+                // Find Wise provider to get mid-market rate
+                const wiseProvider = newProviders.find(p => 
+                  p.providerCode?.toLowerCase() === 'wise' || 
+                  p.providerName?.toLowerCase()?.includes('wise'));
+                
+                // If Wise provider found, use its rate as mid-market rate for all providers
+                const midMarketRate = wiseProvider?.effectiveRate || null;
+                
+                // Add the new providers to results and update all providers with the mid-market rate if available
                 if (newProviders.length > 0) {
+                  // If we have a mid-market rate from Wise, use it as the baseline for all providers
+                  if (midMarketRate) {
+                    // Update all existing results with the mid-market rate
+                    results.forEach(provider => {
+                      provider.baseRate = midMarketRate;
+                    });
+                    
+                    // Update all new providers with the mid-market rate
+                    newProviders.forEach(provider => {
+                      // Skip Wise itself - its baseRate is already set correctly
+                      if (provider.providerCode?.toLowerCase() !== 'wise') {
+                        provider.baseRate = midMarketRate;
+                      }
+                    });
+                  }
+                  
                   const allProviders = [...results, ...newProviders];
                   setProviderResults(allProviders);
                   sortResults(allProviders, sortBy, sortDirection);
@@ -193,16 +219,31 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
     }
   }, [sortBy, sortDirection]);
   
+  // Set best deal provider whenever the provider results change
+  useEffect(() => {
+    if (providerResults.length > 0) {
+      // Find the provider with the highest amount received
+      const bestProvider = [...providerResults].sort((a, b) => 
+        b.amountReceived - a.amountReceived
+      )[0];
+      
+      setBestDealProvider(bestProvider);
+    }
+  }, [providerResults]);
+  
   const sortResults = (results, sortKey, direction) => {
     const sorted = [...results].sort((a, b) => {
       let comparison = 0;
       
       switch (sortKey) {
         case 'rate':
+          // For exchange rate, higher is better (more destination currency per source currency)
+          // Use effectiveRate which accounts for all fees in the actual rate calculation
           comparison = a.effectiveRate - b.effectiveRate;
           break;
         case 'fees':
-          comparison = a.totalCost - b.totalCost;
+          // For fees, lower is better (less fees means more money received)
+          comparison = a.transferFee - b.transferFee;
           break;
         case 'amount':
           comparison = a.amountReceived - b.amountReceived;
@@ -370,52 +411,94 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
           </button>
         </div>
         
-        {/* Compact Summary Panel */}
-        <div className="mb-5 bg-white rounded-lg shadow-sm border border-gray-100 p-4 relative z-10">
-          <h3 className="text-sm font-medium text-gray-700 mb-3">Summary</h3>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:mr-4">
-              <div className="mb-3 sm:mb-0 text-left">
-                <div className="text-xs text-gray-500 mb-1">You send</div>
-                <div className="flex items-center">
-                  <CurrencyFlag currency={fromCurrency} size="sm" />
-                  <span className="ml-2 font-semibold">
-                    {getCurrencySymbol(fromCurrency)} {formatAmount(amount)} {fromCurrency}
-                  </span>
-                </div>
-              </div>
-              
-              <div className="hidden sm:flex sm:items-center sm:mx-4 sm:my-0">
-                <ArrowRight size={16} className="text-gray-400" />
-              </div>
-              
-              <div className="text-left">
-                <div className="text-xs text-gray-500 mb-1">They receive</div>
-                <div className="flex items-center">
-                  <CurrencyFlag currency={toCurrency} size="sm" />
-                  <span className="ml-2 font-semibold">
-                    {providerResults.length > 0 
-                      ? `${getCurrencySymbol(toCurrency)} ${formatAmount(providerResults[0].amountReceived)} ${toCurrency}`
-                      : `Loading...`
-                    }
-                  </span>
-                </div>
-              </div>
+        {/* Sticky Summary Panel */}
+        <div className="mb-5 bg-white rounded-lg shadow-md border border-gray-100 p-3 py-4 sticky top-[calc(4rem+1px)] z-40 transition-all duration-200 backdrop-blur-sm bg-white/95">
+          {/* Mobile view: 2-line layout */}
+          <div className="sm:hidden">
+            {/* First line: labels */}
+            <div className="grid grid-cols-3 gap-2 mb-2">
+              <div className="text-sm font-medium text-gray-700">Summary</div>
+              <div className="text-xs text-gray-500 text-center">You send</div>
+              <div className="text-xs text-gray-500 text-center">They receive</div>
             </div>
             
-            <button 
-              onClick={onBackToSearch}
-              className="px-3 py-1.5 bg-white border border-indigo-500 text-indigo-600 rounded-md hover:bg-indigo-50 transition-colors text-sm w-full sm:w-auto mt-3 sm:mt-0"
-            >
-              Edit
-            </button>
+            {/* Second line: content */}
+            <div className="grid grid-cols-3 gap-2 items-center">
+              <div>
+                <button 
+                  onClick={onBackToSearch}
+                  className="px-2 py-1 bg-white border border-indigo-500 text-indigo-600 rounded-md hover:bg-indigo-50 transition-colors text-xs"
+                >
+                  Edit
+                </button>
+              </div>
+              
+              <div className="flex items-center justify-center">
+                <CurrencyFlag currency={fromCurrency} size="sm" />
+                <span className="ml-1 font-semibold text-sm whitespace-nowrap">
+                  {getCurrencySymbol(fromCurrency)} {formatAmount(amount)}
+                </span>
+              </div>
+              
+              <div className="flex items-center justify-center">
+                <CurrencyFlag currency={toCurrency} size="sm" />
+                <span className="ml-1 font-semibold text-sm whitespace-nowrap">
+                  {bestDealProvider 
+                    ? `${getCurrencySymbol(toCurrency)} ${formatAmount(bestDealProvider.amountReceived)}`
+                    : `Loading...`
+                  }
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          {/* Tablet/Desktop view: original layout */}
+          <div className="hidden sm:block">
+            <h3 className="text-sm font-medium text-gray-700 mb-3">Summary</h3>
+            <div className="flex flex-row items-center justify-between lg:justify-center lg:relative">
+              <div className="flex flex-row items-center mr-4">
+                <div className="text-center">
+                  <div className="text-xs text-gray-500 mb-1">You send</div>
+                  <div className="flex items-center justify-center">
+                    <CurrencyFlag currency={fromCurrency} size="sm" />
+                    <span className="ml-2 font-semibold">
+                      {getCurrencySymbol(fromCurrency)} {formatAmount(amount)} {fromCurrency}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="flex items-center mx-4 my-0">
+                  <ArrowRight size={16} className="text-gray-400" />
+                </div>
+                
+                <div className="text-center">
+                  <div className="text-xs text-gray-500 mb-1">They receive</div>
+                  <div className="flex items-center justify-center">
+                    <CurrencyFlag currency={toCurrency} size="sm" />
+                    <span className="ml-2 font-semibold">
+                      {bestDealProvider 
+                        ? `${getCurrencySymbol(toCurrency)} ${formatAmount(bestDealProvider.amountReceived)} ${toCurrency}`
+                        : `Loading...`
+                      }
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <button 
+                onClick={onBackToSearch}
+                className="px-3 py-1.5 bg-white border border-indigo-500 text-indigo-600 rounded-md hover:bg-indigo-50 transition-colors text-sm w-auto lg:absolute lg:right-0"
+              >
+                Edit
+              </button>
+            </div>
           </div>
         </div>
         
         {/* Best Deal Card - visual and clickable */}
-        {providerResults.length > 0 && (
+        {bestDealProvider && (
           <div 
-            onClick={() => scrollToProvider(providerResults[0].providerId)}
+            onClick={() => scrollToProvider(bestDealProvider.providerId)}
             className="mb-5 rounded-lg shadow-sm border border-indigo-200 p-4 cursor-pointer hover:shadow-md transition-all metal-shimmer gradient-bg relative z-10"
           >
             <div className="flex flex-col md:flex-row items-center justify-between relative z-10">
@@ -426,17 +509,17 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
               
               <div className="flex flex-col md:flex-row items-center justify-center md:flex-1">
                 <img 
-                  src={providerResults[0].providerLogo} 
-                  alt={`${providerResults[0].providerName} logo`} 
+                  src={bestDealProvider.providerLogo} 
+                  alt={`${bestDealProvider.providerName} logo`} 
                   className="w-16 h-16 object-contain mb-3 md:mb-0 md:mr-4"
                   onError={(e) => {
                     // Try to fix the path if it starts with "/"
-                    if ((providerResults[0].providerLogo || '').startsWith('/')) {
-                      const imgSrc = providerResults[0].providerLogo;
+                    if ((bestDealProvider.providerLogo || '').startsWith('/')) {
+                      const imgSrc = bestDealProvider.providerLogo;
                       e.target.src = imgSrc.substring(1);
                     } else {
                       // Fall back to a direct provider logo based on provider name
-                      const providerName = (providerResults[0].providerName || '').toLowerCase();
+                      const providerName = (bestDealProvider.providerName || '').toLowerCase();
                       if (providerName.includes('wise')) {
                         e.target.src = '/images/providers/wise.png';
                         // If that fails, try without the leading slash
@@ -463,7 +546,7 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
                   <div className="text-xs uppercase font-medium text-indigo-600 mb-1">They receive</div>
                   <div className="text-2xl font-bold">
                     <span className="text-shimmer">
-                      {getCurrencySymbol(toCurrency)} {formatAmount(providerResults[0].amountReceived)}
+                      {getCurrencySymbol(toCurrency)} {formatAmount(bestDealProvider.amountReceived)}
                     </span>
                   </div>
                 </div>
@@ -487,6 +570,9 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
               <div className="font-medium flex items-center">
                 <SlidersHorizontal size={16} className="mr-2 text-indigo-500" />
                 Sort by: <span className="ml-2 text-indigo-600">{sortBy === 'rate' ? 'Exchange Rate' : sortBy === 'amount' ? 'Amount Received' : sortBy === 'fees' ? 'Fees' : 'User Rating'}</span>
+                <span className="ml-2 text-gray-400">
+                  ({sortDirection === 'desc' ? 'Highest first' : 'Lowest first'})
+                </span>
               </div>
               <button className="text-gray-500">
                 <svg 
@@ -510,48 +596,76 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
               <div className="p-3 pt-0 border-t border-gray-100">
                 <div className="grid grid-cols-2 gap-2">
                   <button 
-                    onClick={() => setSortBy('amount')}
+                    onClick={() => {
+                      if (sortBy === 'amount') {
+                        toggleSortDirection();
+                      } else {
+                        setSortBy('amount');
+                        setSortDirection('desc'); // Default to highest first
+                      }
+                    }}
                     className={`px-3 py-2 rounded text-sm flex justify-between items-center ${sortBy === 'amount' ? 'bg-indigo-50 text-indigo-700' : 'hover:bg-gray-50'}`}
                   >
                     Amount Received
                     {sortBy === 'amount' && (
-                      <span onClick={toggleSortDirection} className="ml-1">
+                      <span className="ml-1">
                         <ArrowUpDown size={14} />
                       </span>
                     )}
                   </button>
                   
                   <button 
-                    onClick={() => setSortBy('rate')}
+                    onClick={() => {
+                      if (sortBy === 'rate') {
+                        toggleSortDirection();
+                      } else {
+                        setSortBy('rate');
+                        setSortDirection('desc'); // Default to highest first
+                      }
+                    }}
                     className={`px-3 py-2 rounded text-sm flex justify-between items-center ${sortBy === 'rate' ? 'bg-indigo-50 text-indigo-700' : 'hover:bg-gray-50'}`}
                   >
                     Exchange Rate
                     {sortBy === 'rate' && (
-                      <span onClick={toggleSortDirection} className="ml-1">
+                      <span className="ml-1">
                         <ArrowUpDown size={14} />
                       </span>
                     )}
                   </button>
                   
                   <button 
-                    onClick={() => setSortBy('fees')}
+                    onClick={() => {
+                      if (sortBy === 'fees') {
+                        toggleSortDirection();
+                      } else {
+                        setSortBy('fees');
+                        setSortDirection('asc'); // Default to lowest first for fees
+                      }
+                    }}
                     className={`px-3 py-2 rounded text-sm flex justify-between items-center ${sortBy === 'fees' ? 'bg-indigo-50 text-indigo-700' : 'hover:bg-gray-50'}`}
                   >
                     Fees
                     {sortBy === 'fees' && (
-                      <span onClick={toggleSortDirection} className="ml-1">
+                      <span className="ml-1">
                         <ArrowUpDown size={14} />
                       </span>
                     )}
                   </button>
                   
                   <button 
-                    onClick={() => setSortBy('rating')}
+                    onClick={() => {
+                      if (sortBy === 'rating') {
+                        toggleSortDirection();
+                      } else {
+                        setSortBy('rating');
+                        setSortDirection('desc'); // Default to highest first
+                      }
+                    }}
                     className={`px-3 py-2 rounded text-sm flex justify-between items-center ${sortBy === 'rating' ? 'bg-indigo-50 text-indigo-700' : 'hover:bg-gray-50'}`}
                   >
                     User Rating
                     {sortBy === 'rating' && (
-                      <span onClick={toggleSortDirection} className="ml-1">
+                      <span className="ml-1">
                         <ArrowUpDown size={14} />
                       </span>
                     )}
@@ -583,7 +697,7 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
               timeHours={provider.transferTimeHours}
               transferTime={provider.transferTime}
               rating={provider.rating}
-              isBestDeal={provider === providerResults[0]}
+              isBestDeal={provider.providerId === bestDealProvider?.providerId}
               isRealTimeApi={provider.realTimeApi}
               code={provider.providerCode}
             />

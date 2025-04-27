@@ -1,6 +1,99 @@
 import React from 'react';
-import { ExternalLink, Check, ThumbsUp } from 'lucide-react';
+import { ExternalLink, Check, ThumbsUp, ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import { formatAmount, getCurrencySymbol } from '../../utils/currency';
+
+// Map of provider codes to their website URLs - defined at module level
+// so it persists between renders and can be updated
+let websiteMap = {
+  'abn-amro-bank': 'https://www.abn-amro-bank.com',
+  'anz': 'https://www.anz.com',
+  'anz-nz': 'https://www.anz-nz.com',
+  'auckland-savings-bank-nz': 'https://www.auckland-savings-bank-nz.com',
+  'azimo': 'https://www.azimo.com',
+  'bank-of-america': 'https://www.bank-of-america.com',
+  'bank-of-new-zealand-nz': 'https://www.bank-of-new-zealand-nz.com',
+  'barclays': 'https://www.barclays.co.uk/ways-to-bank/international-payments/',
+  'bbva': 'https://www.bbva.com',
+  'bea': 'https://www.bea.com',
+  'bendigo-bank': 'https://www.bendigo-bank.com',
+  'bnc': 'https://www.bnc.com',
+  'bnp': 'https://www.bnp.com',
+  'ccb-hk': 'https://www.ccb-hk.com',
+  'chase': 'https://www.chase.com/digital/customer-service/helpful-tips/online-banking/mobile/wire-transfer-send',
+  'citibank-singapore': 'https://www.citibank-singapore.com',
+  'commerzbank': 'https://www.commerzbank.com',
+  'commonwealth-bank-of-australia': 'https://www.commonwealth-bank-of-australia.com',
+  'currencyfair': 'https://www.currencyfair.com',
+  'deutsche-bank': 'https://www.deutsche-bank.com',
+  'halifax': 'https://www.halifax.co.uk/helpcentre/everyday-banking/payments-and-transfers/international-payments/send-money-guide.html',
+  'hang-seng': 'https://www.hang-seng.com',
+  'hsbc-hk': 'https://www.hsbc-hk.com',
+  'ing-nl': 'https://www.ing-nl.com',
+  'instarem': 'https://www.instarem.com',
+  'kiwibank': 'https://www.kiwibank.com',
+  'knab': 'https://www.knab.com',
+  'la-banque-postale': 'https://www.la-banque-postale.com',
+  'lacaixa': 'https://www.lacaixa.com',
+  'lloyds': 'https://www.lloydsbank.com/help-guidance/everyday-banking/payments-and-transfers/international-payments.html',
+  'migros': 'https://www.migros.com',
+  'monese': 'https://monese.com/gb/en/money-transfers/',
+  'moneygram': 'https://www.moneygram.com',
+  'national-australia-bank': 'https://www.nab.com.au/personal/international-banking/transfer-money-overseas',
+  'nationwide': 'https://www.nationwide.co.uk/help/payments/swift-sepa-international-payments/',
+  'natwest': 'https://www.natwest.com/banking-with-natwest/how-to/send-money-abroad.html',
+  'ocbc': 'https://www.ocbc.com/personal-banking/digital-banking/overseas-funds-transfer.page',
+  'ocbc-whb': 'https://www.ocbc-whb.com',
+  'ofx': 'https://www.ofx.com/en-gb/money-transfer/',
+  'paypal': 'https://www.paypal.com/uk/digital-wallet/send-receive-money/send-money',
+  'postfinance': 'https://www.postfinance.com',
+  'qnb-finansbank': 'https://www.qnb-finansbank.com',
+  'rbc': 'https://www.rbc.com',
+  'rbs': 'https://www.natwest.com/banking-with-natwest/how-to/send-money-abroad.html',
+  'remitly': 'https://www.remitly.com',
+  'revolut': 'https://www.revolut.com/money-transfer/',
+  'ria': 'https://www.riamoneytransfer.com',
+  'sabadell': 'https://www.sabadell.com',
+  'scotiabank': 'https://www.scotiabank.com',
+  'skrill': 'https://www.skrill.com/en/transfer-money/',
+  'starling-bank': 'https://www.starlingbank.com/send-money-abroad/',
+  'swedbank-ab': 'https://www.swedbank-ab.com',
+  'td-bank': 'https://www.td-bank.com',
+  'transfergo': 'https://www.transfergo.com/send-money-abroad',
+  'transferwise': 'https://www.wise.com',
+  'unicredit': 'https://www.unicredit.com',
+  'western-union': 'https://www.westernunion.com/gb/en/web/send-money/start',
+  'westernunion': 'https://www.westernunion.com/gb/en/web/send-money/start',
+  'westpac-nz': 'https://www.westpac-nz.com',
+  'wise': 'https://www.wise.com',
+  'world-remit': 'https://www.world-remit.com',
+  'worldfirst': 'https://www.worldfirst.com',
+  'worldremit': 'https://www.worldremit.com',
+  'xe': 'https://www.xe.com',
+  'xoom': 'https://www.xoom.com',
+  'zkb': 'https://www.zkb.com'
+};
+
+// Try to load any saved providers from localStorage when the module first loads
+try {
+  const savedProviders = localStorage.getItem('providerWebsites');
+  if (savedProviders) {
+    // Change the merge order so the websiteMap (from source code) takes precedence
+    // over localStorage values
+    websiteMap = { ...JSON.parse(savedProviders), ...websiteMap };
+    
+    // Check specifically for starling-bank to ensure it has the correct URL
+    if (websiteMap['starling-bank'] !== 'https://www.starlingbank.com/send-money-abroad/') {
+      websiteMap['starling-bank'] = 'https://www.starlingbank.com/send-money-abroad/';
+      
+      // Update localStorage with the corrected URL
+      const updatedProviders = JSON.parse(localStorage.getItem('providerWebsites') || '{}');
+      updatedProviders['starling-bank'] = 'https://www.starlingbank.com/send-money-abroad/';
+      localStorage.setItem('providerWebsites', JSON.stringify(updatedProviders));
+    }
+  }
+} catch (error) {
+  console.error('Error loading saved provider websites:', error);
+}
 
 /**
  * Component to display a provider's information in a card
@@ -23,6 +116,16 @@ const ProviderCard = ({
   exchangeRateMargin,
   features = []
 }) => {
+  // Debug provider data - log once when component mounts
+  React.useEffect(() => {
+    console.log('Provider data:', { 
+      name: provider?.name || name,
+      providerCode: provider?.providerCode,
+      code: provider?.code,
+      fullProvider: provider
+    });
+  }, []);
+
   // Generate rating visualization elements
   const renderRating = (ratingValue) => {
     const filledCircles = Math.floor(ratingValue);
@@ -117,10 +220,10 @@ const ProviderCard = ({
         .text-shimmer {
           background: linear-gradient(
             to right,
-            #6366f1 20%,
-            #818cf8 40%,
-            #4f46e5 60%,
-            #6366f1 80%
+            #3CBF7A 20%,
+            #4dd88a 40%,
+            #34a86b 60%,
+            #3CBF7A 80%
           );
           background-size: 200% auto;
           background-clip: text;
@@ -229,17 +332,33 @@ const ProviderCard = ({
               </div>
             </div>
             
-            {/* Rate Margin or Mid Market Rate for Wise */}
+            {/* Rate Margin for all providers */}
             <div className="flex items-start">
               <div className="w-1 h-full min-h-[40px] bg-indigo-400 mr-3 self-stretch rounded-full"></div>
               <div className="text-left">
                 <div className="text-xs text-gray-500 font-medium mb-1">
-                  {provider.providerCode === 'wise' ? 'Mid Market Rate' : 'Rate Margin'}
+                  Rate Margin
                 </div>
                 <div>
-                  {provider.providerCode === 'wise'
-                    ? `1 ${fromCurrency} = ${(provider.baseRate || 0).toFixed(4)} ${toCurrency}`
-                    : `${((provider?.exchangeRateMargin || exchangeRateMargin || 0) * 100).toFixed(2)}%`}
+                  {provider?.effectiveRate && provider?.baseRate && provider.effectiveRate > provider.baseRate ? (
+                    <div className="flex items-center text-green-600">
+                      <ArrowUp size={16} className="mr-1" />
+                      <span>{`${((provider.effectiveRate / provider.baseRate - 1) * 100).toFixed(2)}% above mid-market`}</span>
+                    </div>
+                  ) : provider?.effectiveRate && provider?.baseRate && provider.effectiveRate < provider.baseRate ? (
+                    <div className="flex items-center text-red-600">
+                      <ArrowDown size={16} className="mr-1" />
+                      <span>{`${((1 - provider.effectiveRate / provider.baseRate) * 100).toFixed(2)}% below mid-market`}</span>
+                    </div>
+                  ) : provider?.effectiveRate && provider?.baseRate && Math.abs(provider.effectiveRate - provider.baseRate) < 0.0001 ? (
+                    <div className="flex items-center text-gray-600">
+                      <Minus size={16} className="mr-1" />
+                      <span>Same as mid-market</span>
+                    </div>
+                  ) : (
+                    // Fallback to the original margin percentage display
+                    `${((provider?.exchangeRateMargin || exchangeRateMargin || 0) * 100).toFixed(2)}%`
+                  )}
                 </div>
               </div>
             </div>
@@ -266,7 +385,7 @@ const ProviderCard = ({
           </button>
           
           <a 
-            href={getProviderWebsite(provider?.providerCode || provider?.code || '')} 
+            href={getProviderWebsite(provider?.providerCode || provider?.code || provider?.name || name || '')} 
             target="_blank" 
             rel="noopener noreferrer"
             className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center justify-center font-medium transition-colors"
@@ -282,47 +401,23 @@ const ProviderCard = ({
 
 // Function to generate provider website URL based on provider code
 const getProviderWebsite = (providerCode) => {
+  console.log('Getting website for provider:', providerCode);
+  
   // Convert to lowercase for consistent matching
   const code = providerCode.toLowerCase();
-  
-  // Map of provider codes to their website URLs
-  let websiteMap = {
-    'wise': 'https://www.wise.com',
-    'transferwise': 'https://www.wise.com',
-    'xe': 'https://www.xe.com',
-    'westernunion': 'https://www.westernunion.com',
-    'moneygram': 'https://www.moneygram.com',
-    'paypal': 'https://www.paypal.com',
-    'ofx': 'https://www.ofx.com',
-    'remitly': 'https://www.remitly.com',
-    'currencyfair': 'https://www.currencyfair.com',
-    'worldremit': 'https://www.worldremit.com',
-    'ria': 'https://www.riamoneytransfer.com',
-    'azimo': 'https://www.azimo.com',
-    'transfergo': 'https://www.transfergo.com',
-    'worldfirst': 'https://www.worldfirst.com',
-    'instarem': 'https://www.instarem.com',
-    'skrill': 'https://www.skrill.com',
-    'revolut': 'https://www.revolut.com'
-  };
-  
-  // Try to load any saved providers from localStorage
-  try {
-    const savedProviders = localStorage.getItem('providerWebsites');
-    if (savedProviders) {
-      websiteMap = { ...websiteMap, ...JSON.parse(savedProviders) };
-    }
-  } catch (error) {
-    console.error('Error loading saved provider websites:', error);
-  }
+  console.log('Lowercase provider code:', code);
+  console.log('Current websiteMap:', websiteMap);
   
   // If the provider is not in our map, try to generate a website URL based on the code
   if (!websiteMap[code] && code) {
+    console.log(`Adding new provider to websiteMap: ${code}`);
+    
     // Generate a likely website URL
     const generatedUrl = `https://www.${code}.com`;
     
     // Add it to both the current map and localStorage for future use
     websiteMap[code] = generatedUrl;
+    console.log('Updated websiteMap:', websiteMap);
     
     try {
       // Get existing saved providers
@@ -334,6 +429,7 @@ const getProviderWebsite = (providerCode) => {
       
       // Save back to localStorage
       localStorage.setItem('providerWebsites', JSON.stringify(updatedProviders));
+      console.log(`Saved provider ${code} to localStorage:`, updatedProviders);
     } catch (error) {
       console.error('Error saving provider website:', error);
     }
