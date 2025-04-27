@@ -3,7 +3,7 @@ import React from 'react';
 /**
  * Footer component with site information and links
  */
-const Footer = () => {
+const Footer = ({ onAboutClick }) => {
   return (
     <footer className="bg-gray-800 text-white py-6 md:py-8 mt-8 md:mt-12">
       <div className="container mx-auto px-4">
@@ -16,7 +16,6 @@ const Footer = () => {
             <div>
               <h4 className="font-bold mb-3 text-gray-300">Company</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white">About</a></li>
                 <li><a href="#" className="hover:text-white">Careers</a></li>
                 <li><a href="#" className="hover:text-white">Press</a></li>
               </ul>

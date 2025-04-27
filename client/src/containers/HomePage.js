@@ -7,7 +7,7 @@ import adPartners from '../config/adPartners';
 /**
  * Home page container with dynamic ad backgrounds and search form
  */
-const HomePage = ({ onSearch, initialData }) => {
+const HomePage = ({ onSearch, initialData, onAboutClick }) => {
   // Select the appropriate ad partner based on scheduling and priority
   const [currentAdPartner, setCurrentAdPartner] = useState('default');
   const [adMetadata, setAdMetadata] = useState(adPartners.default);
@@ -49,12 +49,14 @@ const HomePage = ({ onSearch, initialData }) => {
         <img 
           src="/mmtlogo.png" 
           alt="mymoneytransfers Logo" 
-          className="hidden md:block lg:pl-8 h-8 md:h-10 lg:h-16"
+          className="hidden md:block h-8 md:h-10 lg:h-16"
           style={{ objectFit: 'contain', width: 'auto', height: '100%' }}
           width="160"
           height="64"
           loading="eager"
         />
+        
+        {/* About Us button removed but we keep the onAboutClick prop for future use */}
       </div>
 
       {/* Main Content with centered search tool - Fixed position */}
