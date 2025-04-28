@@ -340,21 +340,24 @@ const ProviderCard = ({
                   Rate Margin
                 </div>
                 <div>
-                  {provider?.effectiveRate && provider?.baseRate && provider.effectiveRate > provider.baseRate ? (
-                    <div className="flex items-center text-green-600">
-                      <ArrowUp size={16} className="mr-1" />
-                      <span>{`${((provider.effectiveRate / provider.baseRate - 1) * 100).toFixed(2)}% above mid-market`}</span>
-                    </div>
-                  ) : provider?.effectiveRate && provider?.baseRate && provider.effectiveRate < provider.baseRate ? (
-                    <div className="flex items-center text-red-600">
-                      <ArrowDown size={16} className="mr-1" />
-                      <span>{`${((1 - provider.effectiveRate / provider.baseRate) * 100).toFixed(2)}% below mid-market`}</span>
-                    </div>
-                  ) : provider?.effectiveRate && provider?.baseRate && Math.abs(provider.effectiveRate - provider.baseRate) < 0.0001 ? (
-                    <div className="flex items-center text-gray-600">
-                      <Minus size={16} className="mr-1" />
-                      <span>Same as mid-market</span>
-                    </div>
+                  {provider?.effectiveRate && provider?.baseRate ? (
+                    // Compare effective rate with base rate to determine if it's above or below mid-market
+                    provider.effectiveRate > provider.baseRate ? (
+                      <div className="flex items-center text-green-600">
+                        <ArrowUp size={16} className="mr-1" />
+                        <span>{`${((provider.effectiveRate / provider.baseRate - 1) * 100).toFixed(2)}% above mid-market`}</span>
+                      </div>
+                    ) : provider.effectiveRate < provider.baseRate ? (
+                      <div className="flex items-center text-red-600">
+                        <ArrowDown size={16} className="mr-1" />
+                        <span>{`${((1 - provider.effectiveRate / provider.baseRate) * 100).toFixed(2)}% below mid-market`}</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center text-gray-600">
+                        <Minus size={16} className="mr-1" />
+                        <span>Same as mid-market</span>
+                      </div>
+                    )
                   ) : (
                     // Fallback to the original margin percentage display
                     `${((provider?.exchangeRateMargin || exchangeRateMargin || 0) * 100).toFixed(2)}%`

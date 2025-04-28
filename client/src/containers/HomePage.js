@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import SearchForm from './SearchForm';
 import AdBackground from '../components/AdBackground';
+import Header from '../components/layout/Header';
 import { selectAdPartner, trackImpression } from '../services/adService';
 import adPartners from '../config/adPartners';
 
 /**
  * Home page container with dynamic ad backgrounds and search form
  */
-const HomePage = ({ onSearch, initialData, onAboutClick }) => {
+const HomePage = ({ onSearch, initialData, onAboutClick, onGuidesClick, onFaqClick, onHistoricalRatesClick }) => {
   // Select the appropriate ad partner based on scheduling and priority
   const [currentAdPartner, setCurrentAdPartner] = useState('default');
   const [adMetadata, setAdMetadata] = useState(adPartners.default);
+  const [menuOpen, setMenuOpen] = useState(false);
   
   // Initialize the ad partner on component mount
   useEffect(() => {
@@ -21,6 +23,11 @@ const HomePage = ({ onSearch, initialData, onAboutClick }) => {
     // Track impression for analytics
     trackImpression(partnerId);
   }, []);
+  
+  // Handle menu state change from Header component
+  const handleMenuToggle = (isOpen) => {
+    setMenuOpen(isOpen);
+  };
   
   return (
     <div className="relative overflow-hidden" style={{ 
@@ -33,30 +40,29 @@ const HomePage = ({ onSearch, initialData, onAboutClick }) => {
       {/* Dynamic Ad Background */}
       <AdBackground currentAdPartner={currentAdPartner} adMetadata={adMetadata} />
   
-      {/* Centered Logo - Fixed size container */}
-      <div 
-        className="relative z-10 w-full flex justify-center md:justify-center lg:justify-start lg:pl-10 pt-6 md:pt-8 lg:pt-10" 
-        style={{ 
-          minHeight: '80px', 
-          height: '80px',
-          boxSizing: 'content-box',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0
-        }}
-      >
-        <img 
-          src="/mmtlogo.png" 
-          alt="mymoneytransfers Logo" 
-          className="hidden md:block h-8 md:h-10 lg:h-16"
-          style={{ objectFit: 'contain', width: 'auto', height: '100%' }}
-          width="160"
-          height="64"
-          loading="eager"
+      {/* Header with transparent background */}
+      <div className={`absolute top-0 left-0 right-0 ${menuOpen ? 'z-50' : 'z-10'}`}>
+        <Header 
+          onLogoClick={() => {}} 
+          onAboutClick={(e) => {
+            onAboutClick(e);
+            setMenuOpen(false);
+          }}
+          onGuidesClick={(e) => {
+            onGuidesClick(e);
+            setMenuOpen(false);
+          }}
+          onFaqClick={(e) => {
+            onFaqClick(e);
+            setMenuOpen(false);
+          }}
+          onHistoricalRatesClick={(e) => {
+            onHistoricalRatesClick(e);
+            setMenuOpen(false);
+          }}
+          isTransparent={true}
+          onMenuToggle={handleMenuToggle}
         />
-        
-        {/* About Us button removed but we keep the onAboutClick prop for future use */}
       </div>
 
       {/* Main Content with centered search tool - Fixed position */}

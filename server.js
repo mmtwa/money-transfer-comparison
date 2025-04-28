@@ -31,7 +31,6 @@ const authRoutes = require('./routes/auth');
 const providerRoutes = require('./routes/providers');
 const rateRoutes = require('./routes/rates');
 const userRoutes = require('./routes/users');
-const apiKeyRoutes = require('./routes/admin/apiKeys');
 const wiseRoutes = require('./routes/wiseRates');
 
 // Initialize Express app
@@ -138,8 +137,23 @@ app.use('/api/rates', rateRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/wise', wiseRoutes);
 
-// Admin routes
-app.use('/api/admin/apikeys', apiKeyRoutes);
+// Define the v1/rates endpoint for historical rates
+app.use('/v1/rates', (req, res, next) => {
+  console.log('Historical rates API called');
+  
+  // Check for future dates and adjust them
+  if (req.query.to) {
+    const toDate = new Date(req.query.to);
+    const now = new Date();
+    
+    if (toDate > now) {
+      console.log(`Server adjusting future date ${req.query.to} to current date`);
+      req.query.to = now.toISOString();
+    }
+  }
+  
+  rateRoutes.handle(req, res, next);
+});
 
 // Serve static assets in production
 if (process.env.NODE_ENV === 'production') {

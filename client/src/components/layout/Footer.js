@@ -3,7 +3,7 @@ import React from 'react';
 /**
  * Footer component with site information and links
  */
-const Footer = ({ onAboutClick }) => {
+const Footer = ({ onAboutClick, onGuidesClick, onFaqClick, onHistoricalRatesClick }) => {
   return (
     <footer className="bg-gray-800 text-white py-6 md:py-8 mt-8 md:mt-12">
       <div className="container mx-auto px-4">
@@ -18,14 +18,16 @@ const Footer = ({ onAboutClick }) => {
               <ul className="space-y-2 text-gray-400">
                 <li><a href="#" className="hover:text-white">Careers</a></li>
                 <li><a href="#" className="hover:text-white">Press</a></li>
+                <li><a href="#" className="hover:text-white cursor-pointer" onClick={onAboutClick}>About</a></li>
               </ul>
             </div>
             <div>
               <h4 className="font-bold mb-3 text-gray-300">Resources</h4>
               <ul className="space-y-2 text-gray-400">
                 <li><a href="#" className="hover:text-white">Blog</a></li>
-                <li><a href="#" className="hover:text-white">Guides</a></li>
-                <li><a href="#" className="hover:text-white">FAQ</a></li>
+                <li><a href="#" className="hover:text-white cursor-pointer" onClick={onGuidesClick}>Guides</a></li>
+                <li><a href="#" className="hover:text-white cursor-pointer" onClick={onFaqClick}>FAQ</a></li>
+                <li><a href="#" className="hover:text-white cursor-pointer" onClick={onHistoricalRatesClick}>Historical Rates</a></li>
               </ul>
             </div>
             <div>
@@ -38,6 +40,35 @@ const Footer = ({ onAboutClick }) => {
             </div>
           </div>
         </div>
+        
+        {/* Button bar for easy navigation - hidden on mobile */}
+        <div className="hidden md:flex justify-center mt-8 mb-6 space-x-3">
+          <button 
+            onClick={onAboutClick}
+            className="bg-[#4F46E5] hover:bg-[#1B1464] text-white py-2 px-4 rounded-full font-medium transition duration-200"
+          >
+            About
+          </button>
+          <button 
+            onClick={onGuidesClick}
+            className="bg-[#4F46E5] hover:bg-[#1B1464] text-white py-2 px-4 rounded-full font-medium transition duration-200"
+          >
+            Guides
+          </button>
+          <button 
+            onClick={onFaqClick}
+            className="bg-[#4F46E5] hover:bg-[#1B1464] text-white py-2 px-4 rounded-full font-medium transition duration-200"
+          >
+            FAQ
+          </button>
+          <button 
+            onClick={onHistoricalRatesClick}
+            className="bg-[#4F46E5] hover:bg-[#1B1464] text-white py-2 px-4 rounded-full font-medium transition duration-200"
+          >
+            Historical Rates
+          </button>
+        </div>
+        
         <div className="border-t border-gray-700 mt-6 md:mt-8 pt-6 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-400">© {new Date().getFullYear()} mymoneytransfers.com. All rights reserved.</p>
           <div className="flex space-x-4 mt-4 md:mt-0">

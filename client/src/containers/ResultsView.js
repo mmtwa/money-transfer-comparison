@@ -24,181 +24,160 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
       setLoading(true);
       try {
         console.log('Fetching exchange rates for:', { fromCurrency, toCurrency, amount });
-        const response = await apiService.getExchangeRates(fromCurrency, toCurrency, amount);
-        console.log('API Response:', response.data);
         
-        if (response.data && response.data.success) {
-          // Filter out any duplicate wise providers from regular results if we'll be adding them from comparison data
-          const results = response.data.data.filter(provider => 
-            !(provider.providerCode?.toLowerCase() === 'wise' || 
-              provider.providerCode?.toLowerCase() === 'transferwise'));
+        // Fetch providers and exchange rates from Wise v3 comparisons API
+        try {
+          console.log('Fetching data from Wise v3 comparison API');
           
-          console.log('Provider results after filtering:', results);
-          console.log('Results length:', results.length);
+          // First try accessing through our backend proxy
+          let comparisonData = null;
           
-          // Set the provider results and then sort them
-          setProviderResults(results);
-          sortResults(results, sortBy, sortDirection);
-          
-          // Now also fetch Wise comparison data
           try {
             const comparisonResponse = await apiService.getWiseComparison(
               fromCurrency, 
               toCurrency, 
               amount,
-              // Get source and target countries based on currency if needed
+              // Get source country based on currency if needed
               fromCurrency === 'GBP' ? 'GB' : null,
               toCurrency === 'EUR' ? 'DE' : null
             );
             
             if (comparisonResponse.data && comparisonResponse.data.success) {
-              console.log('Wise Comparison Data:', comparisonResponse.data.data);
-              
-              // Parse the comparison data and add to provider results
-              if (comparisonResponse.data.data && comparisonResponse.data.data.providers) {
-                const wiseProviders = comparisonResponse.data.data.providers;
-                
-                // Process ALL providers from comparison API
-                const newProviders = wiseProviders
-                  .filter(p => p.quotes && p.quotes.length > 0)
-                  .map(provider => {
-                    // Find the best quote for this provider
-                    const quote = provider.quotes.reduce((best, current) => 
-                      (current.receivedAmount > best.receivedAmount) ? current : best, provider.quotes[0]);
-                    
-                    // Format delivery time
-                    let transferTime = 'Unknown';
-                    let transferTimeHours = { min: 24, max: 72 };
-                    
-                    if (quote.deliveryEstimation) {
-                      if (quote.deliveryEstimation.duration) {
-                        const duration = quote.deliveryEstimation.duration;
-                        
-                        // Parse min and max durations, handling null values
-                        let minHours = 24;
-                        let maxHours = 72; 
-                        
-                        try {
-                          if (duration.min) {
-                            // Try to extract hours from PT24H format or similar
-                            const minMatch = duration.min.match(/PT(\d+)H/);
-                            if (minMatch && minMatch[1]) {
-                              minHours = parseInt(minMatch[1]);
-                            }
-                          }
-                          
-                          if (duration.max) {
-                            // Try to extract hours from PT24H format or similar
-                            const maxMatch = duration.max.match(/PT(\d+)H/);
-                            if (maxMatch && maxMatch[1]) {
-                              maxHours = parseInt(maxMatch[1]);
-                            }
-                          }
-                        } catch (err) {
-                          console.warn('Error parsing delivery duration:', err);
-                        }
-                        
-                        transferTime = minHours === maxHours 
-                          ? `${minHours} hours` 
-                          : `${minHours}-${maxHours} hours`;
-                        
-                        transferTimeHours = { min: minHours, max: maxHours };
-                      } else if (quote.deliveryEstimation.deliveryDate) {
-                        // Use delivery date if available instead of duration
-                        const deliveryDate = quote.deliveryEstimation.deliveryDate;
-                        if (deliveryDate.min || deliveryDate.max) {
-                          // Format based on dates
-                          const now = new Date();
-                          const minDate = deliveryDate.min ? new Date(deliveryDate.min) : null;
-                          const maxDate = deliveryDate.max ? new Date(deliveryDate.max) : null;
-                          
-                          if (maxDate && !minDate) {
-                            const daysDiff = Math.ceil((maxDate - now) / (1000 * 60 * 60 * 24));
-                            transferTime = daysDiff <= 1 ? "Within 24 hours" : `Within ${daysDiff} days`;
-                            transferTimeHours = { min: 1, max: daysDiff * 24 };
-                          } else if (minDate && maxDate) {
-                            const minDaysDiff = Math.ceil((minDate - now) / (1000 * 60 * 60 * 24));
-                            const maxDaysDiff = Math.ceil((maxDate - now) / (1000 * 60 * 60 * 24));
-                            transferTime = `${minDaysDiff}-${maxDaysDiff} days`;
-                            transferTimeHours = { min: minDaysDiff * 24, max: maxDaysDiff * 24 };
-                          }
-                        }
-                      } else if (quote.deliveryEstimation.durationType) {
-                        // Use duration type if specific times aren't available
-                        if (quote.deliveryEstimation.durationType === 'SAME_DAY') {
-                          transferTime = 'Same day';
-                          transferTimeHours = { min: 1, max: 24 };
-                        } else if (quote.deliveryEstimation.durationType === 'CALENDAR') {
-                          transferTime = '1-3 business days';
-                          transferTimeHours = { min: 24, max: 72 };
-                        }
-                      }
-                    }
-                    
-                    // Return in the format expected by ProviderCard
-                    return {
-                      providerId: `wise-comparison-${provider.id}`,
-                      providerCode: provider.alias,
-                      providerName: provider.name,
-                      providerLogo: provider.logo,
-                      // Use the actual rate as both base and effective rate to indicate it's at the mid-market rate
-                      baseRate: quote.rate,
-                      effectiveRate: quote.rate,
-                      transferFee: quote.fee,
-                      marginPercentage: quote.markup ? quote.markup * 100 : 0.5,
-                      marginCost: (quote.markup ? quote.markup : 0.005) * parseFloat(amount),
-                      totalCost: quote.fee + ((quote.markup ? quote.markup : 0.005) * parseFloat(amount)),
-                      amountReceived: quote.receivedAmount,
-                      transferTimeHours: transferTimeHours,
-                      transferTime: transferTime,
-                      rating: 4.0, // Default rating when not available
-                      methods: ['bank_transfer'],
-                      realTimeApi: true,
-                      timestamp: new Date().toISOString(),
-                      comparisonProvider: true // Mark as coming from comparison API
-                    };
-                  });
-                
-                console.log('Adding comparison providers:', newProviders);
-                
-                // Find Wise provider to get mid-market rate
-                const wiseProvider = newProviders.find(p => 
-                  p.providerCode?.toLowerCase() === 'wise' || 
-                  p.providerName?.toLowerCase()?.includes('wise'));
-                
-                // If Wise provider found, use its rate as mid-market rate for all providers
-                const midMarketRate = wiseProvider?.effectiveRate || null;
-                
-                // Add the new providers to results and update all providers with the mid-market rate if available
-                if (newProviders.length > 0) {
-                  // If we have a mid-market rate from Wise, use it as the baseline for all providers
-                  if (midMarketRate) {
-                    // Update all existing results with the mid-market rate
-                    results.forEach(provider => {
-                      provider.baseRate = midMarketRate;
-                    });
-                    
-                    // Update all new providers with the mid-market rate
-                    newProviders.forEach(provider => {
-                      // Skip Wise itself - its baseRate is already set correctly
-                      if (provider.providerCode?.toLowerCase() !== 'wise') {
-                        provider.baseRate = midMarketRate;
-                      }
-                    });
-                  }
-                  
-                  const allProviders = [...results, ...newProviders];
-                  setProviderResults(allProviders);
-                  sortResults(allProviders, sortBy, sortDirection);
-                }
-              }
+              comparisonData = comparisonResponse.data.data;
+              console.log('Wise Comparison Data from backend:', comparisonData);
             }
-          } catch (comparisonError) {
-            console.error('Error fetching Wise comparison data:', comparisonError);
-            // Not setting error state for this as it's supplementary data
+          } catch (backendError) {
+            console.error('Error fetching from backend, trying direct API:', backendError);
+            // If backend proxy fails, try direct API call as fallback
+            try {
+              const directResponse = await apiService.getWiseV3Comparison(
+                fromCurrency,
+                toCurrency,
+                amount
+              );
+              
+              if (directResponse.data) {
+                comparisonData = directResponse.data;
+                console.log('Wise Comparison Data from direct API:', comparisonData);
+              }
+            } catch (directError) {
+              console.error('Error fetching from direct API:', directError);
+              throw new Error('Failed to fetch comparison data from both backend and direct API');
+            }
           }
-        } else {
-          setError('Failed to fetch exchange rates');
+          
+          if (comparisonData && comparisonData.providers) {
+            const allProviders = comparisonData.providers;
+            console.log(`Found ${allProviders.length} providers from comparison API`);
+            
+            // Process all providers from comparison API
+            const providers = allProviders
+              .filter(p => p.quotes && p.quotes.length > 0)
+              .map(provider => {
+                // Find the best quote for this provider
+                const quote = provider.quotes.reduce((best, current) => 
+                  (current.receivedAmount > best.receivedAmount) ? current : best, provider.quotes[0]);
+                
+                // Find or calculate markup
+                const markup = quote.markup !== undefined ? quote.markup : 0;
+                
+                // Extract delivery time if available
+                let transferTime = 'Unknown';
+                let transferTimeHours = { min: 24, max: 72 };
+                
+                if (quote.estimatedDelivery) {
+                  transferTime = quote.estimatedDelivery;
+                  
+                  // Try to estimate hours from the delivery time text
+                  if (transferTime.includes('hour')) {
+                    const hourMatch = transferTime.match(/(\d+).*?hour/);
+                    if (hourMatch && hourMatch[1]) {
+                      const hours = parseInt(hourMatch[1]);
+                      transferTimeHours = { min: hours, max: hours };
+                    }
+                  } else if (transferTime.includes('day')) {
+                    const dayMatch = transferTime.match(/(\d+).*?day/);
+                    if (dayMatch && dayMatch[1]) {
+                      const days = parseInt(dayMatch[1]);
+                      transferTimeHours = { min: days * 24, max: days * 24 };
+                    }
+                  }
+                }
+                
+                // Basic provider object from comparison API data
+                return {
+                  providerId: `provider-${provider.id}`,
+                  providerCode: provider.alias,
+                  providerName: provider.name,
+                  providerLogo: provider.logos?.normal?.svgUrl || provider.logos?.normal?.pngUrl || provider.logo,
+                  baseRate: quote.rate,
+                  effectiveRate: quote.rate,
+                  transferFee: quote.fee || 0,
+                  marginPercentage: markup * 100,
+                  marginCost: parseFloat(amount) * quote.rate * markup,
+                  totalCost: (quote.fee || 0) + (parseFloat(amount) * quote.rate * markup),
+                  amountReceived: quote.receivedAmount,
+                  sourceCountry: quote.sourceCountry,
+                  targetCountry: quote.targetCountry,
+                  transferTimeHours,
+                  transferTime,
+                  rating: 4.0, // Default rating when not available
+                  methods: ['bank_transfer'],
+                  realTimeApi: true,
+                  timestamp: new Date().toISOString()
+                };
+              });
+            
+            console.log('Processed providers:', providers.length);
+            
+            // Find Wise provider to get mid-market rate
+            const wiseProvider = providers.find(p => 
+              p.providerCode?.toLowerCase() === 'wise' || 
+              p.providerName?.toLowerCase()?.includes('wise'));
+            
+            // If Wise provider found, use its rate as mid-market rate
+            let midMarketRate = null;
+            if (wiseProvider) {
+              midMarketRate = wiseProvider.effectiveRate;
+              console.log('Found mid-market rate from Wise:', midMarketRate);
+              
+              // Also ensure the Wise provider itself has zero margin
+              wiseProvider.marginPercentage = 0;
+              wiseProvider.marginCost = 0;
+              wiseProvider.totalCost = wiseProvider.transferFee;
+            }
+            
+            // For other providers, adjust their margin calculations
+            // based on the mid-market rate if available
+            if (midMarketRate) {
+              providers.forEach(provider => {
+                // Skip Wise itself
+                if (provider !== wiseProvider) {
+                  provider.baseRate = midMarketRate;
+                  
+                  // Calculate margin as the difference between mid-market and effective rate
+                  if (provider.baseRate > 0) {
+                    // Use markup from quote if available, otherwise calculate
+                    if (provider.marginPercentage === 0) {
+                      provider.marginPercentage = ((provider.baseRate - provider.effectiveRate) / provider.baseRate) * 100;
+                      provider.marginCost = parseFloat(amount) * (provider.baseRate - provider.effectiveRate);
+                      provider.totalCost = provider.transferFee + provider.marginCost;
+                    }
+                  }
+                }
+              });
+            }
+            
+            // Set the provider results and sort them
+            setProviderResults(providers);
+            sortResults(providers, sortBy, sortDirection);
+            
+          } else {
+            setError('No provider data available from Wise comparison API');
+          }
+        } catch (comparisonError) {
+          console.error('Error fetching Wise comparison data:', comparisonError);
+          setError('Error fetching provider data: ' + comparisonError.message);
         }
       } catch (err) {
         console.error('Error fetching exchange rates:', err);

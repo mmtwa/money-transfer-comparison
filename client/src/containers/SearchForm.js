@@ -50,6 +50,10 @@ const SearchForm = ({ onSearch, initialData }) => {
   };
   
   const handleSearch = () => {
+    // Add haptic feedback
+    if (navigator.vibrate) {
+      navigator.vibrate(2); // 2ms vibration for a more pronounced feedback
+    }
     setActiveDropdown(null); // Close any open dropdown
     setIsLoading(true);
     
@@ -67,11 +71,19 @@ const SearchForm = ({ onSearch, initialData }) => {
   // Handle dropdown toggle - ensures only one dropdown is open at a time
   // Also toggles the current dropdown closed if clicked again
   const handleDropdownToggle = (dropdownId) => {
+    // Add haptic feedback
+    if (navigator.vibrate) {
+      navigator.vibrate(2); // 2ms vibration
+    }
     setActiveDropdown(prev => prev === dropdownId ? null : dropdownId);
   };
 
   // Handle amount field focus
   const handleAmountFocus = () => {
+    // Add haptic feedback
+    if (navigator.vibrate) {
+      navigator.vibrate(2); // 2ms vibration
+    }
     // Only clear the input if it's the default value or empty
     if (inputValue === formatAmount(1000) || !inputValue) {
       setInputValue('');
@@ -322,14 +334,12 @@ const SearchForm = ({ onSearch, initialData }) => {
         transition={{ duration: 0 }}
       >
         <div className="p-6 md:p-8">
-          <h2 className="text-center mb-4">
-            <div className="flex flex-col items-center mb-2">
+          <h2 className="mb-4 text-left">
+            <div className="flex flex-col items-start mb-2">
               <div
                 className="text-2xl sm:text-2xl md:text-3xl lg:text-3xl font-semibold tracking-tight leading-tight overflow-hidden whitespace-nowrap relative"
                 style={{ 
                   fontFamily: 'Poppins, sans-serif', 
-                  paddingLeft: '5px', 
-                  paddingRight: '5px',
                   minHeight: '40px' // Reserve height
                 }}
               >
@@ -347,16 +357,22 @@ const SearchForm = ({ onSearch, initialData }) => {
               </div>
               
               <div
-                className="text-xs sm:text-sm md:text-base lg:text-lg font-medium tracking-tight leading-tight mt-2 text-gray-900 overflow-hidden text-center"
+                className="text-xs sm:text-sm md:text-base lg:text-lg font-medium tracking-tight leading-tight mt-2 text-gray-900 overflow-hidden"
                 style={{ 
                   fontFamily: 'Poppins, sans-serif', 
-                  paddingLeft: '30px', 
-                  paddingRight: '30px',
                   minHeight: '48px' // Reserve height
                 }}
               >
-                Compare money transfers with us <br />
-                & never wonder again if you could have gotten a better deal.
+                <div className="block sm:hidden">
+                  <div className="text-base leading-tight text-gray-800">Compare money transfers</div>
+                  <div className="text-sm leading-tight text-gray-800">and never wonder again if you</div>
+                  <div className="text-sm leading-tight text-gray-800">could've gotten a better deal.</div>
+                </div>
+                <div className="hidden sm:block">
+                  Compare money transfers with us <br />
+                  & never wonder again if you could <br />
+                  have gotten a better deal.
+                </div>
               </div>
             </div>
             

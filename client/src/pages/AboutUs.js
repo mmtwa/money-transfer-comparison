@@ -1,6 +1,4 @@
 import React from 'react';
-import Header from '../components/layout/Header';
-import Footer from '../components/layout/Footer';
 
 /**
  * About Us page component with a design inspired by Nike's about page
@@ -17,9 +15,7 @@ const AboutUs = () => {
   };
   
   return (
-    <div className="flex flex-col min-h-screen bg-white text-gray-900">
-      <Header onLogoClick={handleNavigateHome} />
-      
+    <div className="flex flex-col bg-white text-gray-900" style={{ paddingTop: "1px" }}>
       {/* Hero Statement - Bold typography with mission statement */}
       <section className="py-20 md:py-32 border-b border-gray-100">
         <div className="container mx-auto px-4">
@@ -75,7 +71,7 @@ const AboutUs = () => {
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
-            <h2 className="text-lg uppercase tracking-wider text-gray-500 mb-8">Featured Story</h2>
+            <h2 className="text-lg uppercase tracking-wider text-gray-500 mb-8">How we do it</h2>
             
             <div className="flex flex-col md:flex-row">
               <div className="w-full md:w-1/2 p-4">
@@ -168,7 +164,7 @@ const AboutUs = () => {
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-lg uppercase tracking-wider text-gray-500 mb-8">From The Archive</h2>
+            <h2 className="text-lg uppercase tracking-wider text-gray-500 mb-8">Why MMT?</h2>
             
             <h3 className="text-3xl md:text-4xl font-bold mb-6">Our Story</h3>
             
@@ -208,8 +204,6 @@ const AboutUs = () => {
           </div>
         </div>
       </section>
-      
-      <Footer onAboutClick={() => {}} />
     </div>
   );
 };

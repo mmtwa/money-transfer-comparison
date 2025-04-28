@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 
 /**
  * Reusable button component with styles and animations
@@ -12,6 +12,24 @@ const Button = ({
   type = 'button',
   fullWidth = false,
 }) => {
+  const [hasShimmered, setHasShimmered] = useState(false);
+  const shimmerRef = useRef(null);
+
+  const handleClick = (e) => {
+    if (!hasShimmered && shimmerRef.current) {
+      shimmerRef.current.style.opacity = '1';
+      shimmerRef.current.style.transform = 'translateX(100%)';
+      setTimeout(() => {
+        if (shimmerRef.current) {
+          shimmerRef.current.style.opacity = '0';
+          shimmerRef.current.style.transform = 'translateX(-100%)';
+        }
+      }, 1000);
+      setHasShimmered(true);
+    }
+    onClick?.(e);
+  };
+
   const baseClasses = 'relative overflow-hidden group text-lg md:text-xl py-4 md:py-5 px-4 md:px-5 rounded-full font-medium flex items-center justify-center transition duration-200';
   
   const primaryClasses = 'bg-[#4F46E5] hover:bg-[#1B1464] text-white';
@@ -42,7 +60,7 @@ const Button = ({
   return (
     <button
       type={type}
-      onClick={onClick}
+      onClick={handleClick}
       disabled={disabled}
       className={classes}
       style={{ 
@@ -70,24 +88,13 @@ const Button = ({
       {/* shimmer overlay with transform instead of opacity */}
       <span className="absolute inset-0 overflow-hidden">
         <span 
+          ref={shimmerRef}
           className="absolute top-0 left-0 h-full w-[200%]" 
           style={{
             background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent)',
-            transform: 'translateX(-100%) rotate(12deg)',
+            transform: 'translateX(-100%)',
             opacity: 0,
             transition: 'transform 1s ease, opacity 0.3s ease',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.opacity = '1';
-            e.currentTarget.style.transform = 'translateX(100%) rotate(12deg)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.opacity = '0';
-            setTimeout(() => {
-              if (e.currentTarget) {
-                e.currentTarget.style.transform = 'translateX(-100%) rotate(12deg)';
-              }
-            }, 300);
           }}
         />
       </span>

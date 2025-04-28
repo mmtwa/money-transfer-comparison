@@ -254,6 +254,7 @@ function getEstimatedDeliveryTime(sourceCurrency, targetCurrency) {
 function clearCache(key = null) {
   if (key) {
     cache.del(key);
+    console.log(`Cleared cache for key: ${key}`);
   } else {
     // Clear all keys that start with 'wise_'
     const keys = cache.keys();
@@ -262,6 +263,7 @@ function clearCache(key = null) {
         cache.del(k);
       }
     });
+    console.log('Cleared all cache');
   }
 }
 
@@ -466,59 +468,115 @@ function isCurrencyPairSupported(sourceCurrency, targetCurrency) {
 }
 
 /**
- * Get historical exchange rates from the Wise API
- * @param {string} sourceCurrency - The source currency code (e.g. 'USD')
- * @param {string} targetCurrency - The target currency code (e.g. 'EUR')
- * @param {number} days - Number of days of historical data to fetch
- * @returns {Promise<Array>} - Promise resolving to array of historical rate data
+ * Get historical exchange rates from Wise API
+ * @param {string} sourceCurrency - Source currency code (e.g. 'EUR')
+ * @param {string} targetCurrency - Target currency code (e.g. 'USD')
+ * @param {string} fromDate - Start date in ISO format (e.g. '2023-01-01T00:00:00')
+ * @param {string} toDate - End date in ISO format (e.g. '2023-01-30T23:59:59')
+ * @param {string} group - Grouping interval (e.g. 'day')
+ * @returns {Promise<Object>} - Historical exchange rate data
  */
-async function getHistoricalRates(sourceCurrency, targetCurrency, days = 30) {
-  const cacheKey = `wise_historical_${sourceCurrency}_${targetCurrency}_${days}`;
-  
-  // Try to get data from cache first
-  const cachedData = cache.get(cacheKey);
-  if (cachedData) {
-    console.log(`Returning cached historical rates for ${sourceCurrency} to ${targetCurrency}`);
-    return cachedData;
-  }
-
-  // Check if we have API credentials configured
-  if (!apiKey && (!clientId || !clientSecret)) {
-    console.error('Wise API credentials not configured properly in .env file.');
-    throw new Error('Wise API credentials not configured. Please set WISE_API_KEY or WISE_CLIENT_ID and WISE_CLIENT_SECRET in the environment variables.');
-  }
-
+async function getHistoricalRates(sourceCurrency, targetCurrency, fromDate = null, toDate = null, group = 'day') {
   try {
-    // First get the current exchange rate
-    const currentRate = await getExchangeRate(sourceCurrency, targetCurrency);
+    // Build cache key
+    const cacheKey = `historical_${sourceCurrency}_${targetCurrency}_${fromDate}_${toDate}_${group}`;
     
-    // Since Wise API doesn't provide historical rates directly in their public API,
-    // we're implementing a solution that simulates historical data by using 
-    // only what we know for certain - the current rate
+    // Check cache first
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+      console.log(`[WiseAPI] Using cached historical rates for ${sourceCurrency}-${targetCurrency}`);
+      return cachedData;
+    }
     
-    // Use current knowledge of today's rate to generate placeholder historical data
-    // Real implementation would need to store historical rates over time
-    const history = [];
-    const baseRate = currentRate.rate;
+    // Get current date to ensure we don't request future data
+    const currentDate = new Date();
     
-    // Throw error so clients can handle this properly
-    console.error('Historical data is not available through the Wise API');
-    throw new Error(`Historical exchange rate data not available for ${sourceCurrency} to ${targetCurrency}. Please implement and use your own rate storage for historical data.`);
+    // Set default date range if not provided (last 30 days)
+    if (!toDate) {
+      toDate = currentDate.toISOString();
+    } else {
+      // Ensure toDate is not in the future
+      const requestedToDate = new Date(toDate);
+      if (requestedToDate > currentDate) {
+        console.log(`[WiseAPI] Adjusted future date ${toDate} to current date`);
+        toDate = currentDate.toISOString();
+      }
+    }
+    
+    // Ensure fromDate is valid
+    if (!fromDate) {
+      // Default to 30 days before the 'to' date
+      const fromDt = new Date(toDate); // Use the potentially adjusted toDate
+      fromDt.setDate(fromDt.getDate() - 30);
+      fromDate = fromDt.toISOString();
+    } else {
+      // Ensure fromDate is not in the future and not after toDate
+      const requestedFromDate = new Date(fromDate);
+      const finalToDate = new Date(toDate); // Use the adjusted 'to' date
+
+      if (requestedFromDate > currentDate) {
+        console.log(`[WiseAPI] Adjusted future fromDate ${fromDate} to 30 days before toDate`);
+        const fromDt = new Date(toDate);
+        fromDt.setDate(fromDt.getDate() - 30);
+        fromDate = fromDt.toISOString();
+      } else if (requestedFromDate > finalToDate) {
+        console.log(`[WiseAPI] Adjusted fromDate ${fromDate} as it was after toDate ${toDate}`);
+        const fromDt = new Date(toDate);
+        fromDt.setDate(fromDt.getDate() - 30);
+        fromDate = fromDt.toISOString();
+      }
+    }
+    
+    // Re-build cache key with potentially adjusted dates
+    const finalCacheKey = `historical_${sourceCurrency}_${targetCurrency}_${fromDate}_${toDate}_${group}`;
+
+    // Check cache again with final dates
+    const finalCachedData = cache.get(finalCacheKey);
+    if (finalCachedData) {
+      console.log(`[WiseAPI] Using cached historical rates for ${sourceCurrency}-${targetCurrency} (post-date adjustment)`);
+      return finalCachedData;
+    }
+
+    // Build parameters for the API call
+    const params = {
+      source: sourceCurrency,
+      target: targetCurrency,
+      from: fromDate,
+      to: toDate,
+      group
+    };
+    
+    // Log the request details
+    console.log(`[WiseAPI] Fetching historical rates for ${sourceCurrency}-${targetCurrency} from ${fromDate} to ${toDate}`);
+    
+    // Make the API request
+    const response = await http.get('/v1/rates', { params });
+    
+    // Process the response
+    const rateData = response.data;
+    
+    // Cache the results
+    cache.set(cacheKey, rateData); // Original cache key might be wrong if dates were adjusted
+
+    // Cache the results with the correct key based on final dates
+    cache.set(finalCacheKey, rateData);
+    
+    return rateData;
   } catch (error) {
-    console.error(`Error getting historical rates: ${error.message}`);
-    throw new Error(`Failed to get historical rates: ${error.message}`);
+    console.error(`Error getting historical rates from Wise API: ${error.message}`);
+    throw error;
   }
 }
 
 /**
- * Get price comparison data from Wise API
- * @param {string} sourceCurrency - Source currency code (3 letter ISO code)
- * @param {string} targetCurrency - Target currency code (3 letter ISO code)
+ * Get price comparison data from Wise API showing all providers
+ * @param {string} sourceCurrency - Source currency code
+ * @param {string} targetCurrency - Target currency code
  * @param {number} amount - Amount to convert
- * @param {string|null} sourceCountry - Source country code (2 letter ISO code)
- * @param {string|null} targetCountry - Target country code (2 letter ISO code)
- * @param {string|null} providerType - Provider type to filter by
- * @returns {Promise<Object>} - Wise price comparison data
+ * @param {string} sourceCountry - Source country code (optional)
+ * @param {string} targetCountry - Target country code (optional)
+ * @param {string} providerType - Type of provider (optional)
+ * @returns {Promise<Object>} - Comparison data with all providers
  */
 const getPriceComparison = async (
   sourceCurrency,
@@ -528,188 +586,55 @@ const getPriceComparison = async (
   targetCountry = null,
   providerType = null
 ) => {
-  // Parameter validation
-  if (!sourceCurrency || !targetCurrency || !amount) {
-    throw new Error('Missing required parameters: sourceCurrency, targetCurrency, and amount are required');
-  }
-  
-  // Ensure amount is a number and positive
-  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
-  if (isNaN(numAmount) || numAmount <= 0) {
-    throw new Error('Amount must be a positive number');
-  }
-  
-  // Normalize currency codes to uppercase
-  const fromCurrency = sourceCurrency.toUpperCase();
-  const toCurrency = targetCurrency.toUpperCase();
-  
-  // Log request details (useful for debugging)
-  console.log('Wise price comparison request:', {
-    sourceCurrency: fromCurrency, 
-    targetCurrency: toCurrency, 
-    amount: numAmount,
-    sourceCountry,
-    targetCountry,
-    providerType
-  });
-  
-  // Build query parameters
-  const queryParams = new URLSearchParams({
-    sourceCurrency: fromCurrency,
-    targetCurrency: toCurrency,
-    sendAmount: numAmount
-  });
-  
-  // Add optional parameters if provided
-  if (sourceCountry) queryParams.append('sourceCountry', sourceCountry.toUpperCase());
-  if (targetCountry) queryParams.append('targetCountry', targetCountry.toUpperCase());
-  if (providerType) queryParams.append('providerType', providerType);
-  
-  // Build the URL - using the correct v3/comparisons endpoint
-  const url = `${WISE_API_URL}/v3/comparisons/?${queryParams.toString()}`;
-  
-  console.log(`[WiseAPI] Using URL: ${url}`);
-  
-  // Create request headers
-  const headers = {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  };
-  
-  // First try authenticated API
-  if (hasAuthToken()) {
-    console.log('Trying authenticated Wise API request');
-    try {
-      const authHeaders = {
-        ...headers,
-        Authorization: `Bearer ${getWiseAuthToken()}`
-      };
-      
-      // Make the request with retry logic
-      const response = await retryAxiosRequest(async () => {
-        console.log(`Making authenticated request to ${url}`);
-        return await axios.get(url, {
-          headers: authHeaders,
-          timeout: 15000, // 15 second timeout
-        });
-      }, 3); // 3 retries
-      
-      if (!response || !response.data) {
-        throw new Error('Empty response from Wise API');
-      }
-      
-      // Check for HTML response (which indicates an error)
-      if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE html>')) {
-        throw new Error('Received HTML instead of JSON from Wise API');
-      }
-      
-      const validatedData = validateComparisonData(response.data, fromCurrency, toCurrency, numAmount);
-      console.log(`Successfully retrieved ${validatedData.providers.length} providers from Wise authenticated API`);
-      
-      return validatedData;
-    } catch (error) {
-      console.error('Error in authenticated Wise price comparison request:', error.message);
-      // Continue to public API fallback
-    }
-  }
-  
-  // Fallback to public API if authenticated request fails or no auth token
-  console.log('Falling back to public Wise API request');
   try {
-    // Make the request with retry logic
-    const response = await retryAxiosRequest(async () => {
-      console.log(`Making public request to ${url}`);
-      return await axios.get(url, {
-        headers,
-        timeout: 15000, // 15 second timeout
-      });
-    }, 3); // 3 retries
+    // Build cache key
+    const cacheKey = `comparison_${sourceCurrency}_${targetCurrency}_${amount}_${sourceCountry || 'all'}_${targetCountry || 'all'}_${providerType || 'all'}`;
     
-    if (!response || !response.data) {
-      throw new Error('Empty response from Wise public API');
+    // Check cache first
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+      console.log(`[WiseAPI] Using cached comparison data for ${sourceCurrency}-${targetCurrency}`);
+      return cachedData;
     }
     
-    // Check for HTML response (which indicates an error)
-    if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE html>')) {
-      throw new Error('Received HTML instead of JSON from Wise public API');
+    // Set up query parameters
+    const params = {
+      sourceCurrency: sourceCurrency.toUpperCase(),
+      targetCurrency: targetCurrency.toUpperCase(),
+      sendAmount: amount
+    };
+    
+    // Add optional parameters if provided
+    if (sourceCountry) params.sourceCountry = sourceCountry.toUpperCase();
+    if (targetCountry) params.targetCountry = targetCountry.toUpperCase();
+    if (providerType) params.providerType = providerType;
+    
+    // Log the request details
+    console.log(`[WiseAPI] Fetching comparison data for ${sourceCurrency}-${targetCurrency}, amount: ${amount}`);
+    console.log(`[WiseAPI] Request URL: https://api.transferwise.com/v3/comparisons/?${new URLSearchParams(params).toString()}`);
+    
+    // Make the API request - use the official Wise comparison API directly
+    const response = await axios.get('https://api.transferwise.com/v3/comparisons/', { 
+      params,
+      timeout: 10000 // 10 second timeout
+    });
+    
+    // Validate the response
+    if (!response.data || typeof response.data !== 'object') {
+      throw new Error('Invalid response from Wise comparison API');
     }
     
-    const validatedData = validateComparisonData(response.data, fromCurrency, toCurrency, numAmount);
-    console.log(`Successfully retrieved ${validatedData.providers.length} providers from Wise public API`);
+    // Process and transform the response data
+    const comparisonData = response.data;
     
-    return validatedData;
+    // Cache the results
+    cache.set(cacheKey, comparisonData);
+    
+    return comparisonData;
   } catch (error) {
-    console.error('Error in public Wise price comparison request:', error.message);
-    
-    // Add contextual information to error
-    const enhancedError = new Error(`Failed to get Wise price comparison: ${error.message}`);
-    enhancedError.originalError = error;
-    enhancedError.statusCode = error.response?.status || 500;
-    enhancedError.requestParams = {
-      sourceCurrency: fromCurrency,
-      targetCurrency: toCurrency,
-      amount: numAmount,
-      sourceCountry,
-      targetCountry,
-      providerType
-    };
-    
-    throw enhancedError;
+    console.error(`Error getting price comparison from Wise API: ${error.message}`);
+    throw error;
   }
-};
-
-/**
- * Helper function to validate comparison data
- * @param {Object} data - Response data from Wise API
- * @param {string} sourceCurrency - Expected source currency
- * @param {string} targetCurrency - Expected target currency
- * @param {number} amount - Expected amount
- * @returns {Object} - Validated data
- * @throws {Error} - If data is invalid
- */
-const validateComparisonData = (data, sourceCurrency, targetCurrency, amount) => {
-  // Basic validation
-  if (!data) {
-    throw new Error('Empty data received from Wise API');
-  }
-  
-  // Ensure providers array exists
-  if (!Array.isArray(data.providers)) {
-    console.error('Invalid Wise API response structure:', data);
-    throw new Error('Wise API response missing providers array');
-  }
-  
-  // Transform the provider data to match the expected client format while preserving quotes array
-  // We don't create a new quotes array since the API already returns one
-  const transformedProviders = data.providers.map(provider => {
-    // Create a standard provider object that works with our client app
-    // Preserve quotes array if it already exists, otherwise use empty array
-    return {
-      id: provider.id || 'unknown',
-      name: provider.name || 'Unknown Provider',
-      alias: provider.alias || provider.name?.toLowerCase().replace(/\s+/g, '') || 'unknown',
-      logo: (provider.logos?.normal?.pngUrl || provider.logos?.normal?.svgUrl || provider.logo || null),
-      type: provider.type || 'Money Transfer',
-      quotes: provider.quotes || [],
-      // Keep these fields for compatibility with older client code
-      quote: provider.quote || null,
-      fee: provider.fee || null,
-      receivedAmount: provider.receivedAmount || null,
-      estimatedDelivery: provider.estimatedDelivery || null,
-      rate: (provider.quotes && provider.quotes[0]?.rate) || provider.quote?.rate || null,
-      logoUrl: (provider.logos?.normal?.pngUrl || provider.logos?.normal?.svgUrl || provider.logoUrl || null),
-      companySlug: provider.alias || provider.companySlug || null
-    };
-  });
-
-  // Create standardized response structure
-  return {
-    sourceCurrency: data.sourceCurrency || sourceCurrency,
-    targetCurrency: data.targetCurrency || targetCurrency,
-    sendAmount: data.sendAmount || amount,
-    providers: transformedProviders,
-    timestamp: new Date().toISOString()
-  };
 };
 
 module.exports = {

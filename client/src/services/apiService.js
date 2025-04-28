@@ -52,39 +52,70 @@ const apiService = {
     return api.get('/auth/me');
   },
   
-  // Transfer rate comparisons
-  getExchangeRates: async (fromCurrency, toCurrency, amount) => {
-    return api.get('/rates/compare', {
-      params: { fromCurrency, toCurrency, amount }
-    });
-  },
-  
-  getHistoricalRates: async (fromCurrency, toCurrency, days = 30) => {
-    return api.get('/rates/history', {
-      params: { fromCurrency, toCurrency, days }
-    });
-  },
-  
-  // Wise specific API methods
-  getWiseComparison: async (fromCurrency, toCurrency, amount, sourceCountry = null, targetCountry = null) => {
+  // Price comparison API
+  getWiseComparison: async (fromCurrency, toCurrency, amount, sourceCountry = null, targetCountry = null, providerType = null) => {
     return api.get('/wise/compare', {
       params: { 
         fromCurrency, 
         toCurrency, 
         amount,
         sourceCountry,
-        targetCountry
+        targetCountry,
+        providerType
       }
     });
   },
   
-  // Provider information
-  getProviders: async () => {
-    return api.get('/providers');
+  // Direct access to the Wise v3 comparison API
+  getWiseV3Comparison: async (sourceCurrency, targetCurrency, sendAmount) => {
+    // This could be a direct call to the Wise API if CORS allows, or through our backend proxy
+    return axios.get(`https://api.transferwise.com/v3/comparisons/`, {
+      params: {
+        sourceCurrency,
+        targetCurrency,
+        sendAmount
+      }
+    });
   },
   
-  getProviderById: async (id) => {
-    return api.get(`/providers/${id}`);
+  // Historical rates API
+  getHistoricalRates: async (fromCurrency, toCurrency, fromDate = null, toDate = null, group = 'day') => {
+    // Ensure we're not requesting future data
+    const now = new Date();
+    
+    // Validate the toDate
+    let validToDate = toDate;
+    if (!validToDate) {
+      validToDate = now.toISOString();
+    } else if (new Date(validToDate) > now) {
+      console.warn(`Adjusting future toDate ${validToDate} to current date`);
+      validToDate = now.toISOString();
+    }
+    
+    // Validate the fromDate
+    let validFromDate = fromDate;
+    if (!validFromDate) {
+      const thirtyDaysAgo = new Date(now);
+      thirtyDaysAgo.setDate(now.getDate() - 30);
+      validFromDate = thirtyDaysAgo.toISOString();
+    } else if (new Date(validFromDate) > now) {
+      console.warn(`Adjusting future fromDate ${validFromDate} to 30 days before today`);
+      const thirtyDaysAgo = new Date(now);
+      thirtyDaysAgo.setDate(now.getDate() - 30);
+      validFromDate = thirtyDaysAgo.toISOString();
+    }
+    
+    console.log(`Making request with validated dates: from=${validFromDate}, to=${validToDate}`);
+    
+    return api.get('/rates/historical', {
+      params: { 
+        source: fromCurrency, 
+        target: toCurrency, 
+        from: validFromDate, 
+        to: validToDate, 
+        group 
+      }
+    });
   },
   
   // User history
@@ -94,6 +125,15 @@ const apiService = {
   
   deleteComparisonFromHistory: async (comparisonId) => {
     return api.delete(`/users/history/${comparisonId}`);
+  },
+  
+  // Provider information
+  getProviders: async () => {
+    return api.get('/providers');
+  },
+  
+  getProviderById: async (id) => {
+    return api.get(`/providers/${id}`);
   },
   
   /**

@@ -109,11 +109,35 @@ const CurrencySelector = ({
     onToggle(id);
   };
   
-  // Filter currencies based on search
-  const filteredCurrencies = currenciesList.filter(currency => 
-    currency.code.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    currency.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter and sort currencies
+  const sortCurrencies = (currencies) => {
+    // Priority currencies to show at the top
+    const priorityCodes = ['GBP', 'USD', 'EUR'];
+    
+    // Filter currencies based on search query
+    const filtered = currencies.filter(currency => 
+      currency.code.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      currency.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    // First, get the priority currencies that match the search query
+    const priorityCurrencies = filtered.filter(currency => 
+      priorityCodes.includes(currency.code)
+    ).sort((a, b) => {
+      // Sort priority currencies by their order in priorityCodes array
+      return priorityCodes.indexOf(a.code) - priorityCodes.indexOf(b.code);
+    });
+    
+    // Then, get the rest of the currencies that match the search query, sorted alphabetically
+    const otherCurrencies = filtered.filter(currency => 
+      !priorityCodes.includes(currency.code)
+    ).sort((a, b) => a.code.localeCompare(b.code));
+    
+    // Combine the two arrays
+    return [...priorityCurrencies, ...otherCurrencies];
+  };
+  
+  const displayCurrencies = sortCurrencies(currenciesList);
   
   const handleCurrencySelect = (e, currency) => {
     createRipple(e, itemRefs.current[currency]);
@@ -172,7 +196,7 @@ const CurrencySelector = ({
               />
             </div>
             <div>
-              {filteredCurrencies.map((currency, index) => (
+              {displayCurrencies.map((currency, index) => (
                 <div 
                   key={currency.code} 
                   ref={el => itemRefs.current[currency.code] = el}

@@ -5,6 +5,7 @@ const providerService = require('../services/providerService');
 const auth = require('../middleware/auth');
 const User = require('../models/User');
 const { cacheApiResponse, createRateLimiter } = require('../middleware/apiMiddleware');
+const wiseApiService = require('../services/wiseApiService');
 
 // Apply rate limiting to all routes
 const ratesLimiter = createRateLimiter(200, 15 * 60 * 1000); // 200 requests per 15 minutes
@@ -298,7 +299,9 @@ router.get('/provider/:provider', [
 router.get('/history', [
   check('fromCurrency', 'From currency is required').notEmpty().isLength({ min: 3, max: 3 }),
   check('toCurrency', 'To currency is required').notEmpty().isLength({ min: 3, max: 3 }),
-  check('days', 'Days must be a positive integer').optional().isInt({ min: 1, max: 365 })
+  check('from', 'From date must be a valid ISO date string').optional(),
+  check('to', 'To date must be a valid ISO date string').optional(),
+  check('group', 'Group must be a valid interval (day, hour, etc.)').optional()
 ], cacheApiResponse(3600), async (req, res) => {
   // Validate request
   const errors = validationResult(req);
@@ -306,19 +309,26 @@ router.get('/history', [
     return res.status(400).json({ success: false, errors: errors.array() });
   }
 
-  const { fromCurrency, toCurrency } = req.query;
-  const days = parseInt(req.query.days || 30);
+  const { fromCurrency, toCurrency, from, to, group } = req.query;
   
   try {
-    // Try to get historical data from a real API or database
-    // This would need to be implemented with a historical rate service or database
-    const error = new Error(`Historical exchange rate data is not available. Please implement a rate storage solution.`);
-    console.error('Historical rate data requested but unavailable:', error);
+    // Get historical rates from Wise API
+    const historicalData = await wiseApiService.getHistoricalRates(
+      fromCurrency.toUpperCase(), 
+      toCurrency.toUpperCase(),
+      from, 
+      to,
+      group || 'day'
+    );
     
-    return res.status(501).json({
-      success: false,
-      message: 'Historical exchange rate data is not available',
-      error: error.message
+    return res.json({
+      success: true,
+      data: historicalData,
+      sourceCurrency: fromCurrency.toUpperCase(),
+      targetCurrency: toCurrency.toUpperCase(),
+      fromDate: from,
+      toDate: to,
+      group: group || 'day'
     });
   } catch (error) {
     console.error('Error fetching historical rates:', error);
@@ -329,6 +339,58 @@ router.get('/history', [
     });
   }
 });
+
+/**
+ * Handle the /v1/rates endpoint for historical rates
+ * This endpoint is compatible with the frontend historical rates page
+ */
+const handleHistoricalRates = async (req, res) => {
+  try {
+    const { source, target, from, to, group } = req.query;
+    
+    // Validate required parameters
+    if (!source || !target) {
+      return res.status(400).json({
+        success: false,
+        message: 'Source and target currencies are required'
+      });
+    }
+    
+    // Ensure 'to' date is not in the future
+    let adjustedTo = to;
+    if (to) {
+      const toDate = new Date(to);
+      const currentDate = new Date();
+      
+      if (toDate > currentDate) {
+        console.log(`Adjusting future date ${to} to current date`);
+        adjustedTo = currentDate.toISOString();
+      }
+    }
+    
+    // Get historical rates from Wise API
+    const historicalData = await wiseApiService.getHistoricalRates(
+      source.toUpperCase(), 
+      target.toUpperCase(),
+      from, 
+      adjustedTo,
+      group || 'day'
+    );
+    
+    // Wrap the data in the format expected by the frontend
+    return res.json({
+      success: true, 
+      data: historicalData
+    });
+  } catch (error) {
+    console.error('Error fetching historical rates:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Could not fetch historical exchange rates',
+      error: error.message
+    });
+  }
+};
 
 /**
  * @route   POST /api/rates/cache/clear
@@ -368,5 +430,10 @@ router.get('/test', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
+
+router.get('/historical', handleHistoricalRates);
+
+// Add the handler method to the router exports
+router.handle = handleHistoricalRates;
 
 module.exports = router;

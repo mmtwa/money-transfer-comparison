@@ -1,4 +1,5 @@
 import React, { useEffect, useState, lazy, Suspense } from 'react';
+import { BrowserRouter } from 'react-router-dom';
 import MoneyCompare from './containers/MoneyCompare';
 import Analytics from './components/Analytics';
 import FontLoader from './components/FontLoader';
@@ -30,18 +31,20 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="App">
-        <Analytics measurementId={measurementId} />
-        <FontLoader />
-        <MoneyCompare initialPath={initialPath} />
-        
-        {/* Lazy load non-critical components */}
-        <Suspense fallback={null}>
-          <PreloadFlags />
-        </Suspense>
+    <BrowserRouter>
+      <div className="min-h-screen bg-gray-50">
+        <div className="App">
+          <Analytics measurementId={measurementId} />
+          <FontLoader />
+          <MoneyCompare initialPath={initialPath} />
+          
+          {/* Lazy load non-critical components */}
+          <Suspense fallback={null}>
+            <PreloadFlags />
+          </Suspense>
+        </div>
       </div>
-    </div>
+    </BrowserRouter>
   );
 }
 
