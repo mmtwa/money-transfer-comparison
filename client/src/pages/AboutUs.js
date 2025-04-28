@@ -39,7 +39,7 @@ const AboutUs = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <p className="text-2xl md:text-3xl leading-relaxed font-light">
-              At Money Transfer Comparison, we believe <span className="font-medium">everyone deserves access to fair, transparent, 
+              At mymoneytransfers.com, we believe <span className="font-medium">everyone deserves access to fair, transparent, 
               and affordable international money transfer services</span>. Our mission is simple: to help you make 
               informed decisions when sending money abroad.
             </p>
@@ -50,11 +50,11 @@ const AboutUs = () => {
       {/* Who We Serve - Visual typography section */}
       <section className="py-20 border-b border-gray-100">
         <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto flex flex-wrap">
-            <div className="w-full md:w-1/3 p-4">
+          <div className="max-w-5xl mx-auto flex flex-wrap justify-center">
+            <div className="w-full md:w-1/3 p-4 md:text-center">
               <h2 className="text-5xl font-bold text-indigo-600 mb-4">WE</h2>
             </div>
-            <div className="w-full md:w-1/3 p-4">
+            <div className="w-full md:w-1/3 p-4 md:text-center">
               <h2 className="text-5xl font-bold text-indigo-600 mb-4">SERVE</h2>
             </div>
             <div className="w-full md:w-2/3 p-4">
@@ -62,9 +62,9 @@ const AboutUs = () => {
                 <div className="text-xl md:text-2xl font-bold py-2">FAMILIES</div>
                 <div className="text-xl md:text-2xl font-bold py-2">STUDENTS</div>
                 <div className="text-xl md:text-2xl font-bold py-2">BUSINESSES</div>
-                <div className="text-xl md:text-2xl font-bold py-2">TRAVELERS</div>
-                <div className="text-xl md:text-2xl font-bold py-2">IMMIGRANTS</div>
-                <div className="text-xl md:text-2xl font-bold py-2">EVERYONE</div>
+                <div className="text-xl md:text-2xl font-bold py-2">TRAVELLERS</div>
+                <div className="text-xl md:text-2xl font-bold py-2">EX PATS</div>
+                <div className="text-xl md:text-2xl font-bold py-2">WORKERS</div>
               </div>
             </div>
           </div>
@@ -109,7 +109,7 @@ const AboutUs = () => {
             
             <div className="grid md:grid-cols-2 gap-12">
               <div className="bg-white rounded-lg p-8">
-                <div className="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center mb-6">
+                <div className="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center mb-6 mx-auto">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                   </svg>
@@ -122,7 +122,7 @@ const AboutUs = () => {
               </div>
               
               <div className="bg-white rounded-lg p-8">
-                <div className="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center mb-6">
+                <div className="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center mb-6 mx-auto">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -135,7 +135,7 @@ const AboutUs = () => {
               </div>
               
               <div className="bg-white rounded-lg p-8">
-                <div className="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center mb-6">
+                <div className="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center mb-6 mx-auto">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                   </svg>
@@ -148,7 +148,7 @@ const AboutUs = () => {
               </div>
               
               <div className="bg-white rounded-lg p-8">
-                <div className="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center mb-6">
+                <div className="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center mb-6 mx-auto">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
@@ -174,7 +174,7 @@ const AboutUs = () => {
             
             <div className="bg-white p-8 rounded-lg">
               <p className="text-lg leading-relaxed mb-6">
-                Money Transfer Comparison was founded by a team of fintech enthusiasts who experienced 
+                mymoneytransfers.com was founded by a team of fintech enthusiasts who experienced 
                 firsthand the challenges of sending money internationally - from high fees and poor 
                 exchange rates to confusing processes and lack of transparency.
               </p>
