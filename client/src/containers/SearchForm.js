@@ -333,6 +333,23 @@ const SearchForm = ({ onSearch, initialData }) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0 }}
       >
+        {/* Trust badge positioned above the main form content */}
+        <div className="flex justify-center">
+          <div 
+            className="inline-flex items-center -mt-3 px-4 py-2 bg-white rounded-full border border-gray-200 shadow-md"
+            style={{ fontFamily: 'Poppins, sans-serif' }}
+          >
+            <div className="flex items-center justify-center h-5 w-5 rounded-full bg-green-500 mr-2 flex-shrink-0">
+              <svg className="h-3 w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+            <span className="text-xs font-semibold tracking-tight leading-tight text-gray-700">
+              TRUST ASSURED: We earn from ad partners, not your money. <br /> No sponsors, no commission. Totally transparant.
+            </span>
+          </div>
+        </div>
+
         <div className="p-6 md:p-8">
           <h2 className="mb-4 text-left">
             <div className="flex flex-col items-start mb-2">
@@ -357,31 +374,22 @@ const SearchForm = ({ onSearch, initialData }) => {
               </div>
               
               <div
-                className="text-xs sm:text-sm md:text-base lg:text-lg font-medium tracking-tight leading-tight mt-2 text-gray-900 overflow-hidden"
+                className="text-xs sm:text-sm md:text-base lg:text-lg font-medium tracking-tight leading-tight mt-2 text-gray-700 overflow-hidden"
                 style={{ 
                   fontFamily: 'Poppins, sans-serif', 
                   minHeight: '48px' // Reserve height
                 }}
               >
                 <div className="block sm:hidden">
-                  <div className="text-base leading-tight text-gray-800">Compare money transfers</div>
-                  <div className="text-sm leading-tight text-gray-800">and never wonder again if you</div>
-                  <div className="text-sm leading-tight text-gray-800">could've gotten a better deal.</div>
+                  <div className="text-base leading-tight">Worried about transfer fees?</div>
+                  <div className="text-sm leading-tight">Compare instantly & see the</div>
+                  <div className="text-sm leading-tight">real cost before you send.</div>
                 </div>
                 <div className="hidden sm:block">
-                  Compare money transfers with us <br />
-                  & never wonder again if you could <br />
-                  have gotten a better deal.
+                  Worried about transfer fees? Compare instantly & see the <span className="font-semibold">real cost</span> before you send money.
                 </div>
               </div>
             </div>
-            
-            <span 
-              className="inline-block hidden text-sm md:text-lg font-medium tracking-tight leading-tight bg-gradient-to-r from-indigo-800 via-purple-600 to-blue-600 text-transparent bg-clip-text" 
-              style={{ fontFamily: 'Poppins, sans-serif' }}
-            >
-              We earn from ads, not your money.
-            </span>
           </h2>
           
           <div className="mb-4">
@@ -449,10 +457,6 @@ const SearchForm = ({ onSearch, initialData }) => {
                 </div>
               )}
             </Button>
-          </div>
-          
-          <div className="mt-6 md:mt-6 text-xs md:text-xs text-center text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
-          We're funded by ad partners, so we don't take any fees or have preferred or sponsored providers, giving you the best rates straight.
           </div>
         </div>
       </motion.div>

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import HomePage from './HomePage';
 import ResultsView from './ResultsView';
 import AboutUs from '../pages/AboutUs';
@@ -14,6 +14,7 @@ import TransferFees from '../pages/guides/TransferFees';
 import FamilyRemittances from '../pages/guides/FamilyRemittances';
 import BusinessTransfers from '../pages/guides/BusinessTransfers';
 import SecurityTips from '../pages/guides/SecurityTips';
+import CanonicalUrl from '../pages/CanonicalUrl';
 
 /**
  * Main container component for the money transfer comparison app
@@ -405,7 +406,271 @@ const MoneyCompare = ({ initialPath }) => {
     }
   };
   
-  return <div className="flex flex-col min-h-screen bg-white text-gray-900">{renderPageContent()}</div>;
+  return (
+    <div className="MoneyCompare">
+      <CanonicalUrl />
+      <Routes>
+        <Route 
+          path="/" 
+          element={
+            <HomePage 
+              onSearch={handleSearch} 
+              initialData={searchData}
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+            />
+          } 
+        />
+        <Route 
+          path="/results" 
+          element={
+            <div className="flex flex-col min-h-screen">
+              <Header 
+                onLogoClick={handleBackToHome} 
+                onAboutClick={navigateToAboutUs}
+                onGuidesClick={navigateToGuides}
+                onFaqClick={navigateToFaq}
+                onHistoricalRatesClick={navigateToHistoricalRates}
+                onMenuToggle={() => {}}
+              />
+              <ResultsView 
+                searchData={searchData} 
+                onBackToSearch={handleBackToHome} 
+              />
+              <Footer 
+                onAboutClick={navigateToAboutUs} 
+                onGuidesClick={navigateToGuides} 
+                onFaqClick={navigateToFaq}
+                onHistoricalRatesClick={navigateToHistoricalRates}
+              />
+            </div>
+          } 
+        />
+        <Route 
+          path="/about" 
+          element={
+            <div className="flex flex-col min-h-screen">
+              <Header 
+                onLogoClick={handleBackToHome} 
+                onAboutClick={navigateToAboutUs}
+                onGuidesClick={navigateToGuides}
+                onFaqClick={navigateToFaq}
+                onHistoricalRatesClick={navigateToHistoricalRates}
+                onMenuToggle={() => {}}
+              />
+              <AboutUs />
+              <Footer 
+                onAboutClick={navigateToAboutUs} 
+                onGuidesClick={navigateToGuides} 
+                onFaqClick={navigateToFaq}
+                onHistoricalRatesClick={navigateToHistoricalRates}
+              />
+            </div>
+          } 
+        />
+        <Route 
+          path="/guides" 
+          element={
+            <div className="flex flex-col min-h-screen">
+              <Header 
+                onLogoClick={handleBackToHome} 
+                onAboutClick={navigateToAboutUs}
+                onGuidesClick={navigateToGuides}
+                onFaqClick={navigateToFaq}
+                onHistoricalRatesClick={navigateToHistoricalRates}
+                onMenuToggle={() => {}}
+              />
+              <Guides />
+              <Footer 
+                onAboutClick={navigateToAboutUs} 
+                onGuidesClick={navigateToGuides} 
+                onFaqClick={navigateToFaq}
+                onHistoricalRatesClick={navigateToHistoricalRates}
+              />
+            </div>
+          } 
+        />
+        <Route 
+          path="/guides/getting-started" 
+          element={
+            <div className="flex flex-col min-h-screen">
+              <Header 
+                onLogoClick={handleBackToHome} 
+                onAboutClick={navigateToAboutUs}
+                onGuidesClick={navigateToGuides}
+                onFaqClick={navigateToFaq}
+                onHistoricalRatesClick={navigateToHistoricalRates}
+                onMenuToggle={() => {}}
+              />
+              <GettingStarted />
+              <Footer 
+                onAboutClick={navigateToAboutUs} 
+                onGuidesClick={navigateToGuides} 
+                onFaqClick={navigateToFaq}
+                onHistoricalRatesClick={navigateToHistoricalRates}
+              />
+            </div>
+          } 
+        />
+        <Route 
+          path="/guides/exchange-rates" 
+          element={
+            <div className="flex flex-col min-h-screen">
+              <Header 
+                onLogoClick={handleBackToHome} 
+                onAboutClick={navigateToAboutUs}
+                onGuidesClick={navigateToGuides}
+                onFaqClick={navigateToFaq}
+                onHistoricalRatesClick={navigateToHistoricalRates}
+                onMenuToggle={() => {}}
+              />
+              <ExchangeRates />
+              <Footer 
+                onAboutClick={navigateToAboutUs} 
+                onGuidesClick={navigateToGuides} 
+                onFaqClick={navigateToFaq}
+                onHistoricalRatesClick={navigateToHistoricalRates}
+              />
+            </div>
+          } 
+        />
+        <Route 
+          path="/guides/transfer-fees" 
+          element={
+            <div className="flex flex-col min-h-screen">
+              <Header 
+                onLogoClick={handleBackToHome} 
+                onAboutClick={navigateToAboutUs}
+                onGuidesClick={navigateToGuides}
+                onFaqClick={navigateToFaq}
+                onHistoricalRatesClick={navigateToHistoricalRates}
+                onMenuToggle={() => {}}
+              />
+              <TransferFees />
+              <Footer 
+                onAboutClick={navigateToAboutUs} 
+                onGuidesClick={navigateToGuides} 
+                onFaqClick={navigateToFaq}
+                onHistoricalRatesClick={navigateToHistoricalRates}
+              />
+            </div>
+          } 
+        />
+        <Route 
+          path="/guides/family-remittances" 
+          element={
+            <div className="flex flex-col min-h-screen">
+              <Header 
+                onLogoClick={handleBackToHome} 
+                onAboutClick={navigateToAboutUs}
+                onGuidesClick={navigateToGuides}
+                onFaqClick={navigateToFaq}
+                onHistoricalRatesClick={navigateToHistoricalRates}
+                onMenuToggle={() => {}}
+              />
+              <FamilyRemittances />
+              <Footer 
+                onAboutClick={navigateToAboutUs} 
+                onGuidesClick={navigateToGuides} 
+                onFaqClick={navigateToFaq}
+                onHistoricalRatesClick={navigateToHistoricalRates}
+              />
+            </div>
+          } 
+        />
+        <Route 
+          path="/guides/business-transfers" 
+          element={
+            <div className="flex flex-col min-h-screen">
+              <Header 
+                onLogoClick={handleBackToHome} 
+                onAboutClick={navigateToAboutUs}
+                onGuidesClick={navigateToGuides}
+                onFaqClick={navigateToFaq}
+                onHistoricalRatesClick={navigateToHistoricalRates}
+                onMenuToggle={() => {}}
+              />
+              <BusinessTransfers />
+              <Footer 
+                onAboutClick={navigateToAboutUs} 
+                onGuidesClick={navigateToGuides} 
+                onFaqClick={navigateToFaq}
+                onHistoricalRatesClick={navigateToHistoricalRates}
+              />
+            </div>
+          } 
+        />
+        <Route 
+          path="/guides/security-tips" 
+          element={
+            <div className="flex flex-col min-h-screen">
+              <Header 
+                onLogoClick={handleBackToHome} 
+                onAboutClick={navigateToAboutUs}
+                onGuidesClick={navigateToGuides}
+                onFaqClick={navigateToFaq}
+                onHistoricalRatesClick={navigateToHistoricalRates}
+                onMenuToggle={() => {}}
+              />
+              <SecurityTips />
+              <Footer 
+                onAboutClick={navigateToAboutUs} 
+                onGuidesClick={navigateToGuides} 
+                onFaqClick={navigateToFaq}
+                onHistoricalRatesClick={navigateToHistoricalRates}
+              />
+            </div>
+          } 
+        />
+        <Route 
+          path="/faq" 
+          element={
+            <div className="flex flex-col min-h-screen">
+              <Header 
+                onLogoClick={handleBackToHome} 
+                onAboutClick={navigateToAboutUs}
+                onGuidesClick={navigateToGuides}
+                onFaqClick={navigateToFaq}
+                onHistoricalRatesClick={navigateToHistoricalRates}
+                onMenuToggle={() => {}}
+              />
+              <FAQ />
+              <Footer 
+                onAboutClick={navigateToAboutUs} 
+                onGuidesClick={navigateToGuides} 
+                onFaqClick={navigateToFaq}
+                onHistoricalRatesClick={navigateToHistoricalRates}
+              />
+            </div>
+          } 
+        />
+        <Route 
+          path="/historical-rates" 
+          element={
+            <div className="flex flex-col min-h-screen">
+              <Header 
+                onLogoClick={handleBackToHome} 
+                onAboutClick={navigateToAboutUs}
+                onGuidesClick={navigateToGuides}
+                onFaqClick={navigateToFaq}
+                onHistoricalRatesClick={navigateToHistoricalRates}
+                onMenuToggle={() => {}}
+              />
+              <HistoricalRates />
+              <Footer 
+                onAboutClick={navigateToAboutUs} 
+                onGuidesClick={navigateToGuides} 
+                onFaqClick={navigateToFaq}
+                onHistoricalRatesClick={navigateToHistoricalRates}
+              />
+            </div>
+          } 
+        />
+      </Routes>
+    </div>
+  );
 };
 
 export default MoneyCompare; 

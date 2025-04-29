@@ -3,6 +3,7 @@ import { BrowserRouter } from 'react-router-dom';
 import MoneyCompare from './containers/MoneyCompare';
 import Analytics from './components/Analytics';
 import FontLoader from './components/FontLoader';
+import StructuredData from './components/StructuredData';
 import './App.css';
 
 // Lazy load non-critical components
@@ -30,10 +31,19 @@ function App() {
     };
   }, []);
 
+  // Determine which page we're on for structured data
+  const getPageType = () => {
+    const path = initialPath.toLowerCase();
+    if (path.includes('/about')) return 'about';
+    if (path === '/' || path.includes('/compare')) return 'comparison';
+    return 'home';
+  };
+
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-gray-50">
         <div className="App">
+          <StructuredData page={getPageType()} />
           <Analytics measurementId={measurementId} />
           <FontLoader />
           <MoneyCompare initialPath={initialPath} />
