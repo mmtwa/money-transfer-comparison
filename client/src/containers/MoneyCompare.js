@@ -15,6 +15,10 @@ import FamilyRemittances from '../pages/guides/FamilyRemittances';
 import BusinessTransfers from '../pages/guides/BusinessTransfers';
 import SecurityTips from '../pages/guides/SecurityTips';
 import CanonicalUrl from '../pages/CanonicalUrl';
+import PrivacyPolicy from '../pages/PrivacyPolicy';
+import TermsOfService from '../pages/TermsOfService';
+import CookiePolicy from '../pages/CookiePolicy';
+import LegalDisclosure from '../pages/LegalDisclosure';
 
 /**
  * Main container component for the money transfer comparison app
@@ -60,6 +64,14 @@ const MoneyCompare = ({ initialPath }) => {
       setCurrentPage('faq');
     } else if (path === '/historical-rates') {
       setCurrentPage('historical-rates');
+    } else if (path === '/privacy-policy') {
+      setCurrentPage('privacy-policy');
+    } else if (path === '/terms-of-service') {
+      setCurrentPage('terms-of-service');
+    } else if (path === '/cookie-policy') {
+      setCurrentPage('cookie-policy');
+    } else if (path === '/legal-disclosure') {
+      setCurrentPage('legal-disclosure');
     }
   }, [location]);
   
@@ -89,6 +101,14 @@ const MoneyCompare = ({ initialPath }) => {
         setCurrentPage('faq');
       } else if (window.location.pathname === '/historical-rates') {
         setCurrentPage('historical-rates');
+      } else if (window.location.pathname === '/privacy-policy') {
+        setCurrentPage('privacy-policy');
+      } else if (window.location.pathname === '/terms-of-service') {
+        setCurrentPage('terms-of-service');
+      } else if (window.location.pathname === '/cookie-policy') {
+        setCurrentPage('cookie-policy');
+      } else if (window.location.pathname === '/legal-disclosure') {
+        setCurrentPage('legal-disclosure');
       }
     };
     
@@ -156,6 +176,38 @@ const MoneyCompare = ({ initialPath }) => {
     });
   };
   
+  const navigateToPrivacyPolicy = () => {
+    setCurrentPage('privacy-policy');
+    
+    navigate('/privacy-policy', { 
+      state: { page: 'privacy-policy' } 
+    });
+  };
+  
+  const navigateToTermsOfService = () => {
+    setCurrentPage('terms-of-service');
+    
+    navigate('/terms-of-service', { 
+      state: { page: 'terms-of-service' } 
+    });
+  };
+  
+  const navigateToCookiePolicy = () => {
+    setCurrentPage('cookie-policy');
+    
+    navigate('/cookie-policy', { 
+      state: { page: 'cookie-policy' } 
+    });
+  };
+  
+  const navigateToLegalDisclosure = () => {
+    setCurrentPage('legal-disclosure');
+    
+    navigate('/legal-disclosure', { 
+      state: { page: 'legal-disclosure' } 
+    });
+  };
+  
   const renderPageContent = () => {
     switch (currentPage) {
       case 'home':
@@ -189,6 +241,10 @@ const MoneyCompare = ({ initialPath }) => {
               onGuidesClick={navigateToGuides} 
               onFaqClick={navigateToFaq}
               onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
             />
           </div>
         );
@@ -209,6 +265,10 @@ const MoneyCompare = ({ initialPath }) => {
               onGuidesClick={navigateToGuides} 
               onFaqClick={navigateToFaq}
               onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
             />
           </div>
         );
@@ -229,6 +289,10 @@ const MoneyCompare = ({ initialPath }) => {
               onGuidesClick={navigateToGuides} 
               onFaqClick={navigateToFaq}
               onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
             />
           </div>
         );
@@ -249,6 +313,10 @@ const MoneyCompare = ({ initialPath }) => {
               onGuidesClick={navigateToGuides} 
               onFaqClick={navigateToFaq}
               onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
             />
           </div>
         );
@@ -269,6 +337,10 @@ const MoneyCompare = ({ initialPath }) => {
               onGuidesClick={navigateToGuides} 
               onFaqClick={navigateToFaq}
               onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
             />
           </div>
         );
@@ -289,6 +361,10 @@ const MoneyCompare = ({ initialPath }) => {
               onGuidesClick={navigateToGuides} 
               onFaqClick={navigateToFaq}
               onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
             />
           </div>
         );
@@ -309,6 +385,10 @@ const MoneyCompare = ({ initialPath }) => {
               onGuidesClick={navigateToGuides} 
               onFaqClick={navigateToFaq}
               onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
             />
           </div>
         );
@@ -329,6 +409,10 @@ const MoneyCompare = ({ initialPath }) => {
               onGuidesClick={navigateToGuides} 
               onFaqClick={navigateToFaq}
               onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
             />
           </div>
         );
@@ -349,6 +433,10 @@ const MoneyCompare = ({ initialPath }) => {
               onGuidesClick={navigateToGuides} 
               onFaqClick={navigateToFaq}
               onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
             />
           </div>
         );
@@ -369,6 +457,10 @@ const MoneyCompare = ({ initialPath }) => {
               onGuidesClick={navigateToGuides} 
               onFaqClick={navigateToFaq}
               onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
             />
           </div>
         );
@@ -389,6 +481,106 @@ const MoneyCompare = ({ initialPath }) => {
               onGuidesClick={navigateToGuides} 
               onFaqClick={navigateToFaq}
               onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+            />
+          </div>
+        );
+      case 'privacy-policy':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <PrivacyPolicy />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+            />
+          </div>
+        );
+      case 'terms-of-service':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <TermsOfService />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+            />
+          </div>
+        );
+      case 'cookie-policy':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <CookiePolicy />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+            />
+          </div>
+        );
+      case 'legal-disclosure':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <LegalDisclosure />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
             />
           </div>
         );
@@ -396,7 +588,7 @@ const MoneyCompare = ({ initialPath }) => {
         return (
           <HomePage 
             onSearch={handleSearch} 
-            initialData={searchData} 
+            initialData={searchData}
             onAboutClick={navigateToAboutUs}
             onGuidesClick={navigateToGuides}
             onFaqClick={navigateToFaq}
@@ -410,264 +602,25 @@ const MoneyCompare = ({ initialPath }) => {
     <div className="MoneyCompare">
       <CanonicalUrl />
       <Routes>
-        <Route 
-          path="/" 
-          element={
-            <HomePage 
-              onSearch={handleSearch} 
-              initialData={searchData}
-              onAboutClick={navigateToAboutUs}
-              onGuidesClick={navigateToGuides}
-              onFaqClick={navigateToFaq}
-              onHistoricalRatesClick={navigateToHistoricalRates}
-            />
-          } 
-        />
-        <Route 
-          path="/results" 
-          element={
-            <div className="flex flex-col min-h-screen">
-              <Header 
-                onLogoClick={handleBackToHome} 
-                onAboutClick={navigateToAboutUs}
-                onGuidesClick={navigateToGuides}
-                onFaqClick={navigateToFaq}
-                onHistoricalRatesClick={navigateToHistoricalRates}
-                onMenuToggle={() => {}}
-              />
-              <ResultsView 
-                searchData={searchData} 
-                onBackToSearch={handleBackToHome} 
-              />
-              <Footer 
-                onAboutClick={navigateToAboutUs} 
-                onGuidesClick={navigateToGuides} 
-                onFaqClick={navigateToFaq}
-                onHistoricalRatesClick={navigateToHistoricalRates}
-              />
-            </div>
-          } 
-        />
-        <Route 
-          path="/about" 
-          element={
-            <div className="flex flex-col min-h-screen">
-              <Header 
-                onLogoClick={handleBackToHome} 
-                onAboutClick={navigateToAboutUs}
-                onGuidesClick={navigateToGuides}
-                onFaqClick={navigateToFaq}
-                onHistoricalRatesClick={navigateToHistoricalRates}
-                onMenuToggle={() => {}}
-              />
-              <AboutUs />
-              <Footer 
-                onAboutClick={navigateToAboutUs} 
-                onGuidesClick={navigateToGuides} 
-                onFaqClick={navigateToFaq}
-                onHistoricalRatesClick={navigateToHistoricalRates}
-              />
-            </div>
-          } 
-        />
-        <Route 
-          path="/guides" 
-          element={
-            <div className="flex flex-col min-h-screen">
-              <Header 
-                onLogoClick={handleBackToHome} 
-                onAboutClick={navigateToAboutUs}
-                onGuidesClick={navigateToGuides}
-                onFaqClick={navigateToFaq}
-                onHistoricalRatesClick={navigateToHistoricalRates}
-                onMenuToggle={() => {}}
-              />
-              <Guides />
-              <Footer 
-                onAboutClick={navigateToAboutUs} 
-                onGuidesClick={navigateToGuides} 
-                onFaqClick={navigateToFaq}
-                onHistoricalRatesClick={navigateToHistoricalRates}
-              />
-            </div>
-          } 
-        />
-        <Route 
-          path="/guides/getting-started" 
-          element={
-            <div className="flex flex-col min-h-screen">
-              <Header 
-                onLogoClick={handleBackToHome} 
-                onAboutClick={navigateToAboutUs}
-                onGuidesClick={navigateToGuides}
-                onFaqClick={navigateToFaq}
-                onHistoricalRatesClick={navigateToHistoricalRates}
-                onMenuToggle={() => {}}
-              />
-              <GettingStarted />
-              <Footer 
-                onAboutClick={navigateToAboutUs} 
-                onGuidesClick={navigateToGuides} 
-                onFaqClick={navigateToFaq}
-                onHistoricalRatesClick={navigateToHistoricalRates}
-              />
-            </div>
-          } 
-        />
-        <Route 
-          path="/guides/exchange-rates" 
-          element={
-            <div className="flex flex-col min-h-screen">
-              <Header 
-                onLogoClick={handleBackToHome} 
-                onAboutClick={navigateToAboutUs}
-                onGuidesClick={navigateToGuides}
-                onFaqClick={navigateToFaq}
-                onHistoricalRatesClick={navigateToHistoricalRates}
-                onMenuToggle={() => {}}
-              />
-              <ExchangeRates />
-              <Footer 
-                onAboutClick={navigateToAboutUs} 
-                onGuidesClick={navigateToGuides} 
-                onFaqClick={navigateToFaq}
-                onHistoricalRatesClick={navigateToHistoricalRates}
-              />
-            </div>
-          } 
-        />
-        <Route 
-          path="/guides/transfer-fees" 
-          element={
-            <div className="flex flex-col min-h-screen">
-              <Header 
-                onLogoClick={handleBackToHome} 
-                onAboutClick={navigateToAboutUs}
-                onGuidesClick={navigateToGuides}
-                onFaqClick={navigateToFaq}
-                onHistoricalRatesClick={navigateToHistoricalRates}
-                onMenuToggle={() => {}}
-              />
-              <TransferFees />
-              <Footer 
-                onAboutClick={navigateToAboutUs} 
-                onGuidesClick={navigateToGuides} 
-                onFaqClick={navigateToFaq}
-                onHistoricalRatesClick={navigateToHistoricalRates}
-              />
-            </div>
-          } 
-        />
-        <Route 
-          path="/guides/family-remittances" 
-          element={
-            <div className="flex flex-col min-h-screen">
-              <Header 
-                onLogoClick={handleBackToHome} 
-                onAboutClick={navigateToAboutUs}
-                onGuidesClick={navigateToGuides}
-                onFaqClick={navigateToFaq}
-                onHistoricalRatesClick={navigateToHistoricalRates}
-                onMenuToggle={() => {}}
-              />
-              <FamilyRemittances />
-              <Footer 
-                onAboutClick={navigateToAboutUs} 
-                onGuidesClick={navigateToGuides} 
-                onFaqClick={navigateToFaq}
-                onHistoricalRatesClick={navigateToHistoricalRates}
-              />
-            </div>
-          } 
-        />
-        <Route 
-          path="/guides/business-transfers" 
-          element={
-            <div className="flex flex-col min-h-screen">
-              <Header 
-                onLogoClick={handleBackToHome} 
-                onAboutClick={navigateToAboutUs}
-                onGuidesClick={navigateToGuides}
-                onFaqClick={navigateToFaq}
-                onHistoricalRatesClick={navigateToHistoricalRates}
-                onMenuToggle={() => {}}
-              />
-              <BusinessTransfers />
-              <Footer 
-                onAboutClick={navigateToAboutUs} 
-                onGuidesClick={navigateToGuides} 
-                onFaqClick={navigateToFaq}
-                onHistoricalRatesClick={navigateToHistoricalRates}
-              />
-            </div>
-          } 
-        />
-        <Route 
-          path="/guides/security-tips" 
-          element={
-            <div className="flex flex-col min-h-screen">
-              <Header 
-                onLogoClick={handleBackToHome} 
-                onAboutClick={navigateToAboutUs}
-                onGuidesClick={navigateToGuides}
-                onFaqClick={navigateToFaq}
-                onHistoricalRatesClick={navigateToHistoricalRates}
-                onMenuToggle={() => {}}
-              />
-              <SecurityTips />
-              <Footer 
-                onAboutClick={navigateToAboutUs} 
-                onGuidesClick={navigateToGuides} 
-                onFaqClick={navigateToFaq}
-                onHistoricalRatesClick={navigateToHistoricalRates}
-              />
-            </div>
-          } 
-        />
-        <Route 
-          path="/faq" 
-          element={
-            <div className="flex flex-col min-h-screen">
-              <Header 
-                onLogoClick={handleBackToHome} 
-                onAboutClick={navigateToAboutUs}
-                onGuidesClick={navigateToGuides}
-                onFaqClick={navigateToFaq}
-                onHistoricalRatesClick={navigateToHistoricalRates}
-                onMenuToggle={() => {}}
-              />
-              <FAQ />
-              <Footer 
-                onAboutClick={navigateToAboutUs} 
-                onGuidesClick={navigateToGuides} 
-                onFaqClick={navigateToFaq}
-                onHistoricalRatesClick={navigateToHistoricalRates}
-              />
-            </div>
-          } 
-        />
-        <Route 
-          path="/historical-rates" 
-          element={
-            <div className="flex flex-col min-h-screen">
-              <Header 
-                onLogoClick={handleBackToHome} 
-                onAboutClick={navigateToAboutUs}
-                onGuidesClick={navigateToGuides}
-                onFaqClick={navigateToFaq}
-                onHistoricalRatesClick={navigateToHistoricalRates}
-                onMenuToggle={() => {}}
-              />
-              <HistoricalRates />
-              <Footer 
-                onAboutClick={navigateToAboutUs} 
-                onGuidesClick={navigateToGuides} 
-                onFaqClick={navigateToFaq}
-                onHistoricalRatesClick={navigateToHistoricalRates}
-              />
-            </div>
-          } 
-        />
+        <Route path="/" element={renderPageContent()} />
+        <Route path="/results" element={renderPageContent()} />
+        <Route path="/about" element={renderPageContent()} />
+        <Route path="/guides" element={renderPageContent()} />
+        <Route path="/guides/getting-started" element={renderPageContent()} />
+        <Route path="/guides/exchange-rates" element={renderPageContent()} />
+        <Route path="/guides/transfer-fees" element={renderPageContent()} />
+        <Route path="/guides/family-remittances" element={renderPageContent()} />
+        <Route path="/guides/business-transfers" element={renderPageContent()} />
+        <Route path="/guides/security-tips" element={renderPageContent()} />
+        <Route path="/faq" element={renderPageContent()} />
+        <Route path="/historical-rates" element={renderPageContent()} />
+        <Route path="/privacy-policy" element={renderPageContent()} />
+        <Route path="/terms-of-service" element={renderPageContent()} />
+        <Route path="/cookie-policy" element={renderPageContent()} />
+        {/* Legal Disclosure route temporarily hidden
+        <Route path="/legal-disclosure" element={renderPageContent()} />
+        */}
+        <Route path="*" element={renderPageContent()} />
       </Routes>
     </div>
   );

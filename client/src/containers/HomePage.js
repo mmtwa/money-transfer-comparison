@@ -122,7 +122,8 @@ const HomePage = ({ onSearch, initialData, onAboutClick, onGuidesClick, onFaqCli
               width: '100%',
               maxWidth: '28rem',
               position: 'relative',
-              boxSizing: 'border-box'
+              boxSizing: 'border-box',
+              zIndex: 20 // Ensure form elements are above other positioned elements like the promo text
             }}
           >
             <SearchForm onSearch={onSearch} initialData={initialData} />
@@ -134,7 +135,7 @@ const HomePage = ({ onSearch, initialData, onAboutClick, onGuidesClick, onFaqCli
           href="https://www.britishairways.com/content/information/travel-classes/club-world"
           target="_blank"
           rel="noopener noreferrer"
-          className="block relative text-center max-w-xs mx-auto mt-8 md:absolute md:text-right md:max-w-3xl md:mx-0 md:mt-0 md:bottom-10 md:right-10"
+          className="block relative text-center max-w-xs mx-auto mb-8 mt-8 md:absolute md:text-right md:max-w-3xl md:mx-0 md:mt-0 md:bottom-10 md:right-10"
           style={{
             padding: '20px',
             color: 'rgba(255, 255, 250, 0.95)',

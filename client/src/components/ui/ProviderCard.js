@@ -114,7 +114,9 @@ const ProviderCard = ({
   transferTime,
   transferFee,
   exchangeRateMargin,
-  features = []
+  features = [],
+  fetchedRating,
+  ratingsLoading
 }) => {
   // Debug provider data - log once when component mounts
   React.useEffect(() => {
@@ -128,26 +130,45 @@ const ProviderCard = ({
 
   // Generate rating visualization elements
   const renderRating = (ratingValue) => {
-    const filledCircles = Math.floor(ratingValue);
-    const hasHalf = ratingValue % 1 >= 0.5;
-    const emptyCircles = 5 - Math.ceil(ratingValue);
+    // Check for loading state first
+    if (ratingsLoading) {
+      return <div className="text-xs text-gray-400 animate-pulse">Loading rating...</div>;
+    }
     
-    return (
-      <div className="flex items-center">
-        {[...Array(filledCircles)].map((_, i) => (
-          <div key={`filled-${i}`} className="w-2 h-2 rounded-full bg-yellow-400 mr-1"></div>
-        ))}
-        {hasHalf && (
-          <div className="w-2 h-2 rounded-full bg-gradient-to-r from-yellow-400 to-gray-200 mr-1"></div>
-        )}
-        {[...Array(emptyCircles)].map((_, i) => (
-          <div key={`empty-${i}`} className="w-2 h-2 rounded-full bg-gray-200 mr-1"></div>
-        ))}
-        <div className="ml-1 flex items-center text-xs text-gray-500">
-          <ThumbsUp size={10} className="mr-1" /> {provider?.rating || rating || 0}
+    // Check if fetchedRating is available (and is an object with 'value')
+    if (fetchedRating && typeof fetchedRating === 'object' && fetchedRating.value != null) {
+      ratingValue = fetchedRating.value;
+      const sourceText = fetchedRating.source ? `(${fetchedRating.source})` : '';
+      
+      const filledCircles = Math.floor(ratingValue);
+      const hasHalf = ratingValue % 1 >= 0.5;
+      const emptyCircles = 5 - Math.ceil(ratingValue);
+      
+      return (
+        <div className="flex items-center">
+          {[...Array(filledCircles)].map((_, i) => (
+            <div key={`filled-${i}`} className="w-2 h-2 rounded-full bg-yellow-400 mr-1"></div>
+          ))}
+          {hasHalf && (
+            <div className="w-2 h-2 rounded-full bg-gradient-to-r from-yellow-400 to-gray-200 mr-1"></div>
+          )}
+          {[...Array(emptyCircles)].map((_, i) => (
+            <div key={`empty-${i}`} className="w-2 h-2 rounded-full bg-gray-200 mr-1"></div>
+          ))}
+          <div className="ml-1 flex items-center text-xs text-gray-500">
+            <ThumbsUp size={10} className="mr-1" /> {ratingValue.toFixed(1)} <span className="ml-1 text-gray-400 text-[10px]">{sourceText}</span>
+          </div>
         </div>
-      </div>
-    );
+      );
+    } else if (fetchedRating === null) {
+      // Explicitly handle case where rating could not be fetched
+      return <div className="text-xs text-gray-400">Rating N/A</div>;
+    }
+    
+    // Fallback if fetchedRating is undefined (still loading maybe? or initial state)
+    // Or keep showing the default rating if needed
+    // For now, let's show N/A if not loading and no fetched rating available
+    return <div className="text-xs text-gray-400">Rating N/A</div>;
   };
 
   // Format transfer time for display
@@ -286,7 +307,7 @@ const ProviderCard = ({
                 }}
               />
             </div>
-            {renderRating(provider?.rating || rating || 0)}
+            {renderRating(provider?.rating || rating)}
           </div>
           
           <div className="text-right">

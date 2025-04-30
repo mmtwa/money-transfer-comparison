@@ -1,9 +1,10 @@
 import React, { useEffect, useState, lazy, Suspense } from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, useNavigate } from 'react-router-dom';
 import MoneyCompare from './containers/MoneyCompare';
 import Analytics from './components/Analytics';
 import FontLoader from './components/FontLoader';
 import StructuredData from './components/StructuredData';
+import CookieConsent from './components/CookieConsent';
 import './App.css';
 
 // Lazy load non-critical components
@@ -39,6 +40,26 @@ function App() {
     return 'home';
   };
 
+  // Wrap CookieConsent in a component that has access to navigation
+  const CookieConsentWithNavigation = () => {
+    const navigate = useNavigate();
+    
+    const handlePrivacyClick = () => {
+      navigate('/privacy-policy');
+    };
+    
+    const handleCookiesClick = () => {
+      navigate('/cookie-policy');
+    };
+    
+    return (
+      <CookieConsent 
+        onPrivacyClick={handlePrivacyClick} 
+        onCookiesClick={handleCookiesClick} 
+      />
+    );
+  };
+
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-gray-50">
@@ -47,6 +68,9 @@ function App() {
           <Analytics measurementId={measurementId} />
           <FontLoader />
           <MoneyCompare initialPath={initialPath} />
+          
+          {/* Cookie Consent Banner */}
+          <CookieConsentWithNavigation />
           
           {/* Lazy load non-critical components */}
           <Suspense fallback={null}>

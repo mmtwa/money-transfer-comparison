@@ -3,7 +3,16 @@ import React from 'react';
 /**
  * Footer component with site information and links
  */
-const Footer = ({ onAboutClick, onGuidesClick, onFaqClick, onHistoricalRatesClick }) => {
+const Footer = ({ 
+  onAboutClick, 
+  onGuidesClick, 
+  onFaqClick, 
+  onHistoricalRatesClick,
+  onPrivacyClick,
+  onTermsClick,
+  onCookiesClick,
+  onLegalDisclosureClick
+}) => {
   return (
     <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-10 md:py-12 mt-12 relative overflow-hidden">
       {/* Decorative elements */}
@@ -63,9 +72,9 @@ const Footer = ({ onAboutClick, onGuidesClick, onFaqClick, onHistoricalRatesClic
             <div className="space-y-4">
               <h4 className="font-semibold text-sm uppercase tracking-wider text-indigo-300">Legal</h4>
               <ul className="space-y-3 text-gray-300">
-                <li><a href="#" className="text-sm hover:text-white transition-colors duration-200 hover:underline">Privacy</a></li>
-                <li><a href="#" className="text-sm hover:text-white transition-colors duration-200 hover:underline">Terms</a></li>
-                <li><a href="#" className="text-sm hover:text-white transition-colors duration-200 hover:underline">Cookies</a></li>
+                <li><a className="text-sm hover:text-white transition-colors duration-200 hover:underline cursor-pointer" onClick={onPrivacyClick}>Privacy</a></li>
+                <li><a className="text-sm hover:text-white transition-colors duration-200 hover:underline cursor-pointer" onClick={onTermsClick}>Terms</a></li>
+                <li><a className="text-sm hover:text-white transition-colors duration-200 hover:underline cursor-pointer" onClick={onCookiesClick}>Cookies</a></li>
               </ul>
             </div>
           </div>
@@ -103,7 +112,11 @@ const Footer = ({ onAboutClick, onGuidesClick, onFaqClick, onHistoricalRatesClic
         
         <div className="border-t border-gray-700/50 mt-6 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-400 text-sm">© {new Date().getFullYear()} mymoneytransfers.com. All rights reserved.</p>
-          <p className="text-gray-500 text-xs mt-2 md:mt-0">Comparing money transfer services worldwide</p>
+          <div className="text-gray-500 text-xs mt-2 md:mt-0 flex space-x-4">
+            <span>Comparing money transfer services worldwide</span>
+            <a onClick={onPrivacyClick} className="hover:text-gray-300 cursor-pointer">Privacy</a>
+            <a onClick={onTermsClick} className="hover:text-gray-300 cursor-pointer">Terms</a>
+          </div>
         </div>
       </div>
     </footer>

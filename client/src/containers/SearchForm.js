@@ -350,8 +350,8 @@ const SearchForm = ({ onSearch, initialData }) => {
                 No sponsored listings, no commission. Totally transparent.
               </span>
               <span className="sm:hidden">
-                TRUST ASSURED: We earn from partners, not your money. <br />
-                No sponsored listings. Totally transparent.
+                TRUSTED: We earn from ad partners, not your money. <br />
+                No sponsored listings. No commission.
               </span>
             </div>
           </div>

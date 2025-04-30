@@ -17,6 +17,9 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
   const [providerResults, setProviderResults] = useState([]);
   const [bestDealProvider, setBestDealProvider] = useState(null);
   const [error, setError] = useState(null);
+  // State for fetched external ratings and loading status
+  const [providerRatings, setProviderRatings] = useState({});
+  const [ratingsLoading, setRatingsLoading] = useState(false);
   
   // Fetch data from API on component mount or when search parameters change
   useEffect(() => {
@@ -207,6 +210,45 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
       )[0];
       
       setBestDealProvider(bestProvider);
+    }
+  }, [providerResults]);
+  
+  // Fetch external ratings when provider results are available
+  useEffect(() => {
+    if (providerResults.length > 0) {
+      const fetchRatings = async () => {
+        setRatingsLoading(true);
+        const ratingsMap = {};
+        
+        // Use Promise.allSettled to fetch all ratings concurrently
+        const ratingPromises = providerResults.map(provider => 
+          apiService.getProviderRating(provider.providerId || provider.providerCode) // Use providerId or code as identifier
+            .then(rating => ({ id: provider.providerId, rating }))
+            .catch(err => ({ id: provider.providerId, rating: null, error: err })) // Store null on error
+        );
+        
+        const results = await Promise.allSettled(ratingPromises);
+        
+        results.forEach(result => {
+          if (result.status === 'fulfilled' && result.value) {
+            ratingsMap[result.value.id] = result.value.rating;
+          } else if (result.status === 'rejected' || (result.status === 'fulfilled' && !result.value)) {
+            // Handle cases where the promise was rejected or resolved without a value
+            // We might need to find the providerId differently if the promise structure is complex
+            // For now, assume we can get the ID even on failure from the initial mapping
+            const failedProvider = providerResults.find((p, index) => index === results.indexOf(result));
+            if(failedProvider) {
+              ratingsMap[failedProvider.providerId] = null; // Explicitly set null for failed/missing ratings
+            }
+            console.error("Failed to fetch rating for a provider:", result.reason || 'No rating returned');
+          }
+        });
+        
+        setProviderRatings(ratingsMap);
+        setRatingsLoading(false);
+      };
+
+      fetchRatings();
     }
   }, [providerResults]);
   
@@ -679,6 +721,9 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
               isBestDeal={provider.providerId === bestDealProvider?.providerId}
               isRealTimeApi={provider.realTimeApi}
               code={provider.providerCode}
+              // Pass fetched rating and loading state
+              fetchedRating={providerRatings[provider.providerId]}
+              ratingsLoading={ratingsLoading}
             />
           ))}
           

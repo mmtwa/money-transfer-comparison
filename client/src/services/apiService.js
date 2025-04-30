@@ -143,6 +143,26 @@ const apiService = {
    */
   submitFeedback: (feedbackData) => {
     return api.post('/feedback', feedbackData);
+  },
+  
+  // Placeholder for fetching external provider ratings
+  getProviderRating: async (providerId) => {
+    console.log(`Simulating fetch rating for providerId: ${providerId}`);
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, Math.random() * 500)); 
+    
+    // Simulate finding a rating sometimes, or returning null
+    if (Math.random() > 0.3) { 
+      // Return a simulated rating object (e.g., value and source)
+      const ratingValue = (Math.random() * (5 - 3) + 3).toFixed(1); // Random rating between 3.0 and 5.0
+      return { 
+        value: parseFloat(ratingValue),
+        source: Math.random() > 0.5 ? 'Trustpilot' : 'Google' 
+      };
+    } else {
+      // Simulate rating not found
+      return null; 
+    }
   }
 };
 
