@@ -1,6 +1,11 @@
 import React from 'react';
 import GuideDetail from './GuideDetail';
 import { Link } from 'react-router-dom';
+// Import images from assets directory
+import heroImageJpg from '../../assets/images/guides/family-remittances-hero.jpg';
+import heroImageWebp from '../../assets/images/guides/family-remittances-hero-new.webp';
+// Import responsive image component
+import ResponsiveImage from '../../components/common/ResponsiveImage';
 
 /**
  * Sending Money to Family Abroad guide page
@@ -12,7 +17,8 @@ const FamilyRemittances = () => {
       subtitle="Discover the best practices for regular international remittances, how to set up recurring transfers and practical ways to save on fees."
       publishDate="10 July 2023"
       readTime="8 min read"
-      heroImage="/images/guides/animated-svg-placeholder.html"
+      heroImage={heroImageJpg}
+      webp={heroImageWebp}
       content={
         <div className="prose prose-lg max-w-none">
           <p className="lead text-xl font-medium mb-8 text-left">

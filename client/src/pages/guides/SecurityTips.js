@@ -1,6 +1,11 @@
 import React from 'react';
 import GuideDetail from './GuideDetail';
 import { Link } from 'react-router-dom';
+// Import images from assets directory
+import heroImageJpg from '../../assets/images/guides/security-tips-hero.jpg';
+import heroImageWebp from '../../assets/images/guides/security-tips-hero-new.webp';
+// Import responsive image component
+import ResponsiveImage from '../../components/common/ResponsiveImage';
 
 /**
  * Security Tips for Money Transfers guide page
@@ -12,7 +17,8 @@ const SecurityTips = () => {
       subtitle="Essential guidance on keeping your international transfers secure and what steps to take if something goes wrong."
       publishDate="12 September 2023"
       readTime="8 min read"
-      heroImage="/images/guides/animated-svg-placeholder.html"
+      heroImage={heroImageJpg}
+      webp={heroImageWebp}
       content={
         <div className="prose prose-lg max-w-none">
           <p className="lead text-xl font-medium mb-8 text-left">
@@ -92,14 +98,14 @@ const SecurityTips = () => {
           
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 my-8">
             <div className="grid md:grid-cols-3 gap-8">
-              <div>
+              <div className="flex flex-col items-center text-center">
                 <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-4">
                   <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold text-indigo-700 mb-3 text-left">Regulatory Compliance</h3>
-                <ul className="space-y-2 text-gray-700 pl-4">
+                <h3 className="text-xl font-semibold text-indigo-700 mb-3">Regulatory Compliance</h3>
+                <ul className="space-y-2 text-gray-700 pl-4 w-full px-4">
                   <li className="flex items-start gap-2 text-left">
                     <svg className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
@@ -121,14 +127,14 @@ const SecurityTips = () => {
                 </ul>
               </div>
               
-              <div>
+              <div className="flex flex-col items-center text-center">
                 <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-4">
                   <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold text-indigo-700 mb-3 text-left">Security Features</h3>
-                <ul className="space-y-2 text-gray-700 pl-4">
+                <h3 className="text-xl font-semibold text-indigo-700 mb-3">Security<br />Features</h3>
+                <ul className="space-y-2 text-gray-700 pl-4 w-full px-4">
                   <li className="flex items-start gap-2 text-left">
                     <svg className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
@@ -150,14 +156,14 @@ const SecurityTips = () => {
                 </ul>
               </div>
               
-              <div>
+              <div className="flex flex-col items-center text-center">
                 <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-4">
                   <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold text-indigo-700 mb-3 text-left">Company Reputation</h3>
-                <ul className="space-y-2 text-gray-700 pl-4">
+                <h3 className="text-xl font-semibold text-indigo-700 mb-3">Company Reputation</h3>
+                <ul className="space-y-2 text-gray-700 pl-4 w-full px-4">
                   <li className="flex items-start gap-2 text-left">
                     <svg className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
@@ -256,41 +262,41 @@ const SecurityTips = () => {
           
           <div className="grid md:grid-cols-3 gap-6 my-8">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <div className="bg-amber-100 p-4">
-                <h3 className="text-amber-800 font-semibold text-lg">If You Suspect Fraud</h3>
+              <div className="bg-amber-100 p-4 h-16 flex items-center">
+                <h3 className="text-amber-800 font-semibold text-lg text-left">If You Suspect Fraud</h3>
               </div>
               <div className="p-5">
-                <ol className="space-y-2 pl-5 list-decimal">
+                <ol className="space-y-2 pl-5 list-decimal text-left">
                   <li className="font-medium">Contact your money transfer provider immediately</li>
                   <li>Report the incident to your bank if you used a bank account or card</li>
                   <li>File a report with Action Fraud (UK) or appropriate authorities</li>
                   <li>Document all communications and evidence</li>
                 </ol>
-                <p className="text-sm text-gray-600 mt-4">Time is critical - report suspected fraud within 24 hours.</p>
+                <p className="text-sm text-gray-600 mt-4 text-left">Time is critical - report suspected fraud within 24 hours.</p>
               </div>
             </div>
             
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <div className="bg-amber-100 p-4">
-                <h3 className="text-amber-800 font-semibold text-lg">If Funds Aren't Received</h3>
+              <div className="bg-amber-100 p-4 h-16 flex items-center">
+                <h3 className="text-amber-800 font-semibold text-lg text-left">If Funds Aren't Received</h3>
               </div>
               <div className="p-5">
-                <ol className="space-y-2 pl-5 list-decimal">
+                <ol className="space-y-2 pl-5 list-decimal text-left">
                   <li className="font-medium">Check the transfer status with your provider</li>
                   <li>Verify that all recipient details were correct</li>
                   <li>Ask about potential delays in the destination country</li>
                   <li>Request a trace on the transfer</li>
                 </ol>
-                <p className="text-sm text-gray-600 mt-4">Most delayed transfers are resolved within 3-5 business days.</p>
+                <p className="text-sm text-gray-600 mt-4 text-left">Most delayed transfers are resolved within 3-5 business days.</p>
               </div>
             </div>
             
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <div className="bg-amber-100 p-4">
-                <h3 className="text-amber-800 font-semibold text-lg">Disputing a Transfer</h3>
+              <div className="bg-amber-100 p-4 h-16 flex items-center">
+                <h3 className="text-amber-800 font-semibold text-lg text-left">Disputing a Transfer</h3>
               </div>
               <div className="p-5">
-                <ul className="space-y-2">
+                <ul className="space-y-2 text-left">
                   <li className="flex items-start gap-2">
                     <svg className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -316,7 +322,7 @@ const SecurityTips = () => {
                     <span><strong>Escalate to ombudsman</strong> if necessary</span>
                   </li>
                 </ul>
-                <p className="text-sm text-gray-600 mt-4">The Financial Ombudsman Service can help with unresolved UK complaints.</p>
+                <p className="text-sm text-gray-600 mt-4 text-left">The Financial Ombudsman Service can help with unresolved UK complaints.</p>
               </div>
             </div>
           </div>

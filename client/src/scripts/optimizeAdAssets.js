@@ -21,7 +21,7 @@ const path = require('path');
 const glob = require('glob');
 
 // This is just a placeholder - in a real implementation you would use sharp for image processing
-// const sharp = require('sharp');
+const sharp = require('sharp');
 
 // Configuration
 const PUBLIC_DIR = path.resolve(__dirname, '../../public');
@@ -94,7 +94,7 @@ async function processDirectory(directory) {
   console.log(`Processing directory: ${dirName}`);
   
   // Find all jpg/png files
-  const imagePattern = path.join(directory, '*.{jpg,jpeg,png}');
+  const imagePattern = path.join(directory, '*.{jpg,jpeg,png}').replace(/\\/g, '/');
   const imageFiles = glob.sync(imagePattern);
   
   if (imageFiles.length === 0) {
@@ -135,16 +135,10 @@ async function optimizeImage(imagePath, sizeKey, outputDir) {
   
   const targetSize = SIZES[sizeKey];
   const outputWebP = path.join(outputDir, `${sizeKey}.webp`);
-  const outputJpg = path.join(outputDir, `${sizeKey}.jpg`);
-  
-  // In a real implementation, you would use sharp to resize and convert images
-  // This is a placeholder for demonstration purposes
-  console.log(`  → Would resize to ${targetSize.width}x${targetSize.height}`);
-  console.log(`  → Would create WebP: ${path.basename(outputWebP)}`);
-  console.log(`  → Would create JPG: ${path.basename(outputJpg)}`);
+  const outputJpg = path.join(outputDir, `${sizeKey}_optimized.jpg`);
   
   // Example of how to implement with sharp:
-  /*
+  
   await sharp(imagePath)
     .resize(targetSize.width, targetSize.height, {
       fit: 'cover',
@@ -160,7 +154,6 @@ async function optimizeImage(imagePath, sizeKey, outputDir) {
     })
     .jpeg({ quality: targetSize.quality, progressive: true })
     .toFile(outputJpg);
-  */
 }
 
 // Execute the script

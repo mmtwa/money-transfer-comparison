@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
+import ResponsiveImage from '../../components/common/ResponsiveImage';
 
 /**
  * GuideDetail component - template for all guide articles
@@ -11,10 +12,16 @@ const GuideDetail = ({
   subtitle, 
   content, 
   heroImage,
+  webp,
   publishDate,
   readTime,
   relatedGuides = []
 }) => {
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-900">
       {/* Hero Section */}
@@ -62,10 +69,13 @@ const GuideDetail = ({
       {/* Hero Image (if provided) */}
       {heroImage && (
         <div className="w-full max-w-4xl mx-auto -mt-8 mb-8 px-4">
-          <img 
+          <ResponsiveImage 
             src={heroImage} 
+            webp={webp}
             alt={title} 
-            className="w-full h-auto rounded-lg shadow-lg" 
+            className="w-full h-auto rounded-lg shadow-lg"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 1024px"
+            lazy={false} // Hero image should load immediately
           />
         </div>
       )}

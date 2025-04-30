@@ -155,6 +155,33 @@ app.use('/v1/rates', (req, res, next) => {
   rateRoutes.handle(req, res, next);
 });
 
+// Serve sitemap.xml with correct content type
+app.get('/sitemap.xml', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client/build/sitemap.xml'), {
+    headers: {
+      'Content-Type': 'application/xml'
+    }
+  });
+});
+
+// Serve robots.txt with correct content type
+app.get('/robots.txt', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client/build/robots.txt'), {
+    headers: {
+      'Content-Type': 'text/plain'
+    }
+  });
+});
+
+// Serve Google verification file
+app.get('/google-site-verification.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client/build/google-site-verification.html'), {
+    headers: {
+      'Content-Type': 'text/html'
+    }
+  });
+});
+
 // Serve static assets in production
 if (process.env.NODE_ENV === 'production') {
   // Make sure we have provider images in the build directory

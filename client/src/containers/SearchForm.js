@@ -326,7 +326,7 @@ const SearchForm = ({ onSearch, initialData }) => {
   };
   
   return (
-    <div className="w-full max-w-md mx-auto lg:mx-0 relative" style={{ minHeight: "600px" }}>
+    <div className="w-full max-w-md mx-auto lg:mx-0 relative">
       <motion.div 
         className="bg-white rounded-3xl shadow-lg border border-gray-100"
         initial={{ opacity: 1, y: 0 }}
@@ -336,21 +336,28 @@ const SearchForm = ({ onSearch, initialData }) => {
         {/* Trust badge positioned above the main form content */}
         <div className="flex justify-center">
           <div 
-            className="inline-flex items-center -mt-3 px-4 py-2 bg-white rounded-full border border-gray-200 shadow-md"
+            className="inline-flex items-center -mt-3 px-3 sm:px-4 py-1 sm:py-2 bg-white rounded-full border border-gray-200 shadow-md"
             style={{ fontFamily: 'Poppins, sans-serif' }}
           >
-            <div className="flex items-center justify-center h-5 w-5 rounded-full bg-green-500 mr-2 flex-shrink-0">
-              <svg className="h-3 w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <div className="flex items-center justify-center h-4 sm:h-5 w-4 sm:w-5 rounded-full bg-green-500 mr-1 sm:mr-2 flex-shrink-0">
+              <svg className="h-2 sm:h-3 w-2 sm:w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
               </svg>
             </div>
-            <span className="text-xs font-semibold tracking-tight leading-tight text-gray-700">
-              TRUST ASSURED: We earn from ad partners, not your money. <br /> No sponsors, no commission. Totally transparant.
-            </span>
+            <div className="text-[10px] sm:text-xs font-semibold tracking-tight leading-tight text-gray-700">
+              <span className="hidden sm:inline">
+                TRUST ASSURED: We earn from ad partners, not your money. <br /> 
+                No sponsored listings, no commission. Totally transparent.
+              </span>
+              <span className="sm:hidden">
+                TRUST ASSURED: We earn from partners, not your money. <br />
+                No sponsored listings. Totally transparent.
+              </span>
+            </div>
           </div>
         </div>
 
-        <div className="p-6 md:p-8">
+        <div className="px-6 pb-6 pt-3 md:px-8 md:pb-8 md:pt-4">
           <h2 className="mb-4 text-left">
             <div className="flex flex-col items-start mb-2">
               <div
@@ -386,7 +393,7 @@ const SearchForm = ({ onSearch, initialData }) => {
                   <div className="text-sm leading-tight">real cost before you send.</div>
                 </div>
                 <div className="hidden sm:block">
-                  Worried about transfer fees? Compare instantly & see the <span className="font-semibold">real cost</span> before you send money.
+                  Worried about transfer fees?<br />Compare instantly & see the <span className="font-semibold">real cost</span> before you send money.
                 </div>
               </div>
             </div>
@@ -405,7 +412,7 @@ const SearchForm = ({ onSearch, initialData }) => {
                 />
               </div>
               <div className="relative w-3/5 ml-4 md:ml-8" style={{ minHeight: "60px" }}>
-                <div className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium text-lg md:text-xl">
+                <div className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium text-lg md:text-xl lg:text-[22px]">
                   {getCurrencySymbol(fromCurrency)}
                 </div>
                 <input
@@ -414,7 +421,7 @@ const SearchForm = ({ onSearch, initialData }) => {
                   value={inputValue}
                   onChange={handleAmountChange}
                   onKeyDown={handleKeyDown}
-                  className={`w-full border ${isInitialFocus ? 'border-indigo-500 pulse-border' : 'border-gray-500 hover:border-indigo-400'} bg-white-100 rounded-xl p-4 md:p-5 pl-10 focus:outline-none text-gray-800 font-medium text-lg md:text-xl text-right placeholder:text-sm md:placeholder:text-base lg:placeholder:text-lg placeholder:text-gray-400 transition-all duration-200`}
+                  className={`w-full border ${isInitialFocus ? 'border-indigo-500 pulse-border' : 'border-gray-500 hover:border-indigo-400'} bg-white-100 rounded-xl p-4 md:p-5 pl-10 focus:outline-none text-gray-800 font-medium text-lg md:text-xl lg:text-[22px] text-right placeholder:text-sm md:placeholder:text-base lg:placeholder:text-lg placeholder:text-gray-400 transition-all duration-200`}
                   inputMode="numeric"
                   pattern="[0-9,]*"
                   placeholder="Enter amount"

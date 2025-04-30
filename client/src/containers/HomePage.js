@@ -29,6 +29,25 @@ const HomePage = ({ onSearch, initialData, onAboutClick, onGuidesClick, onFaqCli
     setMenuOpen(isOpen);
   };
   
+  useEffect(() => {
+    // Embed required fonts
+    const libreCaslonLink = document.createElement('link');
+    libreCaslonLink.rel = 'stylesheet';
+    libreCaslonLink.href = 'https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&display=swap';
+    document.head.appendChild(libreCaslonLink);
+    
+    const poppinsLink = document.createElement('link');
+    poppinsLink.rel = 'stylesheet';
+    poppinsLink.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap';
+    document.head.appendChild(poppinsLink);
+    
+    // Clean up function to remove links on unmount
+    return () => {
+      document.head.removeChild(libreCaslonLink);
+      document.head.removeChild(poppinsLink);
+    };
+  }, []);
+  
   return (
     <div className="relative overflow-hidden" style={{ 
       height: '100vh', 
@@ -66,29 +85,27 @@ const HomePage = ({ onSearch, initialData, onAboutClick, onGuidesClick, onFaqCli
       </div>
 
       {/* Main Content with centered search tool - Fixed position */}
-      <div 
-        className="relative z-10 flex flex-col items-center lg:items-start justify-center px-4 py-6 md:py-8 lg:pl-10 lg:py-12"
-        style={{ 
+      <div
+        className="relative z-10 flex flex-col items-center md:items-start md:justify-center px-4 lg:pl-10 md:pb-20 lg:pb-0"
+        style={{
           position: 'absolute',
           top: '80px',
           left: 0,
           right: 0,
           bottom: 0,
           height: 'calc(100vh - 80px)',
-          minHeight: '600px',
           transform: 'translateZ(0)', // Force GPU rendering
           willChange: 'transform',  // Hint to browser about upcoming animations
           boxSizing: 'border-box'
         }}
       >
         {/* Search Tool - centered on mobile and tablet, left-aligned on desktop */}
-        <div className="w-full max-w-md mx-auto lg:mx-0"> 
-          <div 
-            style={{ 
+        <div className="w-full max-w-md mx-auto md:mx-0 mt-auto md:mt-0 mb-6">
+          <div
+            style={{
               transform: 'translateZ(0)',
               width: '100%',
               maxWidth: '28rem',
-              minHeight: '500px',
               position: 'relative',
               boxSizing: 'border-box'
             }}
@@ -96,6 +113,44 @@ const HomePage = ({ onSearch, initialData, onAboutClick, onGuidesClick, onFaqCli
             <SearchForm onSearch={onSearch} initialData={initialData} />
           </div>
         </div>
+        
+        {/* British Airways promotional text - responsive positioning */}
+        <a
+          href="https://www.britishairways.com/content/information/travel-classes/club-world"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block relative text-center max-w-xs mx-auto mt-8 md:absolute md:text-right md:max-w-3xl md:mx-0 md:mt-0 md:bottom-10 md:right-10"
+          style={{
+            padding: '20px',
+            color: 'rgba(255, 255, 250, 0.95)',
+            textShadow: '0 2px 4px rgba(0, 0, 0, 0.25)',
+            zIndex: 20,
+            textDecoration: 'none',
+            cursor: 'pointer',
+            transition: 'opacity 0.2s ease-in-out'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
+          onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+        >
+          <div style={{
+            fontSize: 'clamp(42px, 4vw, 64px)',
+            marginBottom: '12px',
+            fontFamily: '"Libre Caslon Display", serif',
+            fontStyle: 'italic',
+            fontWeight: 400,
+            lineHeight: 1.2
+          }}>
+            Experience British Airways
+          </div>
+          <div style={{
+            fontSize: 'clamp(24px, 2.5vw, 32px)',
+            fontFamily: '"Poppins", sans-serif',
+            fontWeight: 400,
+            letterSpacing: '0.02em'
+          }}>
+            See their new Club World experience
+          </div>
+        </a>
       </div>
     </div>
   );

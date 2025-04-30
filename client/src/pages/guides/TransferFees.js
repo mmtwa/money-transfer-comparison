@@ -1,6 +1,11 @@
 import React from 'react';
 import GuideDetail from './GuideDetail';
 import { Link } from 'react-router-dom';
+// Import images from assets directory
+import heroImageJpg from '../../assets/images/guides/transfer-fees-hero.jpg';
+import heroImageWebp from '../../assets/images/guides/transfer-fees-hero-new.webp';
+// Import responsive image component
+import ResponsiveImage from '../../components/common/ResponsiveImage';
 
 /**
  * Transfer Fees Explained guide page
@@ -12,7 +17,8 @@ const TransferFees = () => {
       subtitle="Uncover the different types of fees providers charge and learn how to calculate the true cost of your international transfers."
       publishDate="15 June 2023"
       readTime="6 min read"
-      heroImage="/images/guides/exchange-rate-diagram.html"
+      heroImage={heroImageJpg}
+      webp={heroImageWebp}
       content={
         <div className="prose prose-lg max-w-none">
           <p className="lead text-xl font-medium mb-8 text-left">

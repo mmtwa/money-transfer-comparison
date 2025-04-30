@@ -83,17 +83,46 @@ const Header = ({
       className={`${headerBgClass} ${headerBorderClass} sticky top-0 z-[9999] py-4 will-change-transform`}
       style={headerStyle}
     >
-      <div className="container mx-auto px-4 flex justify-between items-center">
-        <div className="flex items-center space-x-2 cursor-pointer" onClick={onLogoClick}>
-          <img 
-            src="/mmtlogo.png" 
-            alt="Money Transfer Comparison" 
-            className="h-10 w-auto" 
-          />
+      <div className="container mx-auto px-4 relative">
+        {/* Mobile Hamburger Button - Positioned Right */}
+        <div className="md:hidden absolute right-4 top-1/2 transform -translate-y-1/2 z-10">
+          <button 
+            className="focus:outline-none"
+            onClick={handleMenuClose}
+            aria-label="Toggle menu"
+          >
+            <svg 
+              className={`w-6 h-6 ${isTransparent && !menuOpen && !isClosing ? 'text-white' : 'text-gray-800'}`} 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24" 
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              {menuOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
+        </div>
+
+        {/* Logo - Centered on mobile/small tablet, Left on desktop */}
+        <div className="flex justify-center md:justify-start">
+          <div 
+            className="flex items-center space-x-2 cursor-pointer" 
+            onClick={onLogoClick}
+          >
+            <img 
+              src="/mmtlogo.png" 
+              alt="Money Transfer Comparison" 
+              className="h-10 w-auto" 
+            />
+          </div>
         </div>
         
         {/* Desktop Navigation */}
-        <div className="hidden md:flex space-x-3">
+        <div className="hidden md:flex space-x-3 absolute right-4 top-1/2 transform -translate-y-1/2">
           <button 
             onClick={onAboutClick}
             className="bg-[#4F46E5] hover:bg-[#1B1464] text-white py-2 px-4 rounded-full font-medium transition duration-200"
@@ -116,30 +145,9 @@ const Header = ({
             onClick={onHistoricalRatesClick}
             className="bg-[#4F46E5] hover:bg-[#1B1464] text-white py-2 px-4 rounded-full font-medium transition duration-200"
           >
-            Historical Rates
+            Rates
           </button>
         </div>
-        
-        {/* Mobile Hamburger Button */}
-        <button 
-          className="md:hidden focus:outline-none"
-          onClick={handleMenuClose}
-          aria-label="Toggle menu"
-        >
-          <svg 
-            className={`w-6 h-6 ${isTransparent && !menuOpen && !isClosing ? 'text-white' : 'text-gray-800'}`} 
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24" 
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            {menuOpen ? (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            ) : (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            )}
-          </svg>
-        </button>
       </div>
       
       {/* Mobile Menu - Only visible on mobile */}
@@ -152,7 +160,7 @@ const Header = ({
             transition: 'opacity 300ms ease'
           }}
         >
-          <div className="container mx-auto px-4 py-4">
+          <div className="container mx-auto px-4 py-4 pb-8">
             <div className="flex flex-col space-y-3">
               <button 
                 onClick={() => {
@@ -188,7 +196,7 @@ const Header = ({
                 }}
                 className="bg-[#4F46E5] hover:bg-[#1B1464] text-white py-2 px-4 rounded-full font-medium transition duration-200 w-full text-center"
               >
-                Historical Rates
+                Rates
               </button>
             </div>
           </div>

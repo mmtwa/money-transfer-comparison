@@ -8,6 +8,7 @@ import CurrencySelector from '../components/ui/CurrencySelector';
 import CurrencyFlag from '../components/ui/CurrencyFlag';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
+import { motion } from 'framer-motion';
 
 // Register Chart.js components manually
 Chart.register(
@@ -22,9 +23,9 @@ Chart.register(
 );
 
 /**
- * Historical Rates page component
+ * Live & Historical Rates page component
  */
-const HistoricalRates = () => {
+const LiveHistoricalRates = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [chartData, setChartData] = useState(null);
@@ -32,6 +33,11 @@ const HistoricalRates = () => {
   const [activeRange, setActiveRange] = useState('1month');
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [historicalData, setHistoricalData] = useState([]);
+  
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   
   // Form state
   const [formState, setFormState] = useState({
@@ -290,6 +296,7 @@ const HistoricalRates = () => {
     };
 
     setChartData(chartData);
+    setHistoricalData(sortedData);
   };
   
   // Fetch data on initial load and when currency changes
@@ -300,242 +307,458 @@ const HistoricalRates = () => {
     }
   }, [formState.fromCurrency, formState.toCurrency, formState.group]);
 
+  // Animation variants for staggered animations
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
+  };
+  
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: { duration: 0.5 }
+    }
+  };
+
   return (
-    <div className="flex flex-col min-h-screen bg-white text-gray-900 py-10 pt-[1px]">
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-indigo-50/30 to-white text-gray-900 py-10 pt-[1px]">
       {/* Hero Section */}
-      <section className="py-16 md:py-20 border-b border-gray-100 bg-gradient-to-b from-indigo-50 to-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-center text-indigo-900">Historical Exchange Rates</h1>
-            <p className="text-lg text-gray-600 text-center">
-              Track currency exchange rate trends over time to make informed decisions
-            </p>
+      <section className="py-16 md:py-20 border-b border-gray-100 bg-gradient-to-b from-indigo-900 to-indigo-800 text-white relative overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute inset-0 opacity-10">
+            {/* Animated background grid */}
+            <div className="absolute inset-0" style={{ backgroundImage: 'linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
           </div>
+          <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/80 to-purple-900/60"></div>
         </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <motion.div 
+            className="max-w-4xl mx-auto"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <motion.h1 
+              className="text-4xl md:text-6xl font-bold mb-4 text-center text-white leading-tight tracking-tight"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.8 }}
+            >
+              <span className="relative inline-block">
+                Live
+                <span className="absolute -bottom-1 left-0 w-full h-1 bg-indigo-400"></span>
+              </span>{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-purple-300">
+                & Historical Exchange Rates
+              </span>
+            </motion.h1>
+            <motion.p 
+              className="text-lg md:text-xl text-indigo-100 text-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.8 }}
+            >
+              Track currency trends over time for smarter international transfers
+            </motion.p>
+          </motion.div>
+        </div>
+        
+        {/* Animated scroll indicator */}
+        <motion.div 
+          className="absolute bottom-6 left-1/2 transform -translate-x-1/2"
+          animate={{ y: [0, 10, 0] }}
+          transition={{ repeat: Infinity, duration: 1.5 }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
+        </motion.div>
       </section>
 
       {/* Main Content */}
-      <section className="py-10">
+      <section className="py-10 md:py-16">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
+          <motion.div 
+            className="max-w-4xl mx-auto"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
             {/* Currency Converter Box */}
-            <div className="bg-white rounded-xl p-6 mb-8 shadow-md border border-gray-100">
-              <div className="flex flex-col md:flex-row md:items-end gap-4 md:gap-8">
-                {/* From Currency */}
-                <div className="flex-1">
-                  <CurrencySelector
-                    label="Amount"
-                    selectedCurrency={formState.fromCurrency}
-                    onCurrencyChange={(currency) => handleCurrencyChange('fromCurrency', currency)}
-                    isOpen={activeDropdown === 'fromCurrency'}
-                    onToggle={handleDropdownToggle}
-                    id="fromCurrency"
-                  />
-                </div>
-                
-                {/* Swap Icon */}
-                <div className="hidden md:flex items-center justify-center pb-5">
-                  <div className="bg-indigo-100 p-2 rounded-full cursor-pointer hover:bg-indigo-200 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="1" y1="9" x2="23" y2="9"></line>
-                      <polyline points="19 5 23 9 19 13"></polyline>
-                      <polyline points="5 19 1 15 5 11"></polyline>
-                      <line x1="23" y1="15" x2="1" y2="15"></line>
-                    </svg>
-                  </div>
-                </div>
-                
-                {/* To Currency */}
-                <div className="flex-1">
-                  <CurrencySelector
-                    label="Conversion to"
-                    selectedCurrency={formState.toCurrency}
-                    onCurrencyChange={(currency) => handleCurrencyChange('toCurrency', currency)}
-                    isOpen={activeDropdown === 'toCurrency'}
-                    onToggle={handleDropdownToggle}
-                    id="toCurrency"
-                  />
-                </div>
-              </div>
+            <motion.div 
+              className="bg-white rounded-2xl p-6 mb-8 shadow-lg border border-indigo-50 relative overflow-hidden"
+              variants={itemVariants}
+            >
+              <div className="absolute -right-10 -top-10 w-48 h-48 bg-indigo-500/5 rounded-full"></div>
+              <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-purple-500/5 rounded-full"></div>
               
-              {/* Current Exchange Rate Display */}
-              {currentExchangeRate && (
-                <div className="mt-6 pt-6 border-t border-gray-100">
-                  <div className="flex flex-col items-center justify-center">
-                    <div className="flex items-center mb-2">
-                      <CurrencyFlag currency={formState.fromCurrency} size="md" />
-                      <span className="mx-2 text-lg font-medium">1 {formState.fromCurrency} = </span>
-                      <span className="text-2xl font-bold text-indigo-600">
-                        {formatExchangeRate(currentExchangeRate)}
-                      </span>
-                      <span className="ml-2 text-lg font-medium">{formState.toCurrency}</span>
-                      <CurrencyFlag currency={formState.toCurrency} size="md" className="ml-2" />
-                    </div>
-                    <p className="text-sm text-gray-500">
-                      Real-time mid-market exchange rate
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Historical Chart */}
-            <div className="bg-white rounded-xl p-6 shadow-md border border-gray-100 mb-8">
-              <div className="flex flex-col">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-xl font-bold text-gray-800">
-                    {formState.fromCurrency}/{formState.toCurrency} Exchange Rate Trend
-                  </h2>
-                  
-                  {/* Time Period Buttons */}
-                  <div className="flex flex-wrap gap-2">
-                    <button 
-                      onClick={() => handleRangeChange('48hours')}
-                      className={`px-3 py-1 text-sm rounded-full ${activeRange === '48hours' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-                    >
-                      48h
-                    </button>
-                    <button 
-                      onClick={() => handleRangeChange('1week')}
-                      className={`px-3 py-1 text-sm rounded-full ${activeRange === '1week' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-                    >
-                      1w
-                    </button>
-                    <button 
-                      onClick={() => handleRangeChange('1month')}
-                      className={`px-3 py-1 text-sm rounded-full ${activeRange === '1month' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-                    >
-                      1m
-                    </button>
-                    <button 
-                      onClick={() => handleRangeChange('6months')}
-                      className={`px-3 py-1 text-sm rounded-full ${activeRange === '6months' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-                    >
-                      6m
-                    </button>
-                    <button 
-                      onClick={() => handleRangeChange('12months')}
-                      className={`px-3 py-1 text-sm rounded-full ${activeRange === '12months' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-                    >
-                      1y
-                    </button>
-                    <button 
-                      onClick={() => handleRangeChange('5years')}
-                      className={`px-3 py-1 text-sm rounded-full ${activeRange === '5years' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-                    >
-                      5y
-                    </button>
-                  </div>
-                </div>
-                
-                {/* Chart Container */}
-                {isLoading ? (
-                  <div className="h-80 flex items-center justify-center">
-                    <div className="flex flex-col items-center">
-                      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
-                      <p className="mt-4 text-gray-600">Loading historical data...</p>
-                    </div>
-                  </div>
-                ) : error ? (
-                  <div className="h-80 flex items-center justify-center">
-                    <div className="bg-red-50 border-l-4 border-red-500 p-4 w-full">
-                      <div className="flex">
-                        <div className="flex-shrink-0">
-                          <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                        <div className="ml-3">
-                          <p className="text-sm text-red-700">{error}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ) : chartData ? (
-                  <div className="h-80">
-                    <Line
-                      data={chartData}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                          y: {
-                            beginAtZero: false,
-                            title: {
-                              display: true,
-                              text: `${formState.toCurrency} per 1 ${formState.fromCurrency}`
-                            },
-                            ticks: {
-                              callback: function(value) {
-                                return value.toFixed(4);
-                              }
-                            }
-                          },
-                          x: {
-                            grid: {
-                              display: false
-                            }
-                          }
-                        },
-                        plugins: {
-                          legend: {
-                            display: false
-                          },
-                          tooltip: {
-                            callbacks: {
-                              label: function(context) {
-                                return `Rate: ${context.parsed.y.toFixed(5)}`;
-                              }
-                            }
-                          }
-                        },
-                        interaction: {
-                          mode: 'index',
-                          intersect: false,
-                        },
-                        elements: {
-                          point: {
-                            radius: activeRange === '48hours' || activeRange === '1week' ? 1 : 0,
-                            hoverRadius: 5
-                          }
-                        }
-                      }}
+              <div className="relative">
+                <div className="flex flex-col md:flex-row md:items-end gap-4 md:gap-8">
+                  {/* From Currency */}
+                  <div className="flex-1">
+                    <CurrencySelector
+                      label="Amount"
+                      selectedCurrency={formState.fromCurrency}
+                      onCurrencyChange={(currency) => handleCurrencyChange('fromCurrency', currency)}
+                      isOpen={activeDropdown === 'fromCurrency'}
+                      onToggle={handleDropdownToggle}
+                      id="fromCurrency"
                     />
                   </div>
-                ) : (
-                  <div className="h-80 flex items-center justify-center">
-                    <p className="text-gray-500">Select currencies and date range to view historical rates</p>
+                  
+                  {/* Swap Icon */}
+                  <motion.div 
+                    className="hidden md:flex items-center justify-center pb-5"
+                    whileHover={{ rotateY: 180 }}
+                    transition={{ duration: 0.3 }}
+                    onClick={() => {
+                      // Swap the currencies
+                      const newFormState = {
+                        ...formState,
+                        fromCurrency: formState.toCurrency,
+                        toCurrency: formState.fromCurrency
+                      };
+                      setFormState(newFormState);
+                    }}
+                    style={{ transformStyle: "preserve-3d" }}
+                  >
+                    <div className="bg-indigo-100 p-2 rounded-full cursor-pointer hover:bg-indigo-200 transition-colors">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="1" y1="9" x2="23" y2="9"></line>
+                        <polyline points="19 5 23 9 19 13"></polyline>
+                        <polyline points="5 19 1 15 5 11"></polyline>
+                        <line x1="23" y1="15" x2="1" y2="15"></line>
+                      </svg>
+                    </div>
+                  </motion.div>
+                  
+                  {/* To Currency */}
+                  <div className="flex-1">
+                    <CurrencySelector
+                      label="Conversion to"
+                      selectedCurrency={formState.toCurrency}
+                      onCurrencyChange={(currency) => handleCurrencyChange('toCurrency', currency)}
+                      isOpen={activeDropdown === 'toCurrency'}
+                      onToggle={handleDropdownToggle}
+                      id="toCurrency"
+                    />
                   </div>
-                )}
+                </div>
                 
-                <div className="mt-4 text-sm text-gray-500">
-                  <p>Data provided by Wise's historical exchange rates API</p>
-                  <p className="mt-1">Note: Maximum 30 days of detailed data is available</p>
+                {/* Current Exchange Rate Display */}
+                {currentExchangeRate && (
+                  <motion.div 
+                    className="mt-6 pt-6 border-t border-gray-100"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5, duration: 0.5 }}
+                  >
+                    <div className="flex flex-col items-center justify-center">
+                      <div className="flex items-center mb-2">
+                        <CurrencyFlag currency={formState.fromCurrency} size="md" />
+                        <span className="mx-2 text-lg font-medium">1 {formState.fromCurrency} = </span>
+                        <motion.span 
+                          className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600"
+                          animate={{ scale: [1, 1.05, 1] }}
+                          transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 3 }}
+                        >
+                          {formatExchangeRate(currentExchangeRate)}
+                        </motion.span>
+                        <span className="mx-2 text-lg font-medium">{formState.toCurrency}</span>
+                        <CurrencyFlag currency={formState.toCurrency} size="md" />
+                      </div>
+                      <p className="text-sm text-gray-500">
+                        Real-time mid-market exchange rate
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+            </motion.div>
+
+            {/* Historical Chart */}
+            <motion.div 
+              className="bg-white rounded-2xl p-6 shadow-lg border border-indigo-50 mb-8 relative overflow-hidden"
+              variants={itemVariants}
+            >
+              <div className="absolute -left-10 -bottom-10 w-48 h-48 bg-indigo-500/5 rounded-full"></div>
+              <div className="absolute right-10 top-10 w-32 h-32 bg-purple-500/5 rounded-full"></div>
+              
+              <div className="relative z-10">
+                <div className="flex flex-col">
+                  <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
+                    <h2 className="text-xl font-bold text-gray-800 flex items-center">
+                      <span className="mr-2 text-indigo-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                        </svg>
+                      </span>
+                      <span>
+                        {formState.fromCurrency}/{formState.toCurrency} Exchange Rate Trend
+                      </span>
+                    </h2>
+                    
+                    {/* Time Period Buttons */}
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        { id: '48hours', label: '48h' },
+                        { id: '1week', label: '1w' },
+                        { id: '1month', label: '1m' },
+                        { id: '6months', label: '6m' },
+                        { id: '12months', label: '1y' },
+                        { id: '5years', label: '5y' }
+                      ].map((range) => (
+                        <motion.button 
+                          key={range.id}
+                          onClick={() => handleRangeChange(range.id)}
+                          className={`px-3 py-1 text-sm rounded-full transition-all duration-300 border ${activeRange === range.id ? 
+                            'bg-indigo-600 text-white border-indigo-600' : 
+                            'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}`}
+                          whileHover={{ y: -2 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          {range.label}
+                        </motion.button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Chart Container */}
+                  <div className={`rounded-xl overflow-hidden ${isLoading || error ? 'bg-gray-50' : 'bg-white'} transition-all duration-500 ease-in-out`}>
+                    {isLoading ? (
+                      <div className="h-80 flex items-center justify-center">
+                        <div className="flex flex-col items-center">
+                          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+                          <p className="mt-4 text-gray-600">Loading historical data...</p>
+                        </div>
+                      </div>
+                    ) : error ? (
+                      <div className="h-80 flex items-center justify-center">
+                        <div className="bg-red-50 border-l-4 border-red-500 p-4 w-full max-w-lg">
+                          <div className="flex">
+                            <div className="flex-shrink-0">
+                              <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                            <div className="ml-3">
+                              <p className="text-sm text-red-700">{error}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ) : chartData ? (
+                      <motion.div 
+                        className="h-80"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        <Line
+                          data={chartData}
+                          options={{
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                              y: {
+                                beginAtZero: false,
+                                title: {
+                                  display: true,
+                                  text: `${formState.toCurrency} per 1 ${formState.fromCurrency}`
+                                },
+                                ticks: {
+                                  callback: function(value) {
+                                    return value.toFixed(4);
+                                  }
+                                }
+                              },
+                              x: {
+                                grid: {
+                                  display: false
+                                }
+                              }
+                            },
+                            plugins: {
+                              legend: {
+                                display: false
+                              },
+                              tooltip: {
+                                callbacks: {
+                                  label: function(context) {
+                                    return `Rate: ${context.parsed.y.toFixed(5)}`;
+                                  }
+                                },
+                                backgroundColor: 'rgba(79, 70, 229, 0.8)',
+                                titleColor: 'white',
+                                bodyColor: 'white',
+                                borderColor: 'rgba(79, 70, 229, 0.2)',
+                                borderWidth: 1,
+                                titleFont: {
+                                  weight: 'bold'
+                                },
+                                padding: 10,
+                                bodyFont: {
+                                  size: 14
+                                },
+                                displayColors: false,
+                                caretSize: 6,
+                              }
+                            },
+                            interaction: {
+                              mode: 'index',
+                              intersect: false,
+                            },
+                            elements: {
+                              point: {
+                                radius: activeRange === '48hours' || activeRange === '1week' ? 1 : 0,
+                                hoverRadius: 5
+                              }
+                            },
+                            animation: {
+                              duration: 1500,
+                              easing: 'easeOutQuart'
+                            }
+                          }}
+                        />
+                      </motion.div>
+                    ) : (
+                      <div className="h-80 flex items-center justify-center">
+                        <p className="text-gray-500">Select currencies and date range to view historical rates</p>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="mt-4 text-sm text-gray-500 flex items-center justify-center">
+                    <span className="inline-flex items-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Data provided by Wise's historical exchange rates API
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
+            
+            {/* Historical Data Stats */}
+            {historicalData.length > 0 && (
+              <motion.div 
+                className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8"
+                variants={containerVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+              >
+                {/* Min Rate Card */}
+                <motion.div
+                  className="bg-white rounded-2xl p-6 shadow-md border border-indigo-50 overflow-hidden relative"
+                  variants={itemVariants}
+                  whileHover={{ y: -4, boxShadow: "0 12px 24px -8px rgba(79, 70, 229, 0.15)" }}
+                >
+                  <div className="absolute -top-10 -right-10 w-32 h-32 bg-green-100 rounded-full opacity-20"></div>
+                  <div className="relative">
+                    <h3 className="text-sm uppercase tracking-wider text-gray-500 font-medium mb-2">Lowest Rate</h3>
+                    <p className="text-2xl font-bold text-green-600">
+                      {formatExchangeRate(Math.min(...historicalData.map(item => item.rate)))}
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">During selected period</p>
+                  </div>
+                </motion.div>
+              
+                {/* Max Rate Card */}
+                <motion.div 
+                  className="bg-white rounded-2xl p-6 shadow-md border border-indigo-50 overflow-hidden relative"
+                  variants={itemVariants}
+                  whileHover={{ y: -4, boxShadow: "0 12px 24px -8px rgba(79, 70, 229, 0.15)" }}
+                >
+                  <div className="absolute -top-10 -right-10 w-32 h-32 bg-red-100 rounded-full opacity-20"></div>
+                  <div className="relative">
+                    <h3 className="text-sm uppercase tracking-wider text-gray-500 font-medium mb-2">Highest Rate</h3>
+                    <p className="text-2xl font-bold text-red-600">
+                      {formatExchangeRate(Math.max(...historicalData.map(item => item.rate)))}
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">During selected period</p>
+                  </div>
+                </motion.div>
+              
+                {/* Average Rate Card */}
+                <motion.div 
+                  className="bg-white rounded-2xl p-6 shadow-md border border-indigo-50 overflow-hidden relative"
+                  variants={itemVariants}
+                  whileHover={{ y: -4, boxShadow: "0 12px 24px -8px rgba(79, 70, 229, 0.15)" }}
+                >
+                  <div className="absolute -top-10 -right-10 w-32 h-32 bg-indigo-100 rounded-full opacity-20"></div>
+                  <div className="relative">
+                    <h3 className="text-sm uppercase tracking-wider text-gray-500 font-medium mb-2">Average Rate</h3>
+                    <p className="text-2xl font-bold text-indigo-600">
+                      {formatExchangeRate(historicalData.reduce((sum, item) => sum + item.rate, 0) / historicalData.length)}
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">During selected period</p>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
             
             {/* Info Boxes */}
-            <div className="grid md:grid-cols-2 gap-6 mt-8">
-              <div className="bg-gradient-to-br from-indigo-50 to-white rounded-xl p-6 shadow-sm border border-indigo-100">
-                <h3 className="text-xl font-bold text-indigo-700 mb-3">Understanding Exchange Rate Trends</h3>
-                <p className="text-gray-700">
-                  Historical exchange rate data helps you understand currency movements over time. Look for patterns like volatility or stability to make better timing decisions for your transfers.
-                </p>
-              </div>
+            <motion.div 
+              className="grid md:grid-cols-2 gap-6 mt-8"
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+            >
+              <motion.div 
+                className="bg-gradient-to-br from-indigo-50 to-white rounded-2xl p-8 shadow-md border border-indigo-100 relative overflow-hidden"
+                variants={itemVariants}
+                whileHover={{ y: -4, boxShadow: "0 15px 30px -10px rgba(79, 70, 229, 0.15)" }}
+              >
+                <div className="absolute -right-10 -bottom-20 w-40 h-40 bg-indigo-200 rounded-full opacity-20 blur-xl"></div>
+                <div className="absolute left-4 top-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-indigo-400 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                </div>
+                <div className="relative">
+                  <h3 className="text-xl font-bold text-indigo-700 mb-3 mt-8">Understanding Exchange Rate Trends</h3>
+                  <p className="text-gray-700">
+                    Historical exchange rate data helps you understand currency movements over time. Look for patterns like volatility or stability to make better timing decisions for your transfers.
+                  </p>
+                </div>
+              </motion.div>
               
-              <div className="bg-gradient-to-br from-indigo-50 to-white rounded-xl p-6 shadow-sm border border-indigo-100">
-                <h3 className="text-xl font-bold text-indigo-700 mb-3">When To Make Your Transfer</h3>
-                <p className="text-gray-700">
-                  By monitoring historical rates, you can identify favorable times to make currency exchanges. Even small rate improvements can lead to significant savings on larger transfers.
-                </p>
-              </div>
-            </div>
-          </div>
+              <motion.div 
+                className="bg-gradient-to-br from-purple-50 to-white rounded-2xl p-8 shadow-md border border-purple-100 relative overflow-hidden"
+                variants={itemVariants}
+                whileHover={{ y: -4, boxShadow: "0 15px 30px -10px rgba(124, 58, 237, 0.15)" }}
+              >
+                <div className="absolute -left-10 -bottom-20 w-40 h-40 bg-purple-200 rounded-full opacity-20 blur-xl"></div>
+                <div className="absolute left-4 top-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-purple-400 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div className="relative">
+                  <h3 className="text-xl font-bold text-purple-700 mb-3 mt-8">When To Make Your Transfer</h3>
+                  <p className="text-gray-700">
+                    By monitoring historical rates, you can identify favorable times to make currency exchanges. Even small rate improvements can lead to significant savings on larger transfers.
+                  </p>
+                </div>
+              </motion.div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
     </div>
   );
 };
 
-export default HistoricalRates; 
+export default LiveHistoricalRates; 

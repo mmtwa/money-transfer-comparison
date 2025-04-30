@@ -1,6 +1,11 @@
 import React from 'react';
 import GuideDetail from './GuideDetail';
 import { Link } from 'react-router-dom';
+// Import images from assets directory
+import heroImageJpg from '../../assets/images/guides/business-transfers-hero.jpg';
+import heroImageWebp from '../../assets/images/guides/business-transfers-hero-new.webp';
+// Import responsive image component
+import ResponsiveImage from '../../components/common/ResponsiveImage';
 
 /**
  * Business Transfers guide page
@@ -12,7 +17,8 @@ const BusinessTransfers = () => {
       subtitle="Expert solutions for businesses needing to make international payments, manage currency risk, and optimise bulk transfers."
       publishDate="5 August 2023"
       readTime="9 min read"
-      heroImage="/images/guides/exchange-rate-diagram.html"
+      heroImage={heroImageJpg}
+      webp={heroImageWebp}
       content={
         <div className="prose prose-lg max-w-none">
           <p className="lead text-xl font-medium mb-8 text-left">
@@ -73,7 +79,7 @@ const BusinessTransfers = () => {
           
           <div className="grid md:grid-cols-3 gap-6 my-8">
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden flex flex-col">
-              <div className="bg-indigo-600 p-4 text-white">
+              <div className="bg-indigo-600 p-4 text-white h-16 flex items-center">
                 <h3 className="text-xl font-semibold text-left">Bank Services</h3>
               </div>
               <div className="p-5 flex-grow">
@@ -112,7 +118,7 @@ const BusinessTransfers = () => {
             </div>
             
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden flex flex-col">
-              <div className="bg-indigo-600 p-4 text-white">
+              <div className="bg-indigo-600 p-4 text-white h-16 flex items-center">
                 <h3 className="text-xl font-semibold text-left">Specialised Providers</h3>
               </div>
               <div className="p-5 flex-grow">
@@ -151,7 +157,7 @@ const BusinessTransfers = () => {
             </div>
             
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden flex flex-col">
-              <div className="bg-indigo-600 p-4 text-white">
+              <div className="bg-indigo-600 p-4 text-white h-16 flex items-center">
                 <h3 className="text-xl font-semibold text-left">Payment Platforms</h3>
               </div>
               <div className="p-5 flex-grow">

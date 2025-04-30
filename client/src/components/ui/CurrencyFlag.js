@@ -41,7 +41,6 @@ const CurrencyFlag = ({ currency, size = 'md' }) => {
         className={`${sizeClasses[size]} rounded-full object-cover bg-gray-100 border border-gray-200 shadow-sm transition-opacity duration-200`}
         onLoad={handleLoad}
         onError={handleError}
-        style={{ opacity: isLoaded || hasError ? 1 : 0.7 }}
       />
     </div>
   );
