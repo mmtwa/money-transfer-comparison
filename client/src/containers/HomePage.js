@@ -48,6 +48,21 @@ const HomePage = ({ onSearch, initialData, onAboutClick, onGuidesClick, onFaqCli
     };
   }, []);
   
+  useEffect(() => {
+    // Attempt to hide the address bar on mobile by scrolling down slightly
+    // Use a small timeout to ensure the page has rendered
+    const timer = setTimeout(() => {
+      // Check if it's likely a mobile device based on touch capability
+      // This isn't foolproof but avoids unnecessary scroll on desktops
+      if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+        window.scrollTo(0, 1);
+      }
+    }, 100); // 100ms delay
+  
+    // Clean up the timer if the component unmounts before it fires
+    return () => clearTimeout(timer);
+  }, []); // Empty dependency array means this runs once on mount
+  
   return (
     <div className="relative overflow-hidden" style={{ 
       height: '100vh', 
@@ -124,7 +139,7 @@ const HomePage = ({ onSearch, initialData, onAboutClick, onGuidesClick, onFaqCli
             padding: '20px',
             color: 'rgba(255, 255, 250, 0.95)',
             textShadow: '0 2px 4px rgba(0, 0, 0, 0.25)',
-            zIndex: 20,
+            zIndex: 5,
             textDecoration: 'none',
             cursor: 'pointer',
             transition: 'opacity 0.2s ease-in-out'

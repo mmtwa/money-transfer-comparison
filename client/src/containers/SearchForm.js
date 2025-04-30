@@ -359,7 +359,7 @@ const SearchForm = ({ onSearch, initialData }) => {
 
         <div className="px-6 pb-6 pt-3 md:px-8 md:pb-8 md:pt-4">
           <h2 className="mb-4 text-left">
-            <div className="flex flex-col items-start mb-2">
+            <div className="flex flex-col items-center sm:items-start mb-2">
               <div
                 className="text-2xl sm:text-2xl md:text-3xl lg:text-3xl font-semibold tracking-tight leading-tight overflow-hidden whitespace-nowrap relative"
                 style={{ 
@@ -387,7 +387,7 @@ const SearchForm = ({ onSearch, initialData }) => {
                   minHeight: '48px' // Reserve height
                 }}
               >
-                <div className="block sm:hidden">
+                <div className="block sm:hidden text-center">
                   <div className="text-base leading-tight">Worried about transfer fees?</div>
                   <div className="text-sm leading-tight">Compare instantly & see the</div>
                   <div className="text-sm leading-tight">real cost before you send.</div>

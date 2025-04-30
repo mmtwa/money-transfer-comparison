@@ -395,7 +395,7 @@ const LiveHistoricalRates = () => {
           >
             {/* Currency Converter Box */}
             <motion.div 
-              className="bg-white rounded-2xl p-6 mb-8 shadow-lg border border-indigo-50 relative overflow-hidden"
+              className="bg-white rounded-2xl p-6 mb-8 shadow-lg border border-indigo-50 relative"
               variants={itemVariants}
             >
               <div className="absolute -right-10 -top-10 w-48 h-48 bg-indigo-500/5 rounded-full"></div>
