@@ -1,11 +1,12 @@
 import React, { useEffect, useState, lazy, Suspense } from 'react';
-import { BrowserRouter, useNavigate } from 'react-router-dom';
+import { BrowserRouter, useNavigate, Route } from 'react-router-dom';
 import MoneyCompare from './containers/MoneyCompare';
 import Analytics from './components/Analytics';
 import FontLoader from './components/FontLoader';
 import StructuredData from './components/StructuredData';
 import CookieConsent from './components/CookieConsent';
 import './App.css';
+import Careers from './pages/Careers';
 
 // Lazy load non-critical components
 const PreloadFlags = lazy(() => import('./components/ui/PreloadFlags'));

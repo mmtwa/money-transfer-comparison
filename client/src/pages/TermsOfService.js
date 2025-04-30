@@ -1,14 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 /**
  * Terms of Service page
  */
 const TermsOfService = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="container mx-auto px-6 py-8 max-w-4xl">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">Terms of Service</h1>
       
-      <div className="prose prose-lg max-w-none">
+      <div className="prose prose-lg max-w-none text-left">
         <p className="text-gray-600">Last Updated: {new Date().toLocaleDateString()}</p>
         
         <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-800">1. Introduction and Acceptance</h2>

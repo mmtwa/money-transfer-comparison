@@ -1,11 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 /**
  * Privacy Policy page
  */
 const PrivacyPolicy = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
-    <div className="container mx-auto px-6 py-8 max-w-4xl">
+    <div className="container mx-auto px-6 py-8 max-w-4xl text-left">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">Privacy Policy</h1>
       
       <div className="prose prose-lg max-w-none">

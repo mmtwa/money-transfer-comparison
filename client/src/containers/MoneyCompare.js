@@ -19,6 +19,8 @@ import PrivacyPolicy from '../pages/PrivacyPolicy';
 import TermsOfService from '../pages/TermsOfService';
 import CookiePolicy from '../pages/CookiePolicy';
 import LegalDisclosure from '../pages/LegalDisclosure';
+import Careers from '../pages/Careers';
+import Press from '../pages/Press';
 
 /**
  * Main container component for the money transfer comparison app
@@ -37,6 +39,9 @@ const MoneyCompare = ({ initialPath }) => {
   
   // Listen for location changes from React Router and update currentPage
   useEffect(() => {
+    // Scroll to top on route change
+    window.scrollTo(0, 0);
+
     const path = location.pathname;
     console.log('Location changed:', path);
     
@@ -72,6 +77,10 @@ const MoneyCompare = ({ initialPath }) => {
       setCurrentPage('cookie-policy');
     } else if (path === '/legal-disclosure') {
       setCurrentPage('legal-disclosure');
+    } else if (path === '/careers') {
+      setCurrentPage('careers');
+    } else if (path === '/press') {
+      setCurrentPage('press');
     }
   }, [location]);
   
@@ -109,6 +118,10 @@ const MoneyCompare = ({ initialPath }) => {
         setCurrentPage('cookie-policy');
       } else if (window.location.pathname === '/legal-disclosure') {
         setCurrentPage('legal-disclosure');
+      } else if (window.location.pathname === '/careers') {
+        setCurrentPage('careers');
+      } else if (window.location.pathname === '/press') {
+        setCurrentPage('press');
       }
     };
     
@@ -205,6 +218,22 @@ const MoneyCompare = ({ initialPath }) => {
     
     navigate('/legal-disclosure', { 
       state: { page: 'legal-disclosure' } 
+    });
+  };
+  
+  const navigateToCareers = () => {
+    setCurrentPage('careers');
+    
+    navigate('/careers', { 
+      state: { page: 'careers' } 
+    });
+  };
+  
+  const navigateToPress = () => {
+    setCurrentPage('press');
+    
+    navigate('/press', { 
+      state: { page: 'press' } 
     });
   };
   
@@ -581,6 +610,58 @@ const MoneyCompare = ({ initialPath }) => {
               onTermsClick={navigateToTermsOfService}
               onCookiesClick={navigateToCookiePolicy}
               onLegalDisclosureClick={navigateToLegalDisclosure}
+              onCareersClick={navigateToCareers}
+            />
+          </div>
+        );
+      case 'careers':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <Careers />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+              onCareersClick={navigateToCareers}
+            />
+          </div>
+        );
+      case 'press':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <Press />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+              onCareersClick={navigateToCareers}
+              onPressClick={navigateToPress}
             />
           </div>
         );
@@ -617,6 +698,8 @@ const MoneyCompare = ({ initialPath }) => {
         <Route path="/privacy-policy" element={renderPageContent()} />
         <Route path="/terms-of-service" element={renderPageContent()} />
         <Route path="/cookie-policy" element={renderPageContent()} />
+        <Route path="/careers" element={renderPageContent()} />
+        <Route path="/press" element={renderPageContent()} />
         {/* Legal Disclosure route temporarily hidden
         <Route path="/legal-disclosure" element={renderPageContent()} />
         */}

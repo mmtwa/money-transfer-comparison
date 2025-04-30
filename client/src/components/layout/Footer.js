@@ -11,8 +11,21 @@ const Footer = ({
   onPrivacyClick,
   onTermsClick,
   onCookiesClick,
-  onLegalDisclosureClick
+  onLegalDisclosureClick,
+  onCareersClick,
+  onPressClick
 }) => {
+  // Helper function to handle clicks with fallback
+  const handleClick = (clickHandler, defaultPath) => (e) => {
+    if (clickHandler) {
+      e.preventDefault();
+      clickHandler();
+    } else if (defaultPath) {
+      // If no click handler, allow default link behavior
+      // but make sure href is set
+    }
+  };
+
   return (
     <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-10 md:py-12 mt-12 relative overflow-hidden">
       {/* Decorative elements */}
@@ -55,15 +68,14 @@ const Footer = ({
             <div className="space-y-4">
               <h4 className="font-semibold text-sm uppercase tracking-wider text-indigo-300">Company</h4>
               <ul className="space-y-3 text-gray-300">
-                <li><a href="#" className="text-sm hover:text-white transition-colors duration-200 hover:underline">Careers</a></li>
-                <li><a href="#" className="text-sm hover:text-white transition-colors duration-200 hover:underline">Press</a></li>
+                <li><a href="/careers" className="text-sm hover:text-white transition-colors duration-200 hover:underline cursor-pointer" onClick={handleClick(onCareersClick, '/careers')}>Careers</a></li>
+                <li><a href="/press" className="text-sm hover:text-white transition-colors duration-200 hover:underline cursor-pointer" onClick={handleClick(onPressClick, '/press')}>Press</a></li>
                 <li><a href="#" className="text-sm hover:text-white transition-colors duration-200 hover:underline cursor-pointer" onClick={onAboutClick}>About</a></li>
               </ul>
             </div>
             <div className="space-y-4">
               <h4 className="font-semibold text-sm uppercase tracking-wider text-indigo-300">Resources</h4>
               <ul className="space-y-3 text-gray-300">
-                <li><a href="#" className="text-sm hover:text-white transition-colors duration-200 hover:underline">Blog</a></li>
                 <li><a href="#" className="text-sm hover:text-white transition-colors duration-200 hover:underline cursor-pointer" onClick={onGuidesClick}>Guides</a></li>
                 <li><a href="#" className="text-sm hover:text-white transition-colors duration-200 hover:underline cursor-pointer" onClick={onFaqClick}>FAQ</a></li>
                 <li><a href="#" className="text-sm hover:text-white transition-colors duration-200 hover:underline cursor-pointer" onClick={onHistoricalRatesClick}>Rates</a></li>
@@ -82,7 +94,7 @@ const Footer = ({
         
         {/* Button bar for easy navigation - now in grid layout for better mobile centering */}
         <div className="mt-12 mb-8 mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-xs md:max-w-2xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-3 max-w-xs md:max-w-4xl mx-auto">
             <button 
               onClick={onAboutClick}
               className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white py-2 px-5 rounded-full font-medium transition duration-200 transform hover:-translate-y-1 shadow-md"
@@ -107,13 +119,27 @@ const Footer = ({
             >
               Rates
             </button>
+            <a 
+              href="/careers"
+              onClick={handleClick(onCareersClick, '/careers')}
+              className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white py-2 px-5 rounded-full font-medium transition duration-200 transform hover:-translate-y-1 shadow-md flex items-center justify-center"
+            >
+              Careers
+            </a>
+            <a 
+              href="/press"
+              onClick={handleClick(onPressClick, '/press')}
+              className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white py-2 px-5 rounded-full font-medium transition duration-200 transform hover:-translate-y-1 shadow-md flex items-center justify-center"
+            >
+              Press
+            </a>
           </div>
         </div>
         
-        <div className="border-t border-gray-700/50 mt-6 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-400 text-sm">© {new Date().getFullYear()} mymoneytransfers.com. All rights reserved.</p>
-          <div className="text-gray-500 text-xs mt-2 md:mt-0 flex space-x-4">
-            <span>Comparing money transfer services worldwide</span>
+        <div className="border-t border-gray-700/50 mt-6 pt-8 flex flex-col md:flex-row justify-between items-start md:items-center">
+          <p className="text-gray-400 text-sm text-center md:text-left">© {new Date().getFullYear()} mymoneytransfers.com. All rights reserved.</p>
+          <div className="text-gray-500 text-xs mt-4 md:mt-0 flex flex-wrap justify-center md:justify-start space-x-4">
+            <span className="w-full md:w-auto text-center md:text-left mb-2 md:mb-0">Comparing money transfer services worldwide</span>
             <a onClick={onPrivacyClick} className="hover:text-gray-300 cursor-pointer">Privacy</a>
             <a onClick={onTermsClick} className="hover:text-gray-300 cursor-pointer">Terms</a>
           </div>

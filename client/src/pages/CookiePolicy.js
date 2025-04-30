@@ -5,10 +5,10 @@ import React from 'react';
  */
 const CookiePolicy = () => {
   return (
-    <div className="container mx-auto px-6 py-8 max-w-4xl">
+    <div className="container mx-auto px-6 pt-8 pb-8 max-w-4xl text-left">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">Cookie Policy</h1>
       
-      <div className="prose prose-lg max-w-none">
+      <div className="max-w-none">
         <p className="text-gray-600">Last Updated: {new Date().toLocaleDateString()}</p>
         
         <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-800">1. Introduction</h2>
@@ -58,47 +58,49 @@ const CookiePolicy = () => {
         </p>
         
         <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-800">4. Specific Cookies We Use</h2>
-        <table className="min-w-full bg-white border-collapse mb-6">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="py-2 px-4 border text-left">Cookie Name</th>
-              <th className="py-2 px-4 border text-left">Purpose</th>
-              <th className="py-2 px-4 border text-left">Duration</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="py-2 px-4 border">_ga</td>
-              <td className="py-2 px-4 border">Used by Google Analytics to distinguish users</td>
-              <td className="py-2 px-4 border">2 years</td>
-            </tr>
-            <tr>
-              <td className="py-2 px-4 border">_gid</td>
-              <td className="py-2 px-4 border">Used by Google Analytics to distinguish users</td>
-              <td className="py-2 px-4 border">24 hours</td>
-            </tr>
-            <tr>
-              <td className="py-2 px-4 border">_gat</td>
-              <td className="py-2 px-4 border">Used by Google Analytics to throttle request rate</td>
-              <td className="py-2 px-4 border">1 minute</td>
-            </tr>
-            <tr>
-              <td className="py-2 px-4 border">currency_preferences</td>
-              <td className="py-2 px-4 border">Stores your currency preferences for calculations</td>
-              <td className="py-2 px-4 border">30 days</td>
-            </tr>
-            <tr>
-              <td className="py-2 px-4 border">session_id</td>
-              <td className="py-2 px-4 border">Maintains your session state</td>
-              <td className="py-2 px-4 border">Session</td>
-            </tr>
-            <tr>
-              <td className="py-2 px-4 border">cookie_consent</td>
-              <td className="py-2 px-4 border">Records your cookie consent preferences</td>
-              <td className="py-2 px-4 border">1 year</td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white border-collapse mb-6">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="py-2 px-4 border text-left">Cookie Name</th>
+                <th className="py-2 px-4 border text-left">Purpose</th>
+                <th className="py-2 px-4 border text-left">Duration</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="py-2 px-4 border">_ga</td>
+                <td className="py-2 px-4 border">Used by Google Analytics to distinguish users</td>
+                <td className="py-2 px-4 border">2 years</td>
+              </tr>
+              <tr>
+                <td className="py-2 px-4 border">_gid</td>
+                <td className="py-2 px-4 border">Used by Google Analytics to distinguish users</td>
+                <td className="py-2 px-4 border">24 hours</td>
+              </tr>
+              <tr>
+                <td className="py-2 px-4 border">_gat</td>
+                <td className="py-2 px-4 border">Used by Google Analytics to throttle request rate</td>
+                <td className="py-2 px-4 border">1 minute</td>
+              </tr>
+              <tr>
+                <td className="py-2 px-4 border">currency_preferences</td>
+                <td className="py-2 px-4 border">Stores your currency preferences for calculations</td>
+                <td className="py-2 px-4 border">30 days</td>
+              </tr>
+              <tr>
+                <td className="py-2 px-4 border">session_id</td>
+                <td className="py-2 px-4 border">Maintains your session state</td>
+                <td className="py-2 px-4 border">Session</td>
+              </tr>
+              <tr>
+                <td className="py-2 px-4 border">cookie_consent</td>
+                <td className="py-2 px-4 border">Records your cookie consent preferences</td>
+                <td className="py-2 px-4 border">1 year</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         
         <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-800">5. Third-Party Cookies</h2>
         <p>
