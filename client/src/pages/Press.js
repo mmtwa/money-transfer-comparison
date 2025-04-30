@@ -35,7 +35,7 @@ The company's analysis shows that users who compare providers before transferrin
 
 The comprehensive study surveyed over 2,000 British nationals living across Spain, France, Portugal, and other EU destinations, finding that nearly two-thirds have experienced increased fees or reduced services from their traditional banking providers.
 
-"What we're seeing is a significant shift toward specialized money transfer services and fintech solutions," explained Robert Thompson, CEO of MyMoneyTransfers.com. "Traditional banking channels have become more expensive and cumbersome for cross-border transactions since the UK left the EU banking framework."
+"What we're seeing is a significant shift toward specialized money transfer services and fintech solutions," explained Freddie Supple, CEO of MyMoneyTransfers.com. "Traditional banking channels have become more expensive and cumbersome for cross-border transactions since the UK left the EU banking framework."
 
 The report indicates that expat retirees are particularly affected, with 81% reporting increased costs when transferring their UK pensions to EU bank accounts. This demographic is increasingly turning to digital comparison platforms to find the most cost-effective solutions.`,
       outlet: 'Telegraph Money',
@@ -115,7 +115,9 @@ The feature will have particular relevance for UK property owners abroad, busine
             </div>
 
             <div className="space-y-12">
-              {pressReleases.map((release, index) => (
+              {pressReleases
+                .filter(release => release.title !== 'MyMoneyTransfers.com Saves UK Consumers £27 Million in Hidden Fees')
+                .map((release, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, y: 20 }}
