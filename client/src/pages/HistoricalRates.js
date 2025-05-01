@@ -374,7 +374,7 @@ const LiveHistoricalRates = () => {
         
         {/* Animated scroll indicator */}
         <motion.div 
-          className="absolute bottom-6 left-1/2 transform -translate-x-1/2"
+          className="absolute bottom-6 left-0 right-0 flex justify-center"
           animate={{ y: [0, 10, 0] }}
           transition={{ repeat: Infinity, duration: 1.5 }}
         >

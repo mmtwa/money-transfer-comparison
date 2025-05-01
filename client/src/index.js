@@ -3,8 +3,8 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
-// Import CSS after initial render to avoid blocking
-import('./index.css');
+// Import CSS statically to ensure styles are loaded before rendering
+import './index.css';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

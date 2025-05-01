@@ -132,7 +132,7 @@ const FAQ = () => {
               className="flex justify-center"
             >
               <Link 
-                to="/compare"
+                to="/"
                 className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-8 py-3 rounded-full transition-all duration-300 shadow-md hover:shadow-lg"
               >
                 Start Comparing

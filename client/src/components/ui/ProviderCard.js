@@ -1,6 +1,8 @@
 import React from 'react';
 import { ExternalLink, Check, ThumbsUp, ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import { formatAmount, getCurrencySymbol } from '../../utils/currency';
+import GoogleRating from './GoogleRating';
+import './GoogleRating.css';
 
 // Map of provider codes to their website URLs - defined at module level
 // so it persists between renders and can be updated
@@ -118,6 +120,8 @@ const ProviderCard = ({
   fetchedRating,
   ratingsLoading
 }) => {
+  const [isLoaded, setIsLoaded] = React.useState(false);
+
   // Debug provider data - log once when component mounts
   React.useEffect(() => {
     console.log('Provider data:', { 
@@ -126,7 +130,47 @@ const ProviderCard = ({
       code: provider?.code,
       fullProvider: provider
     });
+    
+    // Set loaded state after a short delay to avoid flashing
+    const timer = setTimeout(() => {
+      setIsLoaded(true);
+    }, 150);
+    
+    return () => clearTimeout(timer);
   }, []);
+
+  // The provider code to use for the Google rating
+  // Extract from provider ID or use code directly, falling back to name
+  const getProviderCode = () => {
+    // First check if we have a direct code
+    if (provider?.code) {
+      return provider.code;
+    }
+    
+    // Then check for providerCode 
+    if (provider?.providerCode) {
+      return provider.providerCode;
+    }
+    
+    // Check if providerId is in the format "provider-{code}"
+    if (provider?.providerId && provider.providerId.startsWith('provider-')) {
+      const extractedCode = provider.providerId.split('provider-')[1];
+      // Only use the extracted code if it's not numeric
+      if (isNaN(extractedCode)) {
+        return extractedCode;
+      }
+    }
+    
+    // Fall back to formatted name if available
+    if (name) {
+      return name.toLowerCase().replace(/\s+/g, '-');
+    }
+    
+    // Last resort - use index with fallback
+    return `provider-${index || '0'}`;
+  };
+  
+  const providerCode = getProviderCode();
 
   // Generate rating visualization elements
   const renderRating = (ratingValue) => {
@@ -234,6 +278,13 @@ const ProviderCard = ({
     return 'Unknown';
   };
 
+  // Wrap icon components to prevent flashing
+  const IconWrapper = ({ children }) => (
+    <span className={isLoaded ? 'opacity-100' : 'opacity-0'} style={{ transition: 'opacity 0.2s ease-in-out' }}>
+      {children}
+    </span>
+  );
+
   return (
     <>
       {/* Shimmer animation style - only rendered if not already present from ResultsView */}
@@ -266,7 +317,8 @@ const ProviderCard = ({
         className={`rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow 
           ${index === 0 
             ? 'border-2 border-indigo-600 bg-white' 
-            : 'border border-gray-200 bg-white'}`}
+            : 'border border-gray-200 bg-white'} ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+        style={{ transitionDelay: `${index * 50}ms` }}
       >
         {/* Card Header - Provider info and amount */}
         <div className="flex items-center justify-between p-4 border-b border-gray-100">
@@ -307,7 +359,14 @@ const ProviderCard = ({
                 }}
               />
             </div>
-            {renderRating(provider?.rating || rating)}
+            {/* Use GoogleRating component instead of renderRating */}
+            {providerCode && (
+              <div className="mt-2 mb-2">
+                <GoogleRating providerName={providerCode} />
+              </div>
+            )}
+            {/* Fallback to the old rating display if no providerCode is available */}
+            {!providerCode && renderRating(provider?.rating || rating)}
           </div>
           
           <div className="text-right">
@@ -394,7 +453,9 @@ const ProviderCard = ({
             <div className="flex flex-wrap">
               {(provider?.features || features).map((feature, idx) => (
                 <span key={idx} className="flex items-center text-xs text-indigo-700 mr-3 mb-1">
-                  <Check size={12} className="mr-1 text-green-500" />
+                  <IconWrapper>
+                    <Check className="w-4 h-4 text-green-500 mr-1.5" />
+                  </IconWrapper>
                   {feature}
                 </span>
               ))}

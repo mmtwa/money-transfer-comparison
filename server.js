@@ -32,23 +32,43 @@ const providerRoutes = require('./routes/providers');
 const rateRoutes = require('./routes/rates');
 const userRoutes = require('./routes/users');
 const wiseRoutes = require('./routes/wiseRates');
+const googleRatingsRoutes = require('./routes/googleRatings');
 
 // Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useCreateIndex: true,
-  useFindAndModify: false
-})
-.then(() => console.log('MongoDB connected successfully'))
-.catch(err => {
-  console.error('MongoDB connection error:', err);
-  // Continue running the app even if MongoDB fails - don't exit
-});
+const connectDB = async () => {
+  try {
+    console.log('Connecting to MongoDB...');
+    console.log('MongoDB URI:', process.env.MONGODB_URI ? 'URI is set' : 'URI is not set');
+    
+    if (!process.env.MONGODB_URI) {
+      console.error('MONGODB_URI is not set in .env file');
+      return;
+    }
+    
+    await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useCreateIndex: true,
+      useFindAndModify: false
+    });
+    
+    console.log('MongoDB connected successfully');
+    
+    // Test database connection by checking the collections
+    const collections = await mongoose.connection.db.listCollections().toArray();
+    console.log('MongoDB collections:', collections.map(c => c.name).join(', '));
+  } catch (err) {
+    console.error('MongoDB connection error:', err);
+    // Continue running the app even if MongoDB fails - don't exit
+  }
+};
+
+// Call the connectDB function
+connectDB();
 
 // Middleware
 app.use(helmet({
@@ -136,6 +156,7 @@ app.use('/api/providers', providerRoutes);
 app.use('/api/rates', rateRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/wise', wiseRoutes);
+app.use('/api/google-ratings', googleRatingsRoutes);
 
 // Define the v1/rates endpoint for historical rates
 app.use('/v1/rates', (req, res, next) => {
@@ -240,8 +261,22 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+const startServer = (port) => {
+  const server = app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
+
+  // Handle server errors
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.log(`Port ${port} is already in use, trying port ${port + 1}`);
+      startServer(port + 1);
+    } else {
+      console.error('Server error:', err);
+    }
+  });
+};
+
+startServer(PORT);
 
 module.exports = app; // For testing purposes

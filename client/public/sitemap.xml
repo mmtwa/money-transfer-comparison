@@ -25,4 +25,34 @@
     <priority>0.6</priority>
     <changefreq>weekly</changefreq>
   </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/privacy-policy</loc>
+    <priority>0.5</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/terms-of-service</loc>
+    <priority>0.5</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/cookie-policy</loc>
+    <priority>0.5</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/legal-disclosure</loc>
+    <priority>0.5</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/press</loc>
+    <priority>0.6</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/careers</loc>
+    <priority>0.6</priority>
+    <changefreq>weekly</changefreq>
+  </url>
 </urlset> 

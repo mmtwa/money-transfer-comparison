@@ -14,6 +14,7 @@ const PreloadFlags = lazy(() => import('./components/ui/PreloadFlags'));
 function App() {
   const measurementId = 'G-90Q0L28ZF4';
   const [initialPath, setInitialPath] = useState(window.location.pathname);
+  const [isAppReady, setIsAppReady] = useState(false);
   
   // Initialize the app with the correct path based on URL
   useEffect(() => {
@@ -31,6 +32,17 @@ function App() {
     return () => {
       window.removeEventListener('popstate', handleInitialPath);
     };
+  }, []);
+
+  // Apply render-ready class after app is loaded
+  useEffect(() => {
+    // Short delay to ensure DOM is ready
+    const timer = setTimeout(() => {
+      document.body.classList.add('render-ready', 'icons-loaded');
+      setIsAppReady(true);
+    }, 200);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   // Determine which page we're on for structured data
@@ -64,7 +76,7 @@ function App() {
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-gray-50">
-        <div className="App">
+        <div className={`App ${isAppReady ? 'render-ready' : ''}`}>
           <StructuredData page={getPageType()} />
           <Analytics measurementId={measurementId} />
           <FontLoader />

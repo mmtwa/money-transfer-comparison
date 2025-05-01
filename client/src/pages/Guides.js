@@ -58,7 +58,7 @@ const Guides = () => {
               className="flex justify-center"
             >
               <Link 
-                to="/compare"
+                to="/"
                 className="inline-flex items-center gap-2 bg-indigo-600 text-white font-medium px-6 py-3 rounded-full hover:bg-indigo-700 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-indigo-500/20"
               >
                 Compare Providers
@@ -210,7 +210,7 @@ const Guides = () => {
               Apply what you've learned and start comparing providers to find the best rates and lowest fees for your next money transfer.
             </p>
             <Link 
-              to="/compare"
+              to="/"
               className="inline-flex items-center gap-2 bg-white text-indigo-600 font-medium px-8 py-4 rounded-full hover:bg-indigo-50 transition-all duration-300 shadow-lg hover:shadow-xl"
             >
               Compare Providers Now
