@@ -87,23 +87,39 @@ const Header = ({
         {/* Mobile Hamburger Button - Positioned Right */}
         <div className="md:hidden absolute right-4 top-1/2 transform -translate-y-1/2 z-10">
           <button 
-            className="focus:outline-none"
+            className={`flex items-center justify-center w-10 h-10 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4F46E5] transition-all duration-200 ${menuOpen ? 'bg-[#4F46E5] text-white shadow-lg scale-110' : 'bg-gray-100 hover:bg-gray-200 text-gray-800'}`}
             onClick={handleMenuClose}
             aria-label="Toggle menu"
+            aria-expanded={menuOpen}
           >
-            <svg 
-              className={`w-6 h-6 ${isTransparent && !menuOpen && !isClosing ? 'text-white' : 'text-gray-800'}`} 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24" 
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              {menuOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              )}
-            </svg>
+            <div className="relative w-6 h-6 flex items-center justify-center">
+              {/* Top bar */}
+              <span 
+                className={`absolute h-0.5 bg-current rounded-full transition-all duration-300 ease-in-out ${
+                  menuOpen 
+                    ? 'w-5 translate-y-0 rotate-45' 
+                    : 'w-5 -translate-y-1.5'
+                }`}
+              ></span>
+              
+              {/* Middle bar */}
+              <span 
+                className={`absolute h-0.5 bg-current rounded-full transition-all duration-200 ease-in-out ${
+                  menuOpen 
+                    ? 'w-0 opacity-0' 
+                    : 'w-5 opacity-100'
+                }`}
+              ></span>
+              
+              {/* Bottom bar */}
+              <span 
+                className={`absolute h-0.5 bg-current rounded-full transition-all duration-300 ease-in-out ${
+                  menuOpen 
+                    ? 'w-5 translate-y-0 -rotate-45' 
+                    : 'w-5 translate-y-1.5'
+                }`}
+              ></span>
+            </div>
           </button>
         </div>
 
@@ -154,50 +170,45 @@ const Header = ({
       {(menuOpen || isClosing) && (
         <div 
           ref={menuRef}
-          className={`md:hidden absolute top-[72px] left-0 right-0 z-[9999] bg-white shadow-sm ${isClosing ? 'opacity-0' : 'opacity-100'}`}
+          className={`md:hidden absolute top-[72px] left-0 right-0 z-[9999] bg-white shadow-lg overflow-hidden ${isClosing ? 'max-h-0' : 'max-h-[400px]'}`}
           style={{ 
             borderTop: "none",
-            transition: 'opacity 300ms ease'
+            transition: 'max-height 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 300ms ease',
+            opacity: isClosing ? 0 : 1,
+            transform: `translateY(${isClosing ? '-10px' : '0'})`,
+            transitionProperty: 'max-height, opacity, transform',
           }}
         >
           <div className="container mx-auto px-4 py-4 pb-8">
             <div className="flex flex-col space-y-3">
-              <button 
-                onClick={() => {
-                  onAboutClick();
+              {['About', 'Guides', 'FAQ', 'Rates'].map((item, index) => {
+                const handleClick = () => {
+                  const clickHandlers = {
+                    'About': onAboutClick,
+                    'Guides': onGuidesClick,
+                    'FAQ': onFaqClick,
+                    'Rates': onHistoricalRatesClick
+                  };
+                  clickHandlers[item]();
                   handleMenuClose();
-                }}
-                className="bg-[#4F46E5] hover:bg-[#1B1464] text-white py-2 px-4 rounded-full font-medium transition duration-200 w-full text-center"
-              >
-                About
-              </button>
-              <button 
-                onClick={() => {
-                  onGuidesClick();
-                  handleMenuClose();
-                }}
-                className="bg-[#4F46E5] hover:bg-[#1B1464] text-white py-2 px-4 rounded-full font-medium transition duration-200 w-full text-center"
-              >
-                Guides
-              </button>
-              <button 
-                onClick={() => {
-                  onFaqClick();
-                  handleMenuClose();
-                }}
-                className="bg-[#4F46E5] hover:bg-[#1B1464] text-white py-2 px-4 rounded-full font-medium transition duration-200 w-full text-center"
-              >
-                FAQ
-              </button>
-              <button 
-                onClick={() => {
-                  onHistoricalRatesClick();
-                  handleMenuClose();
-                }}
-                className="bg-[#4F46E5] hover:bg-[#1B1464] text-white py-2 px-4 rounded-full font-medium transition duration-200 w-full text-center"
-              >
-                Rates
-              </button>
+                };
+                
+                return (
+                  <button 
+                    key={item}
+                    onClick={handleClick}
+                    className="bg-[#4F46E5] hover:bg-[#1B1464] active:scale-95 text-white py-3 px-6 rounded-xl font-medium transition-all duration-300 w-full text-center"
+                    style={{
+                      opacity: isClosing ? 0 : 1,
+                      transform: isClosing ? 'translateX(-20px)' : 'translateX(0)',
+                      transition: `opacity 300ms ease, transform 300ms ease`,
+                      transitionDelay: `${isClosing ? 0 : index * 50}ms`
+                    }}
+                  >
+                    {item}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
