@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import CurrencyFlag from '../components/ui/CurrencyFlag';
 
 /**
  * Guides page component
@@ -160,12 +161,144 @@ const Guides = () => {
                     </div>
                     
                     <Link to={guide.path}>
-                      <h2 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-indigo-600 transition-colors duration-300 hover:text-indigo-600">
+                      <h2 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-indigo-600 transition-colors duration-300 hover:text-indigo-600 text-left">
                         {guide.title}
                       </h2>
                     </Link>
                     
-                    <p className="text-gray-600 mb-8 flex-grow">
+                    <p className="text-gray-600 mb-8 flex-grow text-left">
+                      {guide.description}
+                    </p>
+                    
+                    <Link 
+                      to={guide.path} 
+                      className="mt-auto inline-flex items-center font-medium text-indigo-600 group-hover:text-indigo-700 transition-colors"
+                    >
+                      <span>Read guide</span>
+                      <span className="ml-1 inline-block transform group-hover:translate-x-1 transition-transform duration-300">→</span>
+                    </Link>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Country-Specific Guides Section */}
+      <section className="py-12 bg-gray-50 relative">
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-indigo-300 to-transparent"></div>
+        
+        <div className="container mx-auto px-4">
+          <motion.div 
+            className="max-w-6xl mx-auto"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">Country-Specific Transfer Guides</h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Detailed information for sending money to specific countries, with local insights and provider recommendations
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8">
+              {[
+                {
+                  title: "Complete Guide to Sending Money to India",
+                  path: "/guides/send-money-to-india",
+                  description: "Find the best providers, lowest fees, and fastest ways to send money to India. Information on receiving methods, regional banks, and mobile wallets.",
+                  currencyCode: "INR",
+                  color: "from-orange-500 to-amber-600"
+                },
+                {
+                  title: "Philippines Money Transfer Guide",
+                  path: "/guides/send-money-to-philippines",
+                  description: "How to support family back home in the Philippines with optimal remittance options. Compare bank transfers, cash pickup locations, and mobile wallet services.",
+                  currencyCode: "PHP",
+                  color: "from-blue-500 to-cyan-600"
+                },
+                {
+                  title: "Mexico Remittance Guide",
+                  path: "/guides/send-money-to-mexico",
+                  description: "Fastest and cheapest ways to send money to Mexico from the US. Includes envíos de dinero options, cash pickup locations, and bank transfer comparisons.",
+                  currencyCode: "MXN",
+                  color: "from-green-500 to-emerald-600"
+                },
+                {
+                  title: "Pakistan Money Transfer Guide",
+                  path: "/guides/send-money-to-pakistan",
+                  description: "Best providers, lowest fees, and fastest ways to send money from the UK to Pakistan. Includes PRI benefits, bank deposits, and cash pickup options.",
+                  icon: "pakistan",
+                  color: "from-emerald-500 to-green-600"
+                },
+                {
+                  title: "Nigeria Money Transfer Guide",
+                  path: "/guides/send-money-to-nigeria",
+                  description: "Navigate Nigeria's unique financial landscape with our guide to exchange rates, cash pickup locations, mobile money options, and the Naira-4-Dollar scheme.",
+                  currencyCode: "NGN",
+                  color: "from-purple-500 to-indigo-600"
+                },
+                {
+                  title: "Poland Money Transfer Guide",
+                  path: "/guides/send-money-to-poland",
+                  description: "Find the best ways to send money to Poland from the UK. Learn about złoty exchange rates, EU transfer regulations, and digital wallet options.",
+                  currencyCode: "PLN",
+                  color: "from-red-500 to-pink-600"
+                },
+                {
+                  title: "Romania Money Transfer Guide",
+                  path: "/guides/send-money-to-romania",
+                  description: "Best options for sending money to Romania, including digital transfers, cash pickup options, and banking preferences across different Romanian regions.",
+                  currencyCode: "RON",
+                  color: "from-yellow-500 to-amber-600"
+                },
+                {
+                  title: "China Money Transfer Guide",
+                  path: "/guides/send-money-to-china",
+                  description: "Navigate China's unique regulations and find the best providers for sending money to China. Learn about documentation requirements and regional considerations.",
+                  currencyCode: "CNY",
+                  color: "from-red-600 to-rose-600"
+                },
+              ].map((guide, index) => (
+                <motion.div
+                  key={guide.path}
+                  className="group relative"
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1, duration: 0.5 }}
+                  whileHover={{ y: -5 }}
+                >
+                  <div className="bg-white rounded-2xl p-8 h-full border border-gray-100 shadow-lg shadow-indigo-100/20 hover:shadow-xl hover:shadow-indigo-200/30 transition-all duration-300 flex flex-col relative overflow-hidden">
+                    <div className={`absolute top-0 left-0 h-1 w-full bg-gradient-to-r opacity-60 group-hover:opacity-100 transition-opacity duration-300 ${guide.color}`}></div>
+                    
+                    <div className="mb-6">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-r ${guide.color} text-white shadow-lg shadow-indigo-500/20`}>
+                        {guide.icon === 'pakistan' ? (
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className="h-7 w-7">
+                            <path fill="#ffffff" d="M0 0h512v512H0z"/>
+                            <path fill="#01411c" d="M0 0h128v512H0z"/>
+                            <g fill="#ffffff">
+                              <path d="M340.1 170.7c-39.1 0-70.7 31.6-70.7 70.7 0 39 31.6 70.7 70.7 70.7 13 0 25.2-3.5 35.6-9.7-29.1-3.7-51.7-28.6-51.7-58.7 0-30.1 22.6-55 51.7-58.7-10.4-6.1-22.6-9.6-35.6-9.6z"/>
+                              <path d="M388.6 297.9l7.6 20.4 21.6-.2-17 13.2 6.4 20.8-17.6-12.4-17.7 12.3 6.5-20.7-16.9-13.3 21.6.3z"/>
+                            </g>
+                          </svg>
+                        ) : (
+                          <CurrencyFlag currency={guide.currencyCode} size="lg" />
+                        )}
+                      </div>
+                    </div>
+                    
+                    <Link to={guide.path}>
+                      <h2 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-indigo-600 transition-colors duration-300 hover:text-indigo-600 text-left">
+                        {guide.title}
+                      </h2>
+                    </Link>
+                    
+                    <p className="text-gray-600 mb-8 flex-grow text-left">
                       {guide.description}
                     </p>
                     

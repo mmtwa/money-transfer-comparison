@@ -344,7 +344,7 @@ const GettingStarted = () => {
       content={content}
       heroImage={heroImageJpg}
       webp={heroImageWebp}
-      publishDate="Updated April 2, 2023"
+      publishDate="Updated April 12, 2025"
       readTime="6"
       relatedGuides={relatedGuides}
     />

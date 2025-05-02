@@ -15,8 +15,8 @@ const TransferFees = () => {
     <GuideDetail
       title="Transfer Fees Explained: The Hidden Costs of Sending Money Abroad"
       subtitle="Uncover the different types of fees providers charge and learn how to calculate the true cost of your international transfers."
-      publishDate="15 June 2023"
-      readTime="6 min read"
+      publishDate="Updated April 30, 2025"
+      readTime="7"
       heroImage={heroImageJpg}
       webp={heroImageWebp}
       content={

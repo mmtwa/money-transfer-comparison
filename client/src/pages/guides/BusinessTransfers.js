@@ -15,8 +15,8 @@ const BusinessTransfers = () => {
     <GuideDetail
       title="Business Transfers: The Ultimate Guide to International Payments"
       subtitle="Expert solutions for businesses needing to make international payments, manage currency risk, and optimise bulk transfers."
-      publishDate="5 August 2023"
-      readTime="9 min read"
+      publishDate="Updated April 28, 2025"
+      readTime="9"
       heroImage={heroImageJpg}
       webp={heroImageWebp}
       content={

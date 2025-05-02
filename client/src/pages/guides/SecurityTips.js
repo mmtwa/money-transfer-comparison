@@ -15,8 +15,8 @@ const SecurityTips = () => {
     <GuideDetail
       title="Security Tips for Money Transfers: How to Protect Your Funds"
       subtitle="Essential guidance on keeping your international transfers secure and what steps to take if something goes wrong."
-      publishDate="12 September 2023"
-      readTime="8 min read"
+      publishDate="Updated May 2, 2025"
+      readTime="7"
       heroImage={heroImageJpg}
       webp={heroImageWebp}
       content={

@@ -15,8 +15,8 @@ const FamilyRemittances = () => {
     <GuideDetail
       title="Sending Money to Family Abroad: A Complete Guide to Remittances"
       subtitle="Discover the best practices for regular international remittances, how to set up recurring transfers and practical ways to save on fees."
-      publishDate="10 July 2023"
-      readTime="8 min read"
+      publishDate="Updated April 22, 2025"
+      readTime="8"
       heroImage={heroImageJpg}
       webp={heroImageWebp}
       content={

@@ -16,6 +16,76 @@
     <changefreq>weekly</changefreq>
   </url>
   <url>
+    <loc>https://www.mymoneytransfers.com/guides/getting-started</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/exchange-rates</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/transfer-fees</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/family-remittances</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/business-transfers</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/security-tips</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/send-money-to-india</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/send-money-to-philippines</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/send-money-to-mexico</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/send-money-to-pakistan</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/send-money-to-nigeria</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/send-money-to-poland</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/send-money-to-romania</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/send-money-to-china</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
     <loc>https://www.mymoneytransfers.com/faq</loc>
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
@@ -54,5 +124,10 @@
     <loc>https://www.mymoneytransfers.com/careers</loc>
     <priority>0.6</priority>
     <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/results</loc>
+    <priority>0.9</priority>
+    <changefreq>daily</changefreq>
   </url>
 </urlset> 

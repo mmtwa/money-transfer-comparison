@@ -356,8 +356,8 @@ const ExchangeRates = () => {
       content={content}
       heroImage={heroImageJpg}
       webp={heroImageWebp}
-      publishDate="Updated May 15, 2023"
-      readTime="8"
+      publishDate="Updated April 25, 2025"
+      readTime="7"
       relatedGuides={relatedGuides}
     />
   );
