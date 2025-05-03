@@ -22,6 +22,10 @@ import SendMoneyToNigeriaGuide from '../pages/guides/send-money-to-nigeria';
 import SendMoneyToPolandGuide from '../pages/guides/send-money-to-poland';
 import SendMoneyToRomaniaGuide from '../pages/guides/send-money-to-romania';
 import SendMoneyToChinaGuide from '../pages/guides/send-money-to-china';
+import SendMoneyToVietnamGuide from '../pages/guides/send-money-to-vietnam';
+import SendMoneyToBangladeshGuide from '../pages/guides/send-money-to-bangladesh';
+import SendMoneyToCanadaGuide from '../pages/guides/send-money-to-canada';
+import SendMoneyToMoroccoGuide from '../pages/guides/send-money-to-morocco';
 import CanonicalUrl from '../pages/CanonicalUrl';
 import PrivacyPolicy from '../pages/PrivacyPolicy';
 import TermsOfService from '../pages/TermsOfService';
@@ -89,6 +93,14 @@ const MoneyCompare = ({ initialPath }) => {
       setCurrentPage('guide-send-money-to-romania');
     } else if (path === '/guides/send-money-to-china') {
       setCurrentPage('guide-send-money-to-china');
+    } else if (path === '/guides/send-money-to-morocco') {
+      setCurrentPage('guide-send-money-to-morocco');
+    } else if (path === '/guides/send-money-to-vietnam') {
+      setCurrentPage('guide-send-money-to-vietnam');
+    } else if (path === '/guides/send-money-to-bangladesh') {
+      setCurrentPage('guide-send-money-to-bangladesh');
+    } else if (path === '/guides/send-money-to-canada') {
+      setCurrentPage('guide-send-money-to-canada');
     } else if (path === '/faq') {
       setCurrentPage('faq');
     } else if (path === '/historical-rates') {
@@ -146,6 +158,14 @@ const MoneyCompare = ({ initialPath }) => {
         setCurrentPage('guide-send-money-to-romania');
       } else if (window.location.pathname === '/guides/send-money-to-china') {
         setCurrentPage('guide-send-money-to-china');
+      } else if (window.location.pathname === '/guides/send-money-to-morocco') {
+        setCurrentPage('guide-send-money-to-morocco');
+      } else if (window.location.pathname === '/guides/send-money-to-vietnam') {
+        setCurrentPage('guide-send-money-to-vietnam');
+      } else if (window.location.pathname === '/guides/send-money-to-bangladesh') {
+        setCurrentPage('guide-send-money-to-bangladesh');
+      } else if (window.location.pathname === '/guides/send-money-to-canada') {
+        setCurrentPage('guide-send-money-to-canada');
       } else if (window.location.pathname === '/faq') {
         setCurrentPage('faq');
       } else if (window.location.pathname === '/historical-rates') {
@@ -711,6 +731,110 @@ const MoneyCompare = ({ initialPath }) => {
             />
           </div>
         );
+      case 'guide-send-money-to-morocco':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header
+              onLogoClick={handleBackToHome}
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <SendMoneyToMoroccoGuide />
+            <Footer
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+              onCareersClick={navigateToCareers}
+              onPressClick={navigateToPress}
+            />
+          </div>
+        );
+      case 'guide-send-money-to-vietnam':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header
+              onLogoClick={handleBackToHome}
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <SendMoneyToVietnamGuide />
+            <Footer
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+              onCareersClick={navigateToCareers}
+              onPressClick={navigateToPress}
+            />
+          </div>
+        );
+      case 'guide-send-money-to-bangladesh':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header
+              onLogoClick={handleBackToHome}
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <SendMoneyToBangladeshGuide />
+            <Footer
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+              onCareersClick={navigateToCareers}
+              onPressClick={navigateToPress}
+            />
+          </div>
+        );
+      case 'guide-send-money-to-canada':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header
+              onLogoClick={handleBackToHome}
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <SendMoneyToCanadaGuide />
+            <Footer
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+              onCareersClick={navigateToCareers}
+              onPressClick={navigateToPress}
+            />
+          </div>
+        );
       case 'faq':
         return (
           <div className="flex flex-col min-h-screen">
@@ -943,6 +1067,10 @@ const MoneyCompare = ({ initialPath }) => {
         <Route path="/guides/send-money-to-poland" element={renderPageContent()} />
         <Route path="/guides/send-money-to-romania" element={renderPageContent()} />
         <Route path="/guides/send-money-to-china" element={renderPageContent()} />
+        <Route path="/guides/send-money-to-morocco" element={renderPageContent()} />
+        <Route path="/guides/send-money-to-vietnam" element={renderPageContent()} />
+        <Route path="/guides/send-money-to-bangladesh" element={renderPageContent()} />
+        <Route path="/guides/send-money-to-canada" element={renderPageContent()} />
         <Route path="/faq" element={renderPageContent()} />
         <Route path="/historical-rates" element={renderPageContent()} />
         <Route path="/privacy-policy" element={renderPageContent()} />

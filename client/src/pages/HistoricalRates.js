@@ -34,6 +34,12 @@ const LiveHistoricalRates = () => {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [historicalData, setHistoricalData] = useState([]);
   
+  // Add state for the second currency pair
+  const [showSecondPair, setShowSecondPair] = useState(false);
+  const [secondPairData, setSecondPairData] = useState([]);
+  const [secondPairCurrentRate, setSecondPairCurrentRate] = useState(null);
+  const [secondPairLoading, setSecondPairLoading] = useState(false);
+  
   // Scroll to top when component mounts
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -43,6 +49,15 @@ const LiveHistoricalRates = () => {
   const [formState, setFormState] = useState({
     fromCurrency: 'GBP',
     toCurrency: 'USD',
+    fromDate: getDefaultFromDate('1month'),
+    toDate: getDefaultToDate(),
+    group: 'day'
+  });
+
+  // Second pair form state
+  const [secondPairFormState, setSecondPairFormState] = useState({
+    fromCurrency: 'USD',
+    toCurrency: 'EUR',
     fromDate: getDefaultFromDate('1month'),
     toDate: getDefaultToDate(),
     group: 'day'
@@ -112,10 +127,23 @@ const LiveHistoricalRates = () => {
       group
     };
     
+    const updatedSecondPairFormState = {
+      ...secondPairFormState,
+      fromDate: newFromDate,
+      toDate: newToDate,
+      group
+    };
+    
     setFormState(updatedFormState);
+    setSecondPairFormState(updatedSecondPairFormState);
     
     // Trigger data fetch with new range
     fetchHistoricalRates(updatedFormState);
+    
+    // If showing second pair, fetch its data too
+    if (showSecondPair) {
+      fetchSecondPairHistoricalRates(updatedSecondPairFormState);
+    }
   };
 
   // Format date for API request
@@ -146,9 +174,29 @@ const LiveHistoricalRates = () => {
     });
   };
   
+  // Handle second pair currency change
+  const handleSecondPairCurrencyChange = (type, currency) => {
+    setSecondPairFormState({
+      ...secondPairFormState,
+      [type]: currency
+    });
+  };
+  
   // Toggle dropdown
   const handleDropdownToggle = (dropdownId) => {
     setActiveDropdown(prev => prev === dropdownId ? null : dropdownId);
+  };
+
+  // Toggle second currency pair
+  const toggleSecondPair = () => {
+    const newShowSecondPair = !showSecondPair;
+    setShowSecondPair(newShowSecondPair);
+    
+    if (newShowSecondPair && secondPairData.length === 0) {
+      // If turning on and no data exists, trigger fetch
+      fetchSecondPairHistoricalRates();
+    } 
+    // No need to explicitly call chart update here, the useEffect watching showSecondPair will handle it.
   };
 
   // Fetch historical rates data
@@ -159,23 +207,16 @@ const LiveHistoricalRates = () => {
       
       const { fromCurrency, toCurrency, fromDate, toDate, group } = params;
       
-      // Validate dates to ensure we're not requesting future data
       const now = new Date();
       const today = now.toISOString().split('T')[0];
-      
-      // If toDate is in the future, use today instead
       const validToDate = new Date(toDate) > now ? today : toDate;
-      
-      // Ensure fromDate is not in the future and not after toDate
       let validFromDate = fromDate;
-      if (new Date(fromDate) > now) {
-        // If fromDate is in the future, set it to 30 days before today
+      if (new Date(fromDate) > now || new Date(fromDate) > new Date(validToDate)) {
         const thirtyDaysAgo = new Date(now);
         thirtyDaysAgo.setDate(now.getDate() - 30);
         validFromDate = thirtyDaysAgo.toISOString().split('T')[0];
       }
       
-      // Format dates for API
       const formattedFromDate = formatDateForApi(validFromDate);
       const formattedToDate = formatDateForApi(validToDate);
       
@@ -189,17 +230,21 @@ const LiveHistoricalRates = () => {
         group
       );
       
-      if (response.data && response.data.success) {
-        processChartData(response.data.data);
+      if (response.data && response.data.success && response.data.data) {
+        // Sort and set the primary historical data
+        const sortedData = [...response.data.data].sort((a, b) => new Date(a.time) - new Date(b.time));
+        setHistoricalData(sortedData);
         
         // Fetch current live rate separately
         fetchCurrentRate(fromCurrency, toCurrency);
       } else {
         setError('Failed to fetch historical rate data');
+        setHistoricalData([]); // Clear data on error
       }
     } catch (err) {
       console.error('Error fetching historical rates:', err);
       setError(err.response?.data?.message || err.message || 'Failed to fetch historical rate data');
+      setHistoricalData([]); // Clear data on error
     } finally {
       setIsLoading(false);
     }
@@ -258,54 +303,253 @@ const LiveHistoricalRates = () => {
     }
   };
 
-  // Process data for chart
-  const processChartData = (apiData) => {
-    if (!apiData || !apiData.length) {
-      setError('No historical rate data available for the selected period');
+  // Fetch second pair historical rates data
+  const fetchSecondPairHistoricalRates = async (params = secondPairFormState) => {
+    try {
+      setSecondPairLoading(true);
+      // We don't set the main error state here, maybe a separate error state for the second pair?
+      // setError(null);
+      
+      const { fromCurrency, toCurrency, fromDate, toDate, group } = params;
+      
+      const now = new Date();
+      const today = now.toISOString().split('T')[0];
+      const validToDate = new Date(toDate) > now ? today : toDate;
+      let validFromDate = fromDate;
+      if (new Date(fromDate) > now || new Date(fromDate) > new Date(validToDate)) {
+        const thirtyDaysAgo = new Date(now);
+        thirtyDaysAgo.setDate(now.getDate() - 30);
+        validFromDate = thirtyDaysAgo.toISOString().split('T')[0];
+      }
+      
+      const formattedFromDate = formatDateForApi(validFromDate);
+      const formattedToDate = formatDateForApi(validToDate);
+      
+      console.log(`Requesting second pair historical rates from ${formattedFromDate} to ${formattedToDate}`);
+      
+      const response = await apiService.getHistoricalRates(
+        fromCurrency,
+        toCurrency,
+        formattedFromDate,
+        formattedToDate,
+        group
+      );
+      
+      if (response.data && response.data.success && response.data.data) {
+        // Sort and set the secondary historical data
+        const sortedData = [...response.data.data].sort((a, b) => new Date(a.time) - new Date(b.time));
+        setSecondPairData(sortedData);
+        
+        // Fetch current live rate for second pair
+        fetchSecondPairCurrentRate(fromCurrency, toCurrency);
+      } else {
+        console.error('Failed to fetch second pair historical data');
+        setSecondPairData([]); // Clear data on error
+      }
+    } catch (err) {
+      console.error('Error fetching second pair historical rates:', err);
+      setSecondPairData([]); // Clear data on error
+    } finally {
+      setSecondPairLoading(false);
+    }
+  };
+
+  // Fetch second pair current rate
+  const fetchSecondPairCurrentRate = async (fromCurrency, toCurrency) => {
+    try {
+      // Use the Wise comparison API to get current rates
+      const response = await apiService.getWiseComparison(fromCurrency, toCurrency, 1000);
+      
+      if (response.data && response.data.success && response.data.data && response.data.data.providers) {
+        const providers = response.data.data.providers;
+        
+        // Find the Wise provider
+        const wiseProvider = providers.find(p => 
+          p.alias?.toLowerCase() === 'wise' || 
+          p.name?.toLowerCase()?.includes('wise')
+        );
+        
+        if (wiseProvider && wiseProvider.quotes && wiseProvider.quotes.length > 0) {
+          // Get the rate from the Wise provider
+          setSecondPairCurrentRate(wiseProvider.quotes[0].rate);
+        } else if (providers.length > 0 && providers[0].quotes && providers[0].quotes.length > 0) {
+          // If no Wise provider found, use the first provider in the list
+          setSecondPairCurrentRate(providers[0].quotes[0].rate);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching second pair current rate:', err);
+      // Try direct API as fallback
+      try {
+        const directResponse = await apiService.getWiseV3Comparison(fromCurrency, toCurrency, 1000);
+        
+        if (directResponse.data && directResponse.data.providers) {
+          const providers = directResponse.data.providers;
+          
+          // Find the Wise provider
+          const wiseProvider = providers.find(p => 
+            p.alias?.toLowerCase() === 'wise' || 
+            p.name?.toLowerCase()?.includes('wise')
+          );
+          
+          if (wiseProvider && wiseProvider.quotes && wiseProvider.quotes.length > 0) {
+            // Get the rate from the Wise provider
+            setSecondPairCurrentRate(wiseProvider.quotes[0].rate);
+          } else if (providers.length > 0 && providers[0].quotes && providers[0].quotes.length > 0) {
+            // If no Wise provider found, use the first provider in the list
+            setSecondPairCurrentRate(providers[0].quotes[0].rate);
+          }
+        }
+      } catch (directErr) {
+        console.error('Error fetching second pair current rate from direct API:', directErr);
+      }
+    }
+  };
+
+  // Centralized function to build chart datasets
+  const buildChartDatasets = () => {
+    if (!historicalData || historicalData.length === 0) {
+      setChartData(null); // No primary data, clear chart
       return;
     }
 
-    // Sort data by date
-    const sortedData = [...apiData].sort((a, b) => new Date(a.time) - new Date(b.time));
-
-    // Extract dates and rates
-    const labels = sortedData.map(item => {
+    // Use primary data for labels and the first dataset
+    const labels = historicalData.map(item => {
       const date = new Date(item.time);
-      return activeRange === '48hours' ? 
-        date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 
-        date.toLocaleDateString();
+      // Format labels based on active range
+      if (activeRange === '48hours') {
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      } else {
+        // Use 'DD Mon YY' format for longer ranges
+        return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' });
+      }
     });
 
-    const rates = sortedData.map(item => item.rate);
+    const primaryRates = historicalData.map(item => item.rate);
 
-    const chartData = {
-      labels,
-      datasets: [
-        {
-          label: `${formState.fromCurrency}/${formState.toCurrency} Exchange Rate`,
-          data: rates,
-          borderColor: '#4F46E5',
-          backgroundColor: 'rgba(79, 70, 229, 0.1)',
-          borderWidth: 2,
-          tension: 0.3,
-          fill: true,
-          pointRadius: 2,
-          pointHoverRadius: 5
+    const datasets = [
+      {
+        label: `${formState.fromCurrency}/${formState.toCurrency}`,
+        data: primaryRates,
+        borderColor: '#4F46E5',
+        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+        borderWidth: 2,
+        tension: 0.3,
+        fill: true,
+        pointRadius: 2,
+        pointHoverRadius: 5,
+        yAxisID: 'y' 
+      }
+    ];
+
+    // Add the second dataset if needed and data is available
+    if (showSecondPair && secondPairData && secondPairData.length > 0) {
+      // --- Start Alignment Logic --- 
+      const alignedSecondRates = [];
+      let lastValidRate = null;
+      
+      // Create a Map for quick lookup of secondary data by time
+      const secondDataMap = new Map();
+      secondPairData.forEach(item => {
+        secondDataMap.set(new Date(item.time).getTime(), item.rate);
+      });
+
+      historicalData.forEach(primaryItem => {
+        const primaryTime = new Date(primaryItem.time).getTime();
+        
+        // Try exact match using the Map
+        if (secondDataMap.has(primaryTime)) {
+          const rate = secondDataMap.get(primaryTime);
+          alignedSecondRates.push(rate);
+          lastValidRate = rate;
+        } else {
+          // If no exact match, use interpolation/nearest neighbor (from previous implementation)
+          const beforeItems = secondPairData.filter(item => new Date(item.time) < new Date(primaryItem.time))
+            .sort((a, b) => new Date(b.time) - new Date(a.time));
+          const afterItems = secondPairData.filter(item => new Date(item.time) > new Date(primaryItem.time))
+            .sort((a, b) => new Date(a.time) - new Date(b.time));
+          
+          const before = beforeItems.length > 0 ? beforeItems[0] : null;
+          const after = afterItems.length > 0 ? afterItems[0] : null;
+          
+          if (before && after) {
+            const beforeTime = new Date(before.time).getTime();
+            const afterTime = new Date(after.time).getTime();
+            // Avoid division by zero if timestamps are identical
+            if (afterTime === beforeTime) {
+              alignedSecondRates.push(before.rate);
+              lastValidRate = before.rate;
+            } else {
+              const ratio = (primaryTime - beforeTime) / (afterTime - beforeTime);
+              const interpolatedRate = before.rate + (after.rate - before.rate) * ratio;
+              alignedSecondRates.push(interpolatedRate);
+              lastValidRate = interpolatedRate;
+            }
+          } else if (before) {
+            alignedSecondRates.push(before.rate);
+            lastValidRate = before.rate;
+          } else if (after) {
+            alignedSecondRates.push(after.rate);
+            lastValidRate = after.rate;
+          } else if (lastValidRate !== null) {
+            alignedSecondRates.push(lastValidRate);
+          } else {
+            alignedSecondRates.push(null); // No data point available
+          }
         }
-      ]
-    };
+      });
+      // --- End Alignment Logic --- 
+      
+      datasets.push({
+        label: `${secondPairFormState.fromCurrency}/${secondPairFormState.toCurrency}`,
+        data: alignedSecondRates,
+        borderColor: '#EA580C',
+        backgroundColor: 'rgba(234, 88, 12, 0.1)',
+        borderWidth: 2,
+        tension: 0.3,
+        fill: false,
+        pointRadius: 2,
+        pointHoverRadius: 5,
+        yAxisID: 'y1'
+      });
+    }
 
-    setChartData(chartData);
-    setHistoricalData(sortedData);
+    // Update the chart data state
+    setChartData({
+      labels,
+      datasets
+    });
   };
-  
-  // Fetch data on initial load and when currency changes
+
+  // Remove the chart processing logic from processSecondPairChartData
+  const processSecondPairChartData = (apiData) => {
+    if (!apiData || !apiData.length) {
+      setSecondPairData([]); // Clear data if API returns nothing
+      return;
+    }
+    // Only sort and set the state. The useEffect will handle the chart update.
+    const sortedData = [...apiData].sort((a, b) => new Date(a.time) - new Date(b.time));
+    setSecondPairData(sortedData);
+  };
+
+  // useEffect to update chart when data changes
+  useEffect(() => {
+    buildChartDatasets();
+  }, [historicalData, secondPairData, showSecondPair, formState.fromCurrency, formState.toCurrency, secondPairFormState.fromCurrency, secondPairFormState.toCurrency]); // Dependencies include currencies to update labels
+
+  // Fetch primary data on initial load and when primary currency/group changes
   useEffect(() => {
     if (formState.fromCurrency && formState.toCurrency) {
-      fetchCurrentRate(formState.fromCurrency, formState.toCurrency);
-      fetchHistoricalRates();
+      fetchHistoricalRates(); // Fetch primary data
     }
-  }, [formState.fromCurrency, formState.toCurrency, formState.group]);
+  }, [formState.fromCurrency, formState.toCurrency, formState.group]); // Removed fetchCurrentRate from here
+
+  // Fetch secondary data when secondary currency/group changes OR when it's toggled on
+  useEffect(() => {
+    if (showSecondPair && secondPairFormState.fromCurrency && secondPairFormState.toCurrency) {
+      fetchSecondPairHistoricalRates(); // Fetch secondary data
+    }
+  }, [showSecondPair, secondPairFormState.fromCurrency, secondPairFormState.toCurrency, secondPairFormState.group]); // Removed fetchSecondPairCurrentRate
 
   // Animation variants for staggered animations
   const containerVariants = {
@@ -503,7 +747,7 @@ const LiveHistoricalRates = () => {
                         </svg>
                       </span>
                       <span>
-                        {formState.fromCurrency}/{formState.toCurrency} Exchange Rate Trend
+                        Exchange Rate Trend
                       </span>
                     </h2>
                     
@@ -530,6 +774,88 @@ const LiveHistoricalRates = () => {
                         </motion.button>
                       ))}
                     </div>
+                  </div>
+                  
+                  {/* Add Second Currency Pair Toggle */}
+                  <div className="mb-6">
+                    <div className="flex items-center justify-between">
+                      <motion.button
+                        onClick={toggleSecondPair}
+                        className={`flex items-center gap-2 text-sm ${showSecondPair ? 'text-indigo-600' : 'text-gray-600'} hover:text-indigo-700 transition-colors`}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${showSecondPair ? 'text-indigo-600' : 'text-gray-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={showSecondPair ? "M19 9l-7 7-7-7" : "M12 4v16m8-8H4"} />
+                        </svg>
+                        <span>{showSecondPair ? 'Hide Comparison Pair' : 'Add Comparison Pair'}</span>
+                      </motion.button>
+                      
+                      {secondPairLoading && (
+                        <div className="flex items-center text-sm text-gray-500">
+                          <div className="animate-spin h-4 w-4 border-t-2 border-indigo-500 rounded-full mr-2"></div>
+                          <span>Loading comparison data...</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Second Currency Pair Selector */}
+                    {showSecondPair && (
+                      <motion.div 
+                        className="mt-4 p-4 bg-orange-50 rounded-xl border border-orange-100"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <div className="flex flex-col md:flex-row gap-4 items-end">
+                          <div className="flex-1">
+                            <CurrencySelector
+                              label="Compare From"
+                              selectedCurrency={secondPairFormState.fromCurrency}
+                              onCurrencyChange={(currency) => handleSecondPairCurrencyChange('fromCurrency', currency)}
+                              isOpen={activeDropdown === 'secondFromCurrency'}
+                              onToggle={() => handleDropdownToggle('secondFromCurrency')}
+                              id="secondFromCurrency"
+                            />
+                          </div>
+                          
+                          <div className="hidden md:flex items-center justify-center pb-5">
+                            <div className="bg-orange-100 p-2 rounded-full text-orange-600">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                              </svg>
+                            </div>
+                          </div>
+                          
+                          <div className="flex-1">
+                            <CurrencySelector
+                              label="Compare To"
+                              selectedCurrency={secondPairFormState.toCurrency}
+                              onCurrencyChange={(currency) => handleSecondPairCurrencyChange('toCurrency', currency)}
+                              isOpen={activeDropdown === 'secondToCurrency'}
+                              onToggle={() => handleDropdownToggle('secondToCurrency')}
+                              id="secondToCurrency"
+                            />
+                          </div>
+                        </div>
+                        
+                        {/* Display Second Pair Current Rate */}
+                        {secondPairCurrentRate && (
+                          <div className="mt-4 pt-3 border-t border-orange-200">
+                            <div className="flex items-center justify-center">
+                              <CurrencyFlag currency={secondPairFormState.fromCurrency} size="sm" />
+                              <span className="mx-2 text-sm font-medium">1 {secondPairFormState.fromCurrency} = </span>
+                              <span className="text-lg font-bold text-orange-600">
+                                {formatExchangeRate(secondPairCurrentRate)}
+                              </span>
+                              <span className="mx-2 text-sm font-medium">{secondPairFormState.toCurrency}</span>
+                              <CurrencyFlag currency={secondPairFormState.toCurrency} size="sm" />
+                            </div>
+                          </div>
+                        )}
+                      </motion.div>
+                    )}
                   </div>
                   
                   {/* Chart Container */}
@@ -570,31 +896,81 @@ const LiveHistoricalRates = () => {
                             maintainAspectRatio: false,
                             scales: {
                               y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
                                 beginAtZero: false,
                                 title: {
                                   display: true,
-                                  text: `${formState.toCurrency} per 1 ${formState.fromCurrency}`
+                                  text: `${formState.fromCurrency}/${formState.toCurrency}`,
+                                  color: '#4F46E5'
                                 },
                                 ticks: {
                                   callback: function(value) {
                                     return value.toFixed(4);
-                                  }
+                                  },
+                                  color: '#4F46E5'
+                                },
+                                grid: {
+                                  drawOnChartArea: true
+                                }
+                              },
+                              y1: {
+                                type: 'linear',
+                                display: showSecondPair && secondPairData.length > 0,
+                                position: 'right',
+                                beginAtZero: false,
+                                title: {
+                                  display: true,
+                                  text: showSecondPair ? `${secondPairFormState.fromCurrency}/${secondPairFormState.toCurrency}` : '',
+                                  color: '#EA580C'
+                                },
+                                ticks: {
+                                  callback: function(value) {
+                                    return value.toFixed(4);
+                                  },
+                                  color: '#EA580C'
+                                },
+                                grid: {
+                                  drawOnChartArea: false // Only draw grid lines for the primary y-axis
                                 }
                               },
                               x: {
                                 grid: {
                                   display: false
+                                },
+                                ticks: {
+                                  maxTicksLimit: 10,
+                                  maxRotation: activeRange === '48hours' ? 0 : 45, // No rotation needed for time
+                                  minRotation: 0,
+                                  font: {
+                                    size: 11
+                                  },
+                                  autoSkip: true,
+                                  autoSkipPadding: 30
                                 }
                               }
                             },
                             plugins: {
                               legend: {
-                                display: false
+                                display: true,
+                                position: 'top',
+                                align: 'center', // Center align legend items
+                                labels: {
+                                  usePointStyle: true,
+                                  pointStyle: 'circle', // Use circles instead of boxes
+                                  boxWidth: 8,      // Adjust size of the color indicator
+                                  boxHeight: 8,     // Make it a square
+                                  padding: 25,      // Increase padding between legend items
+                                  font: {
+                                    size: 13,       // Slightly larger font for legend text
+                                  }
+                                }
                               },
                               tooltip: {
                                 callbacks: {
                                   label: function(context) {
-                                    return `Rate: ${context.parsed.y.toFixed(5)}`;
+                                    return `${context.dataset.label}: ${context.parsed.y.toFixed(5)}`;
                                   }
                                 },
                                 backgroundColor: 'rgba(79, 70, 229, 0.8)',
@@ -609,7 +985,7 @@ const LiveHistoricalRates = () => {
                                 bodyFont: {
                                   size: 14
                                 },
-                                displayColors: false,
+                                displayColors: true,
                                 caretSize: 6,
                               }
                             },
@@ -642,7 +1018,6 @@ const LiveHistoricalRates = () => {
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      {/* Data provided by Wise's historical exchange rates API */}
                       {'Data provided by a leading exchange rate service using live data'}
                     </span>
                   </div>

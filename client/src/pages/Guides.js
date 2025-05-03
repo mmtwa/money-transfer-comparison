@@ -1,6 +1,13 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import {
+  ComposableMap,
+  Geographies,
+  Geography,
+  Marker,
+  ZoomableGroup
+} from "react-simple-maps";
 import CurrencyFlag from '../components/ui/CurrencyFlag';
 
 /**
@@ -154,8 +161,8 @@ const Guides = () => {
                     
                     <div className="mb-6">
                       <div className={`w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-r ${guide.color} text-white shadow-lg shadow-indigo-500/20`}>
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d={guide.icon} />
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={guide.icon} />
                         </svg>
                       </div>
                     </div>
@@ -204,115 +211,8 @@ const Guides = () => {
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8">
-              {[
-                {
-                  title: "Complete Guide to Sending Money to India",
-                  path: "/guides/send-money-to-india",
-                  description: "Find the best providers, lowest fees, and fastest ways to send money to India. Information on receiving methods, regional banks, and mobile wallets.",
-                  currencyCode: "INR",
-                  color: "from-orange-500 to-amber-600"
-                },
-                {
-                  title: "Philippines Money Transfer Guide",
-                  path: "/guides/send-money-to-philippines",
-                  description: "How to support family back home in the Philippines with optimal remittance options. Compare bank transfers, cash pickup locations, and mobile wallet services.",
-                  currencyCode: "PHP",
-                  color: "from-blue-500 to-cyan-600"
-                },
-                {
-                  title: "Mexico Remittance Guide",
-                  path: "/guides/send-money-to-mexico",
-                  description: "Fastest and cheapest ways to send money to Mexico from the US. Includes envíos de dinero options, cash pickup locations, and bank transfer comparisons.",
-                  currencyCode: "MXN",
-                  color: "from-green-500 to-emerald-600"
-                },
-                {
-                  title: "Pakistan Money Transfer Guide",
-                  path: "/guides/send-money-to-pakistan",
-                  description: "Best providers, lowest fees, and fastest ways to send money from the UK to Pakistan. Includes PRI benefits, bank deposits, and cash pickup options.",
-                  icon: "pakistan",
-                  color: "from-emerald-500 to-green-600"
-                },
-                {
-                  title: "Nigeria Money Transfer Guide",
-                  path: "/guides/send-money-to-nigeria",
-                  description: "Navigate Nigeria's unique financial landscape with our guide to exchange rates, cash pickup locations, mobile money options, and the Naira-4-Dollar scheme.",
-                  currencyCode: "NGN",
-                  color: "from-purple-500 to-indigo-600"
-                },
-                {
-                  title: "Poland Money Transfer Guide",
-                  path: "/guides/send-money-to-poland",
-                  description: "Find the best ways to send money to Poland from the UK. Learn about złoty exchange rates, EU transfer regulations, and digital wallet options.",
-                  currencyCode: "PLN",
-                  color: "from-red-500 to-pink-600"
-                },
-                {
-                  title: "Romania Money Transfer Guide",
-                  path: "/guides/send-money-to-romania",
-                  description: "Best options for sending money to Romania, including digital transfers, cash pickup options, and banking preferences across different Romanian regions.",
-                  currencyCode: "RON",
-                  color: "from-yellow-500 to-amber-600"
-                },
-                {
-                  title: "China Money Transfer Guide",
-                  path: "/guides/send-money-to-china",
-                  description: "Navigate China's unique regulations and find the best providers for sending money to China. Learn about documentation requirements and regional considerations.",
-                  currencyCode: "CNY",
-                  color: "from-red-600 to-rose-600"
-                },
-              ].map((guide, index) => (
-                <motion.div
-                  key={guide.path}
-                  className="group relative"
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1, duration: 0.5 }}
-                  whileHover={{ y: -5 }}
-                >
-                  <div className="bg-white rounded-2xl p-8 h-full border border-gray-100 shadow-lg shadow-indigo-100/20 hover:shadow-xl hover:shadow-indigo-200/30 transition-all duration-300 flex flex-col relative overflow-hidden">
-                    <div className={`absolute top-0 left-0 h-1 w-full bg-gradient-to-r opacity-60 group-hover:opacity-100 transition-opacity duration-300 ${guide.color}`}></div>
-                    
-                    <div className="mb-6">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-r ${guide.color} text-white shadow-lg shadow-indigo-500/20`}>
-                        {guide.icon === 'pakistan' ? (
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className="h-7 w-7">
-                            <path fill="#ffffff" d="M0 0h512v512H0z"/>
-                            <path fill="#01411c" d="M0 0h128v512H0z"/>
-                            <g fill="#ffffff">
-                              <path d="M340.1 170.7c-39.1 0-70.7 31.6-70.7 70.7 0 39 31.6 70.7 70.7 70.7 13 0 25.2-3.5 35.6-9.7-29.1-3.7-51.7-28.6-51.7-58.7 0-30.1 22.6-55 51.7-58.7-10.4-6.1-22.6-9.6-35.6-9.6z"/>
-                              <path d="M388.6 297.9l7.6 20.4 21.6-.2-17 13.2 6.4 20.8-17.6-12.4-17.7 12.3 6.5-20.7-16.9-13.3 21.6.3z"/>
-                            </g>
-                          </svg>
-                        ) : (
-                          <CurrencyFlag currency={guide.currencyCode} size="lg" />
-                        )}
-                      </div>
-                    </div>
-                    
-                    <Link to={guide.path}>
-                      <h2 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-indigo-600 transition-colors duration-300 hover:text-indigo-600 text-left">
-                        {guide.title}
-                      </h2>
-                    </Link>
-                    
-                    <p className="text-gray-600 mb-8 flex-grow text-left">
-                      {guide.description}
-                    </p>
-                    
-                    <Link 
-                      to={guide.path} 
-                      className="mt-auto inline-flex items-center font-medium text-indigo-600 group-hover:text-indigo-700 transition-colors"
-                    >
-                      <span>Read guide</span>
-                      <span className="ml-1 inline-block transform group-hover:translate-x-1 transition-transform duration-300">→</span>
-                    </Link>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+            {/* Interactive Country Guide Selector */}
+            <CountryGuideSelector />
           </motion.div>
         </div>
       </section>
@@ -354,6 +254,407 @@ const Guides = () => {
           </motion.div>
         </div>
       </section>
+    </div>
+  );
+};
+
+export const CountryGuideSelector = () => {
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [selectedRegion, setSelectedRegion] = React.useState('All');
+  const [visibleGuides, setVisibleGuides] = React.useState(8);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const searchContainerRef = useRef(null);
+  const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
+  
+  const regions = [
+    { id: 'All', name: 'All Regions' },
+    { id: 'Asia', name: 'Asia' },
+    { id: 'Europe', name: 'Europe' },
+    { id: 'Americas', name: 'Americas' },
+    { id: 'Africa', name: 'Africa' }
+  ];
+  
+  const countryGuides = [
+    {
+      title: "Complete Guide to Sending Money to India",
+      path: "/guides/send-money-to-india",
+      description: "Find the best providers, lowest fees, and fastest ways to send money to India. Information on receiving methods, regional banks, and mobile wallets.",
+      currencyCode: "INR",
+      color: "from-orange-500 to-amber-600",
+      region: "Asia",
+      coordinates: [78.9629, 20.5937]
+    },
+    {
+      title: "Send Money to Bangladesh Guide",
+      path: "/guides/send-money-to-bangladesh",
+      description: "Best providers, receiving options, and regional considerations for sending money to Bangladesh. Includes details on the 2% government incentive and mobile financial services.",
+      currencyCode: "BDT",
+      color: "from-green-600 to-emerald-500",
+      region: "Asia",
+      coordinates: [90.3563, 23.6850]
+    },
+    {
+      title: "Philippines Money Transfer Guide",
+      path: "/guides/send-money-to-philippines",
+      description: "How to support family back home in the Philippines with optimal remittance options. Compare bank transfers, cash pickup locations, and mobile wallet services.",
+      currencyCode: "PHP",
+      color: "from-blue-500 to-cyan-600",
+      region: "Asia",
+      coordinates: [121.7740, 12.8797]
+    },
+    {
+      title: "Mexico Remittance Guide",
+      path: "/guides/send-money-to-mexico",
+      description: "Fastest and cheapest ways to send money to Mexico from the US. Includes envíos de dinero options, cash pickup locations, and bank transfer comparisons.",
+      currencyCode: "MXN",
+      color: "from-green-500 to-emerald-600",
+      region: "Americas",
+      coordinates: [-102.5528, 23.6345]
+    },
+    {
+      title: "Pakistan Money Transfer Guide",
+      path: "/guides/send-money-to-pakistan",
+      description: "Best providers, lowest fees, and fastest ways to send money from the UK to Pakistan. Includes PRI benefits, bank deposits, and cash pickup options.",
+      currencyCode: "PKR",
+      color: "from-emerald-500 to-green-600",
+      region: "Asia",
+      coordinates: [69.3451, 30.3753]
+    },
+    {
+      title: "Nigeria Money Transfer Guide",
+      path: "/guides/send-money-to-nigeria",
+      description: "Navigate Nigeria's unique financial landscape with our guide to exchange rates, cash pickup locations, mobile money options, and the Naira-4-Dollar scheme.",
+      currencyCode: "NGN",
+      color: "from-purple-500 to-indigo-600",
+      region: "Africa",
+      coordinates: [8.6753, 9.0820]
+    },
+    {
+      title: "Vietnam Money Transfer Guide",
+      path: "/guides/send-money-to-vietnam",
+      description: "Best options for sending money to Vietnam from the UK. Includes details on banking infrastructure, cash pickup networks, mobile wallets, and regional considerations.",
+      currencyCode: "VND",
+      color: "from-red-600 to-red-400",
+      region: "Asia",
+      coordinates: [108.2772, 14.0583]
+    },
+    {
+      title: "Poland Money Transfer Guide",
+      path: "/guides/send-money-to-poland",
+      description: "Find the best ways to send money to Poland from the UK. Learn about złoty exchange rates, EU transfer regulations, and digital wallet options.",
+      currencyCode: "PLN",
+      color: "from-red-500 to-pink-600",
+      region: "Europe",
+      coordinates: [19.1451, 51.9194]
+    },
+    {
+      title: "Romania Money Transfer Guide",
+      path: "/guides/send-money-to-romania",
+      description: "Best options for sending money to Romania, including digital transfers, cash pickup options, and banking preferences across different Romanian regions.",
+      currencyCode: "RON",
+      color: "from-yellow-500 to-amber-600",
+      region: "Europe",
+      coordinates: [24.9668, 45.9432]
+    },
+    {
+      title: "China Money Transfer Guide",
+      path: "/guides/send-money-to-china",
+      description: "Navigate China's unique regulations and find the best providers for sending money to China. Learn about documentation requirements and regional considerations.",
+      currencyCode: "CNY",
+      color: "from-red-600 to-rose-600",
+      region: "Asia",
+      coordinates: [104.1954, 35.8617]
+    },
+    {
+      title: "Morocco Money Transfer Guide",
+      path: "/guides/send-money-to-morocco",
+      description: "Navigate exchange controls, find the best providers, and understand the unique aspects of UK to Morocco transfers.",
+      currencyCode: "MAD",
+      color: "from-green-600 to-emerald-600",
+      region: "Africa",
+      coordinates: [-7.0926, 31.7917]
+    },
+    {
+      title: "Canada Money Transfer Guide",
+      path: "/guides/send-money-to-canada",
+      description: "Find the best ways to send money to Canada from the UK. Compare providers, understand receiving options, and learn about exchange rates and fees.",
+      currencyCode: "CAD",
+      color: "from-red-500 to-red-600",
+      region: "Americas",
+      coordinates: [-106.3468, 56.1304]
+    }
+  ];
+  
+  const searchFilteredGuides = searchTerm
+    ? countryGuides.filter(guide =>
+        guide.title.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : [];
+
+  const regionFilteredGuides = countryGuides.filter(guide => {
+    return selectedRegion === 'All' || guide.region === selectedRegion;
+  });
+  
+  const handleLoadMore = () => {
+    setVisibleGuides(prev => Math.min(prev + 6, regionFilteredGuides.length));
+  };
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+        setIsSearchFocused(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [searchContainerRef]);
+  
+  return (
+    <div className="space-y-8">
+      <div className="bg-white rounded-xl shadow-md p-6">
+        {/* Search and Filter Bar */}
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <div className="relative flex-grow" ref={searchContainerRef}>
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <input
+              type="text"
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="Search country guides..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onFocus={() => setIsSearchFocused(true)}
+            />
+            {isSearchFocused && searchTerm && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="absolute z-20 w-full mt-1 bg-white rounded-md shadow-lg max-h-60 overflow-auto border border-gray-200"
+              >
+                {searchFilteredGuides.length > 0 ? (
+                  searchFilteredGuides.map((guide) => (
+                    <Link
+                      key={guide.path}
+                      to={guide.path}
+                      className="block px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors duration-150"
+                      onClick={() => {
+                        setSearchTerm('');
+                        setIsSearchFocused(false);
+                      }}
+                    >
+                      <div className="flex items-center gap-3">
+                        <CurrencyFlag currency={guide.currencyCode} size="sm" />
+                        <span>{guide.title.replace(/Send Money to |Sending Money to |Money Transfer Guide|Guide|Complete Guide to |Remittance Guide/g, '').trim()}</span>
+                      </div>
+                    </Link>
+                  ))
+                ) : (
+                  <div className="px-4 py-3 text-sm text-gray-500">No guides found matching "{searchTerm}".</div>
+                )}
+              </motion.div>
+            )}
+          </div>
+          
+          <div className="flex flex-wrap gap-2 -mx-1 py-1 overflow-x-auto scrollbar-hide">
+            {regions.map((region) => (
+              <motion.button
+                key={region.id}
+                className={`mx-1 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                  selectedRegion === region.id
+                    ? 'bg-indigo-600 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+                onClick={() => {
+                  setSelectedRegion(region.id);
+                  setVisibleGuides(8);
+                }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {region.name}
+              </motion.button>
+            ))}
+          </div>
+        </div>
+        
+        {/* Visual Country Flag Selector */}
+        <div className="mb-8">
+          <h3 className="text-lg font-medium mb-4 text-gray-700">Popular Destinations</h3>
+          <div className="flex flex-wrap gap-3">
+            {countryGuides.map((guide) => (
+              <Link
+                key={guide.path}
+                to={guide.path}
+                className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  selectedRegion === 'All' || guide.region === selectedRegion
+                    ? 'opacity-100 scale-100'
+                    : 'opacity-50 scale-95'
+                } hover:bg-indigo-50`}
+              >
+                <CurrencyFlag currency={guide.currencyCode} size="md" />
+                <span className="hidden md:inline-block">{guide.title.replace(/Send Money to |Sending Money to |Money Transfer Guide|Guide|Complete Guide to |Remittance Guide/g, '').trim()}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+      
+      {/* World Map Visualization - Replace placeholder with react-simple-maps */}
+      <motion.div 
+        className="bg-white rounded-xl shadow-md p-4 overflow-hidden hidden lg:block"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3, duration: 0.8 }}
+      >
+        <h3 className="text-lg font-medium mb-2 text-gray-700">Select a Country</h3> 
+        <div className="relative h-[450px] w-full bg-indigo-50 rounded-lg overflow-hidden border border-indigo-100"> 
+          <ComposableMap projection="geoMercator" className="w-full h-full">
+            <ZoomableGroup center={[30, 20]} zoom={1}>
+              <Geographies geography={geoUrl}>
+                {({ geographies }) =>
+                  geographies.map((geo) => (
+                    <Geography
+                      key={geo.rsmKey}
+                      geography={geo}
+                      fill="#E0E7FF"
+                      stroke="#FFFFFF"
+                      style={{
+                        default: { outline: "none" },
+                        hover: { outline: "none", fill: "#C7D2FE" },
+                        pressed: { outline: "none", fill: "#A5B4FC" },
+                      }}
+                    />
+                  ))
+                }
+              </Geographies>
+              {countryGuides.map((guide) => {
+                const isActive = selectedRegion === 'All' || guide.region === selectedRegion;
+                return (
+                  <Marker key={guide.path} coordinates={guide.coordinates}>
+                    <Link to={guide.path}>
+                      <motion.g
+                        initial={{ opacity: 0.6, scale: 0.8 }}
+                        animate={{ 
+                            opacity: isActive ? 1 : 0.5, 
+                            scale: isActive ? 1 : 0.8 
+                        }}
+                        whileHover={{ scale: 1.5, opacity: 1, zIndex: 10 }}
+                        transition={{ 
+                            type: "spring", 
+                            stiffness: 300, 
+                            damping: 20,
+                            scale: { duration: 0.2 },
+                            opacity: { duration: 0.2 }
+                         }}
+                        style={{ zIndex: isActive ? 1 : 0 }}
+                      >
+                        <foreignObject x={isActive ? -10 : -7} y={isActive ? -10 : -7} width={isActive ? 20 : 14} height={isActive ? 20 : 14}>
+                           <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <CurrencyFlag currency={guide.currencyCode} size={isActive ? "sm" : "xs"} />
+                          </div>
+                        </foreignObject>
+                      </motion.g>
+                      <title>{guide.title}</title> 
+                    </Link>
+                  </Marker>
+                );
+              })}
+            </ZoomableGroup>
+          </ComposableMap>
+          <div className="absolute bottom-2 right-2 text-xs text-gray-500 bg-white/50 px-1 rounded">
+            Click on a marker to view the country guide.
+          </div>
+        </div>
+      </motion.div>
+      
+      {/* Country Cards Grid with Animation */}
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {regionFilteredGuides.slice(0, visibleGuides).map((guide, index) => (
+          <motion.div
+            key={guide.path}
+            className="group relative"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: index * 0.05, duration: 0.5 }}
+            whileHover={{ y: -5 }}
+            layoutId={`card-${guide.currencyCode}`}
+          >
+            <div className="bg-white rounded-2xl p-8 h-full border border-gray-100 shadow-lg shadow-indigo-100/20 hover:shadow-xl hover:shadow-indigo-200/30 transition-all duration-300 flex flex-col relative overflow-hidden">
+              <div className={`absolute top-0 left-0 h-1 w-full bg-gradient-to-r opacity-60 group-hover:opacity-100 transition-opacity duration-300 ${guide.color}`}></div>
+              
+              <div className="mb-6">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-r ${guide.color} text-white shadow-lg shadow-indigo-500/20`}>
+                  <CurrencyFlag currency={guide.currencyCode} size="lg" />
+                </div>
+              </div>
+              
+              <Link to={guide.path}>
+                <h2 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-indigo-600 transition-colors duration-300 hover:text-indigo-600 text-left">
+                  {guide.title}
+                </h2>
+              </Link>
+              
+              <p className="text-gray-600 mb-8 flex-grow text-left">
+                {guide.description}
+              </p>
+              
+              <Link 
+                to={guide.path} 
+                className="mt-auto inline-flex items-center font-medium text-indigo-600 group-hover:text-indigo-700 transition-colors"
+              >
+                <span>Read guide</span>
+                <span className="ml-1 inline-block transform group-hover:translate-x-1 transition-transform duration-300">→</span>
+              </Link>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+      
+      {/* Load More Button */}
+      {regionFilteredGuides.length > visibleGuides && (
+        <div className="flex justify-center mt-8">
+          <motion.button
+            onClick={handleLoadMore}
+            className="inline-flex items-center px-6 py-3 rounded-full bg-white border border-indigo-200 text-indigo-600 shadow-sm hover:shadow-md transition-all duration-300"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <span>Load more guides</span>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </motion.button>
+        </div>
+      )}
+      
+      {/* No Results Message */}
+      {regionFilteredGuides.length === 0 && (
+        <div className="text-center py-12 bg-white rounded-lg shadow-sm">
+          <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <h3 className="mt-2 text-lg font-medium text-gray-900">No guides found for this region</h3>
+          <p className="mt-1 text-gray-500">Try selecting a different region or 'All Regions'.</p>
+          <div className="mt-6">
+            <button
+              onClick={() => {
+                setSelectedRegion('All');
+                setVisibleGuides(8);
+              }}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none"
+            >
+              Show All Regions
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
