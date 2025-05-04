@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   ComposableMap,
   Geographies,
@@ -90,6 +90,9 @@ const Guides = () => {
         </div>
       </section>
 
+      {/* Interactive Guide Navigation Menu */}
+      <GuidesMenu />
+
       {/* Main Content with Cards */}
       <section className="py-12 relative">
         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-indigo-300 to-transparent"></div>
@@ -102,6 +105,13 @@ const Guides = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
+            <div className="text-center mb-10">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">Money Transfer Basics</h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Essential guides to help you understand and optimize your international money transfers
+              </p>
+            </div>
+            
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[
                 {
@@ -255,6 +265,405 @@ const Guides = () => {
         </div>
       </section>
     </div>
+  );
+};
+
+/**
+ * GuidesMenu component - An expandable, hierarchical menu system for guides
+ */
+const GuidesMenu = () => {
+  const [activeCategory, setActiveCategory] = useState(null);
+  const [activeContinent, setActiveContinent] = useState(null);
+  
+  // Country guides data
+  const countryGuides = [
+    {
+      title: "Complete Guide to Sending Money to India",
+      path: "/guides/send-money-to-india",
+      description: "Find the best providers, lowest fees, and fastest ways to send money to India. Information on receiving methods, regional banks, and mobile wallets.",
+      currencyCode: "INR",
+      color: "from-orange-500 to-amber-600",
+      region: "Asia",
+      coordinates: [78.9629, 20.5937]
+    },
+    {
+      title: "Send Money to Bangladesh Guide",
+      path: "/guides/send-money-to-bangladesh",
+      description: "Best providers, receiving options, and regional considerations for sending money to Bangladesh. Includes details on the 2% government incentive and mobile financial services.",
+      currencyCode: "BDT",
+      color: "from-green-600 to-emerald-500",
+      region: "Asia",
+      coordinates: [90.3563, 23.6850]
+    },
+    {
+      title: "Philippines Money Transfer Guide",
+      path: "/guides/send-money-to-philippines",
+      description: "How to support family back home in the Philippines with optimal remittance options. Compare bank transfers, cash pickup locations, and mobile wallet services.",
+      currencyCode: "PHP",
+      color: "from-blue-500 to-cyan-600",
+      region: "Asia",
+      coordinates: [121.7740, 12.8797]
+    },
+    {
+      title: "Mexico Remittance Guide",
+      path: "/guides/send-money-to-mexico",
+      description: "Fastest and cheapest ways to send money to Mexico from the US. Includes envíos de dinero options, cash pickup locations, and bank transfer comparisons.",
+      currencyCode: "MXN",
+      color: "from-green-500 to-emerald-600",
+      region: "Americas",
+      coordinates: [-102.5528, 23.6345]
+    },
+    {
+      title: "Pakistan Money Transfer Guide",
+      path: "/guides/send-money-to-pakistan",
+      description: "Best providers, lowest fees, and fastest ways to send money from the UK to Pakistan. Includes PRI benefits, bank deposits, and cash pickup options.",
+      currencyCode: "PKR",
+      color: "from-emerald-500 to-green-600",
+      region: "Asia",
+      coordinates: [69.3451, 30.3753]
+    },
+    {
+      title: "Nigeria Money Transfer Guide",
+      path: "/guides/send-money-to-nigeria",
+      description: "Navigate Nigeria's unique financial landscape with our guide to exchange rates, cash pickup locations, mobile money options, and the Naira-4-Dollar scheme.",
+      currencyCode: "NGN",
+      color: "from-purple-500 to-indigo-600",
+      region: "Africa",
+      coordinates: [8.6753, 9.0820]
+    },
+    {
+      title: "Vietnam Money Transfer Guide",
+      path: "/guides/send-money-to-vietnam",
+      description: "Best options for sending money to Vietnam from the UK. Includes details on banking infrastructure, cash pickup networks, mobile wallets, and regional considerations.",
+      currencyCode: "VND",
+      color: "from-red-600 to-red-400",
+      region: "Asia",
+      coordinates: [108.2772, 14.0583]
+    },
+    {
+      title: "Poland Money Transfer Guide",
+      path: "/guides/send-money-to-poland",
+      description: "Find the best ways to send money to Poland from the UK. Learn about złoty exchange rates, EU transfer regulations, and digital wallet options.",
+      currencyCode: "PLN",
+      color: "from-red-500 to-pink-600",
+      region: "Europe",
+      coordinates: [19.1451, 51.9194]
+    },
+    {
+      title: "Romania Money Transfer Guide",
+      path: "/guides/send-money-to-romania",
+      description: "Best options for sending money to Romania, including digital transfers, cash pickup options, and banking preferences across different Romanian regions.",
+      currencyCode: "RON",
+      color: "from-yellow-500 to-amber-600",
+      region: "Europe",
+      coordinates: [24.9668, 45.9432]
+    },
+    {
+      title: "China Money Transfer Guide",
+      path: "/guides/send-money-to-china",
+      description: "Navigate China's unique regulations and find the best providers for sending money to China. Learn about documentation requirements and regional considerations.",
+      currencyCode: "CNY",
+      color: "from-red-600 to-rose-600",
+      region: "Asia",
+      coordinates: [104.1954, 35.8617]
+    },
+    {
+      title: "Morocco Money Transfer Guide",
+      path: "/guides/send-money-to-morocco",
+      description: "Navigate exchange controls, find the best providers, and understand the unique aspects of UK to Morocco transfers.",
+      currencyCode: "MAD",
+      color: "from-green-600 to-emerald-600",
+      region: "Africa",
+      coordinates: [-7.0926, 31.7917]
+    },
+    {
+      title: "Canada Money Transfer Guide",
+      path: "/guides/send-money-to-canada",
+      description: "Find the best ways to send money to Canada from the UK. Compare providers, understand receiving options, and learn about exchange rates and fees.",
+      currencyCode: "CAD",
+      color: "from-red-500 to-red-600",
+      region: "Americas",
+      coordinates: [-106.3468, 56.1304]
+    }
+  ];
+  
+  // Menu categories and subcategories data structure
+  const menuCategories = [
+    {
+      id: 'basics',
+      title: 'Money Transfer Basics',
+      icon: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+      color: 'from-blue-500 to-indigo-600',
+      subcategories: [
+        { id: 'getting-started', title: 'Getting Started with International Transfers', path: '/guides/getting-started' },
+        { id: 'business-transfers', title: 'Business Transfers Guide', path: '/guides/business-transfers' },
+        { id: 'transfer-fees', title: 'Transfer Fees Explained', path: '/guides/transfer-fees' },
+        { id: 'exchange-rates', title: 'Understanding Exchange Rates', path: '/guides/exchange-rates' },
+        { id: 'family-remittances', title: 'Sending Money to Family Abroad', path: '/guides/family-remittances' },
+        { id: 'security-tips', title: 'Security Tips for Money Transfers', path: '/guides/security-tips' }
+      ]
+    },
+    {
+      id: 'countries',
+      title: 'Country Specific Guides',
+      icon: 'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+      color: 'from-green-500 to-teal-600',
+      subcategories: [
+        { id: 'asia', title: 'Asia', path: '/guides/regions/asia' },
+        { id: 'europe', title: 'Europe', path: '/guides/regions/europe' },
+        { id: 'americas', title: 'Americas', path: '/guides/regions/americas' },
+        { id: 'africa', title: 'Africa', path: '/guides/regions/africa' },
+        { id: 'oceania', title: 'Oceania', path: '/guides/regions/oceania' }
+      ]
+    },
+    {
+      id: 'value',
+      title: 'Value of Transfer',
+      icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+      color: 'from-amber-500 to-orange-600',
+      subcategories: [
+        { id: 'high-value', title: 'High Value Transfers', path: '/guides/high-value' },
+        { id: 'mid-value', title: 'Mid-Range Transfers', path: '/guides/mid-value' },
+        { id: 'low-value', title: 'Low Value Transfers', path: '/guides/low-value' },
+        { id: 'micro', title: 'Micro Transfers', path: '/guides/micro' }
+      ]
+    },
+    {
+      id: 'purpose',
+      title: 'Transfer Purpose',
+      icon: 'M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z',
+      color: 'from-purple-500 to-pink-600',
+      subcategories: [
+        { id: 'property', title: 'Buying Property Abroad', path: '/guides/purpose/property' },
+        { id: 'study', title: 'Studying Abroad', path: '/guides/purpose/study' },
+        { id: 'family', title: 'Sending to Family', path: '/guides/purpose/family' },
+        { id: 'nomad', title: 'Digital Nomads', path: '/guides/purpose/nomad' },
+        { id: 'business', title: 'Business Purposes', path: '/guides/purpose/business' }
+      ]
+    },
+    {
+      id: 'frequency',
+      title: 'Transfer Frequency',
+      icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+      color: 'from-blue-600 to-cyan-600',
+      subcategories: [
+        { id: 'regular', title: 'Regular Transfers', path: '/guides/frequency/regular' },
+        { id: 'periodic', title: 'Periodic Transfers', path: '/guides/frequency/periodic' },
+        { id: 'one-time', title: 'One-Time Transfers', path: '/guides/frequency/one-time' },
+        { id: 'occasional', title: 'Occasional Transfers', path: '/guides/frequency/occasional' }
+      ]
+    },
+    {
+      id: 'corridors',
+      title: 'Key Corridors',
+      icon: 'M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7',
+      color: 'from-red-500 to-orange-600',
+      subcategories: [
+        { id: 'uk-asia', title: 'UK to Asia', path: '/guides/corridors/uk-asia' },
+        { id: 'us-latam', title: 'US to Latin America', path: '/guides/corridors/us-latam' },
+        { id: 'eu-africa', title: 'Europe to Africa', path: '/guides/corridors/eu-africa' },
+        { id: 'aus-pacific', title: 'Australia to Pacific', path: '/guides/corridors/aus-pacific' },
+        { id: 'gulf-asia', title: 'Gulf to Asia', path: '/guides/corridors/gulf-asia' }
+      ]
+    },
+    {
+      id: 'criteria',
+      title: 'Transfer by Criteria',
+      icon: 'M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z',
+      color: 'from-indigo-500 to-purple-600',
+      subcategories: [
+        { id: 'cost', title: 'Cost Optimizing', path: '/guides/criteria/cost' },
+        { id: 'convenience', title: 'Convenience', path: '/guides/criteria/convenience' },
+        { id: 'security', title: 'Security and Trust', path: '/guides/criteria/security' },
+        { id: 'service', title: 'Service Quality', path: '/guides/criteria/service' }
+      ]
+    },
+    {
+      id: 'method',
+      title: 'Transfer Method',
+      icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
+      color: 'from-teal-500 to-emerald-600',
+      subcategories: [
+        { id: 'digital-native', title: 'Digital Natives', path: '/guides/method/digital-native' },
+        { id: 'digital-adapter', title: 'Digital Adapters', path: '/guides/method/digital-adapter' },
+        { id: 'traditional', title: 'Traditional Users', path: '/guides/method/traditional' }
+      ]
+    }
+  ];
+  
+  // Get country guides for a specific continent
+  const getCountryGuidesForContinent = (continent) => {
+    return countryGuides.filter(guide => guide.region === continent);
+  };
+  
+  // Toggle category expansion
+  const toggleCategory = (categoryId) => {
+    setActiveCategory(activeCategory === categoryId ? null : categoryId);
+    setActiveContinent(null);
+  };
+
+  // Toggle continent expansion
+  const toggleContinent = (continentId) => {
+    setActiveContinent(activeContinent === continentId ? null : continentId);
+  };
+  
+  return (
+    <section className="py-10 bg-indigo-50 relative">
+      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-indigo-300 to-transparent"></div>
+      
+      <div className="container mx-auto px-4">
+        <motion.div
+          className="max-w-6xl mx-auto"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
+          <div className="text-center mb-10">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">Explore Our Guide Categories</h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Find the information you need based on your specific transfer scenario and requirements
+            </p>
+          </div>
+          
+          {/* Responsive Grid of Categories */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {menuCategories.map((category) => (
+              <motion.div 
+                key={category.id}
+                className="relative"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4 }}
+              >
+                <div 
+                  onClick={() => toggleCategory(category.id)}
+                  className={`bg-white cursor-pointer rounded-xl shadow-md p-5 border border-gray-100 hover:shadow-lg transition-all duration-300 h-[100px] flex items-center ${activeCategory === category.id ? 'ring-2 ring-indigo-400 shadow-lg' : ''}`}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center space-x-4">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-r ${category.color} text-white shadow-md`}>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={category.icon} />
+                        </svg>
+                      </div>
+                      <h3 className="font-bold text-gray-900 text-left">{category.title}</h3>
+                    </div>
+                    <motion.div
+                      animate={{ rotate: activeCategory === category.id ? 180 : 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </motion.div>
+                  </div>
+                </div>
+                
+                {/* Subcategories dropdown */}
+                <AnimatePresence>
+                  {activeCategory === category.id && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="mt-2 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-20 relative"
+                    >
+                      <ul className="py-2">
+                        {category.subcategories.map((subcategory) => (
+                          <motion.li 
+                            key={subcategory.id}
+                            whileHover={{ x: 5 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            {category.id === 'countries' ? (
+                              <div 
+                                onClick={() => toggleContinent(subcategory.id)}
+                                className="block px-6 py-3 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors duration-200 text-left cursor-pointer"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className="text-left">{subcategory.title}</span>
+                                  <motion.div
+                                    animate={{ rotate: activeContinent === subcategory.id ? 180 : 0 }}
+                                    transition={{ duration: 0.3 }}
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                                    </svg>
+                                  </motion.div>
+                                </div>
+                                {/* Country guides submenu */}
+                                {activeContinent === subcategory.id && (
+                                  <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="mt-2 ml-4 bg-gray-50 rounded-lg overflow-hidden"
+                                  >
+                                    <ul className="py-2">
+                                      {getCountryGuidesForContinent(subcategory.title).map((guide) => (
+                                        <motion.li
+                                          key={guide.path}
+                                          whileHover={{ x: 5 }}
+                                          transition={{ duration: 0.2 }}
+                                        >
+                                          <Link
+                                            to={guide.path}
+                                            className="block px-4 py-2 text-gray-600 hover:bg-indigo-50 hover:text-indigo-700 transition-colors duration-200 text-left"
+                                          >
+                                            <div className="flex items-center gap-2">
+                                              <CurrencyFlag currency={guide.currencyCode} size="sm" />
+                                              <span>{guide.title.replace(/Send Money to |Sending Money to |Money Transfer Guide|Guide|Complete Guide to |Remittance Guide/g, '').trim()}</span>
+                                            </div>
+                                          </Link>
+                                        </motion.li>
+                                      ))}
+                                    </ul>
+                                  </motion.div>
+                                )}
+                              </div>
+                            ) : (
+                              <Link 
+                                to={subcategory.path} 
+                                className="block px-6 py-3 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors duration-200 text-left"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className="text-left">{subcategory.title}</span>
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10 10.586 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                                  </svg>
+                                </div>
+                              </Link>
+                            )}
+                          </motion.li>
+                        ))}
+                      </ul>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            ))}
+          </div>
+          
+          {/* View All Guides Button */}
+          <div className="mt-10 text-center">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="inline-flex items-center px-6 py-3 rounded-full bg-indigo-100 text-indigo-700 font-medium shadow-sm hover:shadow-md hover:bg-indigo-200 transition-all duration-300"
+            >
+              <span>Browse All Guides</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </motion.button>
+          </div>
+        </motion.div>
+      </div>
+    </section>
   );
 };
 

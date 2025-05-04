@@ -78,6 +78,10 @@ const Header = ({
     transition: 'background-color 300ms ease, border-color 300ms ease',
   };
   
+  // Tagline text styling based on transparency (homepage vs other pages)
+  const taglineTextColor = isTransparent ? "text-white" : "text-indigo-700";
+  const taglineLineColor = isTransparent ? "bg-white" : "bg-indigo-300";
+  
   return (
     <header 
       className={`${headerBgClass} ${headerBorderClass} sticky top-0 z-[9999] py-4 will-change-transform`}
@@ -136,6 +140,20 @@ const Header = ({
             />
           </div>
         </div>
+        
+        {/* Tagline - Only visible on desktop and not on homepage */}
+        {(!isTransparent) && (
+          <div className="hidden lg:flex absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="relative inline-flex items-center w-full">
+              <span className="h-px w-8 bg-indigo-300 mr-4"></span>
+              <span className="flex flex-col text-center">
+                <span className="text-indigo-700 font-medium text-sm leading-tight">Truly Independent</span>
+                <span className="text-indigo-700 font-medium text-sm leading-tight">Transparently Better</span>
+              </span>
+              <span className="h-px w-8 bg-indigo-300 ml-4"></span>
+            </div>
+          </div>
+        )}
         
         {/* Desktop Navigation */}
         <div className="hidden md:flex space-x-3 absolute right-4 top-1/2 transform -translate-y-1/2">

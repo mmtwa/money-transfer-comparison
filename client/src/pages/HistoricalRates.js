@@ -40,6 +40,14 @@ const LiveHistoricalRates = () => {
   const [secondPairCurrentRate, setSecondPairCurrentRate] = useState(null);
   const [secondPairLoading, setSecondPairLoading] = useState(false);
   
+  // Multi-currency ecommerce pricing tool state
+  const [productPrice, setProductPrice] = useState(100);
+  const [baseCurrency, setBaseCurrency] = useState('USD');
+  const [targetCurrencies, setTargetCurrencies] = useState(['EUR', 'GBP', 'JPY', 'CAD', 'AUD']);
+  const [convertedPrices, setConvertedPrices] = useState({});
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [priceToolError, setPriceToolError] = useState(null);
+  
   // Scroll to top when component mounts
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -532,6 +540,108 @@ const LiveHistoricalRates = () => {
     setSecondPairData(sortedData);
   };
 
+  // Handle product price change
+  const handleProductPriceChange = (e) => {
+    const value = parseFloat(e.target.value);
+    setProductPrice(isNaN(value) ? 0 : value);
+  };
+
+  // Handle base currency change for ecommerce tool
+  const handleBaseCurrencyChange = (currency) => {
+    setBaseCurrency(currency);
+  };
+
+  // Handle adding a target currency
+  const handleAddTargetCurrency = (currency) => {
+    if (!targetCurrencies.includes(currency)) {
+      setTargetCurrencies([...targetCurrencies, currency]);
+    }
+  };
+
+  // Handle removing a target currency
+  const handleRemoveTargetCurrency = (currency) => {
+    setTargetCurrencies(targetCurrencies.filter(c => c !== currency));
+  };
+
+  // Calculate converted prices
+  const calculatePrices = async () => {
+    if (productPrice <= 0) {
+      setPriceToolError("Please enter a valid product price");
+      return;
+    }
+
+    setIsCalculating(true);
+    setPriceToolError(null);
+    
+    try {
+      const results = {};
+      
+      // Get rates for all target currencies
+      await Promise.all(targetCurrencies.map(async (currency) => {
+        try {
+          const response = await apiService.getWiseComparison(baseCurrency, currency, productPrice);
+          
+          if (response.data && response.data.success && response.data.data && response.data.data.providers) {
+            const providers = response.data.data.providers;
+            
+            // Find Wise provider or use first provider
+            const wiseProvider = providers.find(p => 
+              p.alias?.toLowerCase() === 'wise' || 
+              p.name?.toLowerCase()?.includes('wise')
+            );
+            
+            if (wiseProvider && wiseProvider.quotes && wiseProvider.quotes.length > 0) {
+              results[currency] = wiseProvider.quotes[0].rate * productPrice;
+            } else if (providers.length > 0 && providers[0].quotes && providers[0].quotes.length > 0) {
+              results[currency] = providers[0].quotes[0].rate * productPrice;
+            }
+          }
+        } catch (err) {
+          console.error(`Error fetching rate for ${currency}:`, err);
+          
+          // Try direct API as fallback
+          try {
+            const directResponse = await apiService.getWiseV3Comparison(baseCurrency, currency, productPrice);
+            
+            if (directResponse.data && directResponse.data.providers) {
+              const providers = directResponse.data.providers;
+              
+              const wiseProvider = providers.find(p => 
+                p.alias?.toLowerCase() === 'wise' || 
+                p.name?.toLowerCase()?.includes('wise')
+              );
+              
+              if (wiseProvider && wiseProvider.quotes && wiseProvider.quotes.length > 0) {
+                results[currency] = wiseProvider.quotes[0].rate * productPrice;
+              } else if (providers.length > 0 && providers[0].quotes && providers[0].quotes.length > 0) {
+                results[currency] = providers[0].quotes[0].rate * productPrice;
+              }
+            }
+          } catch (directErr) {
+            console.error(`Error fetching direct rate for ${currency}:`, directErr);
+          }
+        }
+      }));
+      
+      setConvertedPrices(results);
+    } catch (error) {
+      console.error("Error calculating prices:", error);
+      setPriceToolError("Failed to calculate prices. Please try again.");
+    } finally {
+      setIsCalculating(false);
+    }
+  };
+
+  // Format price with currency symbol
+  const formatPrice = (price, currencyCode) => {
+    return new Intl.NumberFormat('en-US', { 
+      style: 'currency', 
+      currency: currencyCode,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(price);
+  };
+
   // useEffect to update chart when data changes
   useEffect(() => {
     buildChartDatasets();
@@ -550,6 +660,13 @@ const LiveHistoricalRates = () => {
       fetchSecondPairHistoricalRates(); // Fetch secondary data
     }
   }, [showSecondPair, secondPairFormState.fromCurrency, secondPairFormState.toCurrency, secondPairFormState.group]); // Removed fetchSecondPairCurrentRate
+
+  // Calculate prices when base currency or product price changes
+  useEffect(() => {
+    if (productPrice > 0) {
+      calculatePrices();
+    }
+  }, [baseCurrency, productPrice]);
 
   // Animation variants for staggered animations
   const containerVariants = {
@@ -572,8 +689,36 @@ const LiveHistoricalRates = () => {
     }
   };
 
+  // Currency options for the dropdown
+  const availableCurrencies = currenciesList.map(currency => currency.code);
+
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-indigo-50/30 to-white text-gray-900 py-10 pt-[1px]">
+      {/* Add shimmer styles */}
+      <style jsx="true" global="true">{`
+        .text-shimmer {
+          background: linear-gradient(
+            to right,
+            #6366f1 20%,
+            #818cf8 40%,
+            #4f46e5 60%,
+            #6366f1 80%
+          );
+          background-size: 200% auto;
+          background-clip: text;
+          text-fill-color: transparent;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: text-shine 1.5s linear infinite;
+        }
+        
+        @keyframes text-shine {
+          to {
+            background-position: 200% center;
+          }
+        }
+      `}</style>
+      
       {/* Hero Section */}
       <section className="py-16 md:py-20 border-b border-gray-100 bg-gradient-to-b from-indigo-900 to-indigo-800 text-white relative overflow-hidden">
         <div className="absolute inset-0 overflow-hidden">
@@ -642,9 +787,6 @@ const LiveHistoricalRates = () => {
               className="bg-white rounded-2xl p-6 mb-8 shadow-lg border border-indigo-50 relative"
               variants={itemVariants}
             >
-              <div className="absolute -right-10 -top-10 w-48 h-48 bg-indigo-500/5 rounded-full"></div>
-              <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-purple-500/5 rounded-full"></div>
-              
               <div className="relative">
                 <div className="flex flex-col md:flex-row md:items-end gap-4 md:gap-8">
                   {/* From Currency */}
@@ -709,15 +851,15 @@ const LiveHistoricalRates = () => {
                     <div className="flex flex-col items-center justify-center">
                       <div className="flex items-center mb-2">
                         <CurrencyFlag currency={formState.fromCurrency} size="md" />
-                        <span className="mx-2 text-lg font-medium">1 {formState.fromCurrency} = </span>
+                        <span className="mx-2 text-lg md:text-xl font-medium">1 {formState.fromCurrency} = </span>
                         <motion.span 
-                          className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600"
+                          className="text-2xl md:text-4xl lg:text-5xl font-bold text-shimmer"
                           animate={{ scale: [1, 1.05, 1] }}
                           transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 3 }}
                         >
                           {formatExchangeRate(currentExchangeRate)}
                         </motion.span>
-                        <span className="mx-2 text-lg font-medium">{formState.toCurrency}</span>
+                        <span className="mx-2 text-lg md:text-xl font-medium">{formState.toCurrency}</span>
                         <CurrencyFlag currency={formState.toCurrency} size="md" />
                       </div>
                       <p className="text-sm text-gray-500">
@@ -734,9 +876,6 @@ const LiveHistoricalRates = () => {
               className="bg-white rounded-2xl p-6 shadow-lg border border-indigo-50 mb-8 relative overflow-hidden"
               variants={itemVariants}
             >
-              <div className="absolute -left-10 -bottom-10 w-48 h-48 bg-indigo-500/5 rounded-full"></div>
-              <div className="absolute right-10 top-10 w-32 h-32 bg-purple-500/5 rounded-full"></div>
-              
               <div className="relative z-10">
                 <div className="flex flex-col">
                   <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
@@ -1040,10 +1179,9 @@ const LiveHistoricalRates = () => {
                   variants={itemVariants}
                   whileHover={{ y: -4, boxShadow: "0 12px 24px -8px rgba(79, 70, 229, 0.15)" }}
                 >
-                  <div className="absolute -top-10 -right-10 w-32 h-32 bg-green-100 rounded-full opacity-20"></div>
                   <div className="relative">
                     <h3 className="text-sm uppercase tracking-wider text-gray-500 font-medium mb-2">Lowest Rate</h3>
-                    <p className="text-2xl font-bold text-green-600">
+                    <p className="text-2xl font-bold text-red-600">
                       {formatExchangeRate(Math.min(...historicalData.map(item => item.rate)))}
                     </p>
                     <p className="text-sm text-gray-500 mt-1">During selected period</p>
@@ -1056,10 +1194,9 @@ const LiveHistoricalRates = () => {
                   variants={itemVariants}
                   whileHover={{ y: -4, boxShadow: "0 12px 24px -8px rgba(79, 70, 229, 0.15)" }}
                 >
-                  <div className="absolute -top-10 -right-10 w-32 h-32 bg-red-100 rounded-full opacity-20"></div>
                   <div className="relative">
                     <h3 className="text-sm uppercase tracking-wider text-gray-500 font-medium mb-2">Highest Rate</h3>
-                    <p className="text-2xl font-bold text-red-600">
+                    <p className="text-2xl font-bold text-green-600">
                       {formatExchangeRate(Math.max(...historicalData.map(item => item.rate)))}
                     </p>
                     <p className="text-sm text-gray-500 mt-1">During selected period</p>
@@ -1072,7 +1209,6 @@ const LiveHistoricalRates = () => {
                   variants={itemVariants}
                   whileHover={{ y: -4, boxShadow: "0 12px 24px -8px rgba(79, 70, 229, 0.15)" }}
                 >
-                  <div className="absolute -top-10 -right-10 w-32 h-32 bg-indigo-100 rounded-full opacity-20"></div>
                   <div className="relative">
                     <h3 className="text-sm uppercase tracking-wider text-gray-500 font-medium mb-2">Average Rate</h3>
                     <p className="text-2xl font-bold text-indigo-600">
@@ -1083,6 +1219,201 @@ const LiveHistoricalRates = () => {
                 </motion.div>
               </motion.div>
             )}
+            
+            {/* E-commerce Pricing Tool Section */}
+            <motion.div 
+              className="bg-white rounded-2xl p-6 shadow-lg border border-purple-100 mb-8 relative overflow-hidden"
+              variants={itemVariants}
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-200/30 to-indigo-200/30 rounded-bl-full"></div>
+              
+              <div className="relative z-10">
+                <div className="flex items-center mb-6">
+                  <div className="mr-3 bg-purple-100 p-2 rounded-full text-purple-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <h2 className="text-2xl font-bold text-gray-800">Multi-Currency Pricing Tool</h2>
+                </div>
+                
+                <p className="text-gray-600 mb-6">
+                  Convert your product prices to multiple currencies in real-time to optimize your global e-commerce strategy.
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  {/* Product Price Input */}
+                  <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Product Price</label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={productPrice}
+                        onChange={handleProductPriceChange}
+                        className="w-full appearance-none border border-gray-500 rounded-xl p-4 md:p-5 text-gray-800 focus:outline-none cursor-pointer flex items-center justify-between hover:border-blue-500 hover:shadow-md transition-all duration-200 relative overflow-hidden"
+                        style={{ minHeight: '64px', fontSize: '1rem', fontWeight: '500' }}
+                        placeholder="Enter product price"
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Base Currency Selector */}
+                  <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Base Currency</label>
+                    <div className="relative flex justify-center">
+                      <div className="flex items-center">
+                        <CurrencySelector
+                          selectedCurrency={baseCurrency}
+                          onCurrencyChange={handleBaseCurrencyChange}
+                          isOpen={activeDropdown === 'baseCurrency'}
+                          onToggle={() => handleDropdownToggle('baseCurrency')}
+                          id="baseCurrency"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Target Currencies */}
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-lg font-semibold text-gray-800">Target Markets</h3>
+                    <div className="relative">
+                      <button
+                        onClick={() => handleDropdownToggle('targetCurrencyAdd')}
+                        className="flex items-center text-sm text-purple-600 hover:text-purple-700 gap-1"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        <span>Add Market</span>
+                      </button>
+                      
+                      {activeDropdown === 'targetCurrencyAdd' && (
+                        <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg border border-gray-200 z-30 max-h-80 overflow-y-auto">
+                          <div className="p-3">
+                            <input
+                              type="text"
+                              className="w-full p-2 border border-gray-300 rounded mb-3 text-sm"
+                              placeholder="Search currencies..."
+                              onChange={(e) => {
+                                // Filter currencies based on input
+                              }}
+                            />
+                            <div className="max-h-60 overflow-y-auto">
+                              {availableCurrencies.map(currency => (
+                                <button
+                                  key={currency}
+                                  className={`flex items-center p-2.5 text-sm w-full hover:bg-purple-50 rounded transition-colors ${targetCurrencies.includes(currency) ? 'opacity-50' : ''}`}
+                                  onClick={() => {
+                                    handleAddTargetCurrency(currency);
+                                    handleDropdownToggle(null);
+                                  }}
+                                  disabled={targetCurrencies.includes(currency)}
+                                >
+                                  <div className="flex items-center min-w-[60px]">
+                                    <CurrencyFlag currency={currency} size="sm" />
+                                    <span className="ml-2 font-medium">{currency}</span>
+                                  </div>
+                                  <span className="text-gray-600 ml-2">{currenciesList.find(c => c.code === currency)?.name || currency}</span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    {targetCurrencies.length === 0 ? (
+                      <p className="text-gray-500 text-center py-4">No target markets selected. Add markets to see price conversions.</p>
+                    ) : (
+                      <div className="space-y-4">
+                        {targetCurrencies.map(currency => (
+                          <div key={currency} className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
+                            <div className="flex items-center">
+                              <CurrencyFlag currency={currency} size="md" />
+                              <div className="ml-3 text-left">
+                                <span className="text-sm font-medium text-gray-900">{currency}</span>
+                                <p className="text-xs text-gray-500">{currenciesList.find(c => c.code === currency)?.name || currency}</p>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center">
+                              {isCalculating ? (
+                                <div className="text-lg font-bold text-purple-600 animate-pulse">
+                                  Calculating...
+                                </div>
+                              ) : (
+                                <div className="text-lg font-bold text-purple-600">
+                                  {convertedPrices[currency] ? formatPrice(convertedPrices[currency], currency) : '--'}
+                                </div>
+                              )}
+                              
+                              <button
+                                onClick={() => handleRemoveTargetCurrency(currency)}
+                                className="ml-3 text-gray-400 hover:text-red-500"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {priceToolError && (
+                    <div className="mt-3 bg-red-50 border-l-4 border-red-500 p-4">
+                      <div className="flex">
+                        <div className="flex-shrink-0">
+                          <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div className="ml-3">
+                          <p className="text-sm text-red-700">{priceToolError}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex justify-center mt-4">
+                  <motion.button
+                    onClick={calculatePrices}
+                    disabled={isCalculating || productPrice <= 0 || targetCurrencies.length === 0}
+                    className={`px-6 py-3 rounded-lg shadow-md flex items-center justify-center ${
+                      isCalculating || productPrice <= 0 || targetCurrencies.length === 0
+                        ? 'bg-gray-300 cursor-not-allowed'
+                        : 'bg-purple-600 hover:bg-purple-700 text-white'
+                    } transition-colors`}
+                    whileHover={{ scale: isCalculating ? 1 : 1.02 }}
+                    whileTap={{ scale: isCalculating ? 1 : 0.98 }}
+                  >
+                    {isCalculating ? (
+                      <>
+                        <div className="animate-spin h-5 w-5 border-t-2 border-b-2 border-white rounded-full mr-2"></div>
+                        <span>Calculating...</span>
+                      </>
+                    ) : (
+                      <span>Calculate Prices</span>
+                    )}
+                  </motion.button>
+                </div>
+                
+                <div className="mt-6 text-sm text-gray-500 text-center">
+                  <p>
+                    Price conversion uses real-time exchange rates. Final prices may vary based on payment processors and local taxes.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
             
             {/* Info Boxes */}
             <motion.div 
@@ -1097,14 +1428,8 @@ const LiveHistoricalRates = () => {
                 variants={itemVariants}
                 whileHover={{ y: -4, boxShadow: "0 15px 30px -10px rgba(79, 70, 229, 0.15)" }}
               >
-                <div className="absolute -right-10 -bottom-20 w-40 h-40 bg-indigo-200 rounded-full opacity-20 blur-xl"></div>
-                <div className="absolute left-4 top-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-indigo-400 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                  </svg>
-                </div>
                 <div className="relative">
-                  <h3 className="text-xl font-bold text-indigo-700 mb-3 mt-8">Understanding Exchange Rate Trends</h3>
+                  <h3 className="text-xl font-bold text-indigo-700 mb-3">Understanding Exchange Rate Trends</h3>
                   <p className="text-gray-700">
                     Historical exchange rate data helps you understand currency movements over time. Look for patterns like volatility or stability to make better timing decisions for your transfers.
                   </p>
@@ -1116,14 +1441,8 @@ const LiveHistoricalRates = () => {
                 variants={itemVariants}
                 whileHover={{ y: -4, boxShadow: "0 15px 30px -10px rgba(124, 58, 237, 0.15)" }}
               >
-                <div className="absolute -left-10 -bottom-20 w-40 h-40 bg-purple-200 rounded-full opacity-20 blur-xl"></div>
-                <div className="absolute left-4 top-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-purple-400 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
                 <div className="relative">
-                  <h3 className="text-xl font-bold text-purple-700 mb-3 mt-8">When To Make Your Transfer</h3>
+                  <h3 className="text-xl font-bold text-purple-700 mb-3">When To Make Your Transfer</h3>
                   <p className="text-gray-700">
                     By monitoring historical rates, you can identify favorable times to make currency exchanges. Even small rate improvements can lead to significant savings on larger transfers.
                   </p>

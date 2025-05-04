@@ -200,7 +200,7 @@ const FAQ = () => {
                       transition={{ duration: 0.3, ease: "easeInOut" }}
                     >
                       <div className="px-6 py-5 bg-indigo-50/50 border-t border-indigo-100">
-                        <p className="text-gray-700 leading-relaxed">{item.answer}</p>
+                        <p className="text-gray-700 leading-relaxed text-left">{item.answer}</p>
                       </div>
                     </motion.div>
                   </div>

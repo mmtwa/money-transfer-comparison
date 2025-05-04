@@ -288,7 +288,9 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
   
   // Scroll to provider card when clicking best deal
   const scrollToProvider = (id) => {
-    const element = document.getElementById(`provider-${id}`);
+    // Remove 'provider-' prefix if it's already present
+    const cleanId = id.startsWith('provider-') ? id : `provider-${id}`;
+    const element = document.getElementById(cleanId);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
@@ -573,7 +575,10 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
                 </div>
               </div>
               
-              <button className="text-xs bg-white px-3 py-1.5 rounded-md shadow-sm border border-indigo-100 text-indigo-700 font-medium flex items-center mt-3 md:mt-0">
+              <button 
+                onClick={() => scrollToProvider(bestDealProvider.providerId)}
+                className="text-xs bg-white px-3 py-1.5 rounded-md shadow-sm border border-indigo-100 text-indigo-700 font-medium flex items-center mt-3 md:mt-0"
+              >
                 View Provider
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1">
                   <path d="M5 12h14"></path>
