@@ -19,7 +19,160 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
   const [error, setError] = useState(null);
   // State for fetched external ratings and loading status
   const [providerRatings, setProviderRatings] = useState({});
+  const [trustpilotRatings, setTrustpilotRatings] = useState({});
   const [ratingsLoading, setRatingsLoading] = useState(false);
+  
+  // XE currency classifications for different markup percentages
+  const majorCurrencies = ['USD', 'EUR', 'GBP', 'AUD', 'CAD', 'NZD', 'CHF', 'JPY', 'SGD'];
+  const tier2Currencies = ['INR', 'ZAR', 'MXN', 'PLN', 'SEK', 'NOK', 'DKK', 'HUF', 'CZK', 'ILS', 'TRY', 'THB', 'PHP', 'MYR', 'RON', 'BGN', 'KRW', 'HKD', 'CNY', 'CLP', 'COP', 'SAR', 'AED', 'QAR', 'KWD', 'NGN', 'BRL', 'RUB', 'ARS', 'EGP', 'IDR'];
+  const exoticCurrencies = ['NGN', 'KWD', 'QAR', 'ARS', 'EGP', 'IDR', 'CLP', 'COP', 'RUB', 'BRL', 'TRY'];
+  
+  // Function to determine XE markup based on currency pair
+  const getXEMarkup = (fromCurr, toCurr) => {
+    // If both currencies are major, use 0.7%
+    if (majorCurrencies.includes(fromCurr) && majorCurrencies.includes(toCurr)) {
+      return 0.007;
+    }
+    
+    // If either currency is in tier2 list but not in exotic, use 1.7%
+    if ((majorCurrencies.includes(fromCurr) && tier2Currencies.includes(toCurr)) || 
+        (tier2Currencies.includes(fromCurr) && majorCurrencies.includes(toCurr)) ||
+        (tier2Currencies.includes(fromCurr) && tier2Currencies.includes(toCurr))) {
+      // Check if one of the currencies is exotic, then use 2.2%
+      if (exoticCurrencies.includes(fromCurr) || exoticCurrencies.includes(toCurr)) {
+        return 0.022;
+      }
+      return 0.017;
+    }
+    
+    // Default to exotic rate 2.2%
+    return 0.022;
+  };
+  
+  // Function to determine Profee markup based on currency pair
+  const getProfeeMarkup = (fromCurr, toCurr) => {
+    // Major pairs (EUR, USD, GBP, PLN, CZK, HUF, RUB, TRY)
+    const majorPairs = ['EUR', 'USD', 'GBP', 'PLN', 'CZK', 'HUF', 'RUB', 'TRY'];
+    if (majorPairs.includes(fromCurr) && majorPairs.includes(toCurr)) {
+      return 0.007; // 0.7%
+    }
+    
+    // Tier 2 pairs (INR, ZAR, MXN, etc.)
+    const tier2Pairs = ['INR', 'ZAR', 'MXN', 'PLN', 'SEK', 'NOK', 'DKK', 'HUF', 'CZK', 'ILS', 'TRY', 'THB', 'PHP', 'MYR', 'RON', 'BGN', 'KRW', 'HKD', 'CNY', 'CLP', 'COP', 'SAR', 'AED', 'QAR', 'KWD', 'NGN', 'BRL', 'RUB', 'ARS', 'EGP', 'IDR'];
+    if ((majorPairs.includes(fromCurr) && tier2Pairs.includes(toCurr)) || 
+        (tier2Pairs.includes(fromCurr) && majorPairs.includes(toCurr)) ||
+        (tier2Pairs.includes(fromCurr) && tier2Pairs.includes(toCurr))) {
+      return 0.012; // 1.2%
+    }
+    
+    // Exotic pairs
+    return 0.017; // 1.7%
+  };
+  
+  // Function to determine XE fee based on amount
+  const getXEFee = (amt, currency) => {
+    // Free above $500 equivalent
+    if (amt >= 500) {
+      return 0;
+    }
+    
+    // Otherwise between 0-2.00 in the respective currency
+    switch(currency) {
+      case 'USD':
+        return 2.00;
+      case 'EUR':
+        return 2.00;
+      case 'GBP':
+        return 2.00;
+      default:
+        // For other currencies, use USD equivalent
+        return 2.00;
+    }
+  };
+  
+  // Function to determine Profee fee based on amount
+  const getProfeeFee = (amt, currency) => {
+    // Free above €100 equivalent
+    if (amt >= 100) {
+      return 0;
+    }
+    
+    // Otherwise between 0-1.00 in the respective currency
+    switch(currency) {
+      case 'USD':
+        return 1.00;
+      case 'EUR':
+        return 1.00;
+      case 'GBP':
+        return 1.00;
+      default:
+        // For other currencies, use EUR equivalent
+        return 1.00;
+    }
+  };
+  
+  // Function to determine XE delivery time based on currency pair
+  const getXEDeliveryTime = (fromCurr, toCurr) => {
+    // Major pairs: Same day to 1 business day
+    if (majorCurrencies.includes(fromCurr) && majorCurrencies.includes(toCurr)) {
+      return {
+        text: 'Same day to 1 business day',
+        hours: { min: 0, max: 24 }
+      };
+    }
+    
+    // Tier 2 currencies: 1-2 business days
+    if ((majorCurrencies.includes(fromCurr) && tier2Currencies.includes(toCurr)) || 
+        (tier2Currencies.includes(fromCurr) && majorCurrencies.includes(toCurr)) ||
+        (tier2Currencies.includes(fromCurr) && tier2Currencies.includes(toCurr))) {
+      // Exotic currencies: 1-3 business days
+      if (exoticCurrencies.includes(fromCurr) || exoticCurrencies.includes(toCurr)) {
+        return {
+          text: '1-3 business days',
+          hours: { min: 24, max: 72 }
+        };
+      }
+      return {
+        text: '1-2 business days',
+        hours: { min: 24, max: 48 }
+      };
+    }
+    
+    // Default to exotic timing
+    return {
+      text: '1-3 business days',
+      hours: { min: 24, max: 72 }
+    };
+  };
+  
+  // Function to determine Profee delivery time based on currency pair
+  const getProfeeDeliveryTime = (fromCurr, toCurr) => {
+    // Major pairs: Instant to 1 business day
+    const majorPairs = ['EUR', 'USD', 'GBP', 'PLN', 'CZK', 'HUF', 'RUB', 'TRY'];
+    if (majorPairs.includes(fromCurr) && majorPairs.includes(toCurr)) {
+      return {
+        text: 'Instant to 1 business day',
+        hours: { min: 0, max: 24 }
+      };
+    }
+    
+    // Tier 2 pairs: 1-2 business days
+    const tier2Pairs = ['INR', 'ZAR', 'MXN', 'PLN', 'SEK', 'NOK', 'DKK', 'HUF', 'CZK', 'ILS', 'TRY', 'THB', 'PHP', 'MYR', 'RON', 'BGN', 'KRW', 'HKD', 'CNY', 'CLP', 'COP', 'SAR', 'AED', 'QAR', 'KWD', 'NGN', 'BRL', 'RUB', 'ARS', 'EGP', 'IDR'];
+    if ((majorPairs.includes(fromCurr) && tier2Pairs.includes(toCurr)) || 
+        (tier2Pairs.includes(fromCurr) && majorPairs.includes(toCurr)) ||
+        (tier2Pairs.includes(fromCurr) && tier2Pairs.includes(toCurr))) {
+      return {
+        text: '1-2 business days',
+        hours: { min: 24, max: 48 }
+      };
+    }
+    
+    // Default to exotic timing
+    return {
+      text: '1-3 business days',
+      hours: { min: 24, max: 72 }
+    };
+  };
   
   // Fetch data from API on component mount or when search parameters change
   useEffect(() => {
@@ -76,6 +229,12 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
             // Process all providers from comparison API
             const providers = allProviders
               .filter(p => p.quotes && p.quotes.length > 0)
+              // Filter out TorFX from API results since we'll add our own calculated version
+              .filter(p => {
+                const providerAlias = (p.alias || '').toLowerCase();
+                const providerName = (p.name || '').toLowerCase();
+                return !(providerAlias === 'torfx' || providerName.includes('torfx'));
+              })
               .map(provider => {
                 // Find the best quote for this provider
                 const quote = provider.quotes.reduce((best, current) => 
@@ -107,12 +266,22 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
                   }
                 }
                 
+                // Determine logo path, override for TorFX if SVG is provided
+                let logoUrl = provider.logos?.normal?.svgUrl || provider.logos?.normal?.pngUrl || provider.logo;
+                const providerAlias = (provider.alias || '').toLowerCase();
+                const providerNameCheck = (provider.name || '').toLowerCase();
+
+                if ((providerAlias === 'torfx' || providerNameCheck.includes('torfx')) && logoUrl && logoUrl.endsWith('.svg')) {
+                  console.log(`Overriding TorFX SVG logo with PNG for provider ${provider.id}`);
+                  logoUrl = '/images/providers/torfx.png'; // Force PNG for TorFX
+                }
+                
                 // Basic provider object from comparison API data
                 return {
                   providerId: `provider-${provider.id}`,
                   providerCode: provider.alias,
                   providerName: provider.name,
-                  providerLogo: provider.logos?.normal?.svgUrl || provider.logos?.normal?.pngUrl || provider.logo,
+                  providerLogo: logoUrl, // Use the potentially overridden logoUrl
                   baseRate: quote.rate,
                   effectiveRate: quote.rate,
                   transferFee: quote.fee || 0,
@@ -169,6 +338,178 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
                   }
                 }
               });
+              
+              // Add XE as a provider using the mid-market rate and our markup matrix
+              // Only add if we have a valid mid-market rate
+              const xeMarkupPercentage = getXEMarkup(fromCurrency, toCurrency);
+              const xeFee = getXEFee(amount, fromCurrency);
+              const xeDeliveryTime = getXEDeliveryTime(fromCurrency, toCurrency);
+              
+              // Calculate XE's effective rate using the markup
+              const xeEffectiveRate = midMarketRate * (1 - xeMarkupPercentage);
+              
+              // Calculate amount received (amount converted at effective rate minus the fee)
+              const xeAmountBeforeFee = parseFloat(amount) * xeEffectiveRate;
+              const xeAmountReceived = xeAmountBeforeFee - (xeFee * xeEffectiveRate); // Convert fee to target currency
+              
+              // Calculate margin cost
+              const xeMarginCost = parseFloat(amount) * (midMarketRate - xeEffectiveRate);
+              
+              // Create XE provider object
+              const xeProvider = {
+                providerId: 'provider-xe',
+                providerCode: 'xe',
+                providerName: 'XE Money Transfer',
+                providerLogo: '/images/providers/XElogo.svg',
+                baseRate: midMarketRate,
+                effectiveRate: xeEffectiveRate,
+                transferFee: xeFee,
+                marginPercentage: xeMarkupPercentage * 100,
+                marginCost: xeMarginCost,
+                totalCost: xeFee + xeMarginCost,
+                amountReceived: xeAmountReceived > 0 ? xeAmountReceived : 0, // Ensure amount is not negative
+                sourceCountry: fromCurrency === 'GBP' ? 'GB' : fromCurrency === 'USD' ? 'US' : fromCurrency === 'EUR' ? 'EU' : null,
+                targetCountry: toCurrency === 'GBP' ? 'GB' : toCurrency === 'USD' ? 'US' : toCurrency === 'EUR' ? 'EU' : null,
+                transferTimeHours: xeDeliveryTime.hours,
+                transferTime: xeDeliveryTime.text,
+                rating: 4.5, // Default XE rating
+                methods: ['bank_transfer'],
+                realTimeApi: false, // Not from real-time API
+                timestamp: new Date().toISOString()
+              };
+              
+              // Add XE to providers array
+              providers.push(xeProvider);
+              console.log('Added XE as a provider with markup:', xeMarkupPercentage * 100 + '%');
+
+              // Add Profee as a provider using the mid-market rate and our markup matrix
+              const profeeMarkupPercentage = getProfeeMarkup(fromCurrency, toCurrency);
+              const profeeFee = getProfeeFee(amount, fromCurrency);
+              const profeeDeliveryTime = getProfeeDeliveryTime(fromCurrency, toCurrency);
+              
+              // Calculate Profee's effective rate using the markup
+              const profeeEffectiveRate = midMarketRate * (1 - profeeMarkupPercentage);
+              
+              // Calculate amount received (amount converted at effective rate minus the fee)
+              const profeeAmountBeforeFee = parseFloat(amount) * profeeEffectiveRate;
+              const profeeAmountReceived = profeeAmountBeforeFee - (profeeFee * profeeEffectiveRate); // Convert fee to target currency
+              
+              // Calculate margin cost
+              const profeeMarginCost = parseFloat(amount) * (midMarketRate - profeeEffectiveRate);
+              
+              // Create Profee provider object
+              const profeeProvider = {
+                providerId: 'provider-profee',
+                providerCode: 'profee',
+                providerName: 'Profee',
+                providerLogo: '/images/providers/profee.svg',
+                baseRate: midMarketRate,
+                effectiveRate: profeeEffectiveRate,
+                transferFee: profeeFee,
+                marginPercentage: profeeMarkupPercentage * 100,
+                marginCost: profeeMarginCost,
+                totalCost: profeeFee + profeeMarginCost,
+                amountReceived: profeeAmountReceived > 0 ? profeeAmountReceived : 0, // Ensure amount is not negative
+                sourceCountry: fromCurrency === 'GBP' ? 'GB' : fromCurrency === 'USD' ? 'US' : fromCurrency === 'EUR' ? 'EU' : null,
+                targetCountry: toCurrency === 'GBP' ? 'GB' : toCurrency === 'USD' ? 'US' : toCurrency === 'EUR' ? 'EU' : null,
+                transferTimeHours: profeeDeliveryTime.hours,
+                transferTime: profeeDeliveryTime.text,
+                rating: 4.3, // Default Profee rating
+                methods: ['bank_transfer'],
+                realTimeApi: false, // Not from real-time API
+                timestamp: new Date().toISOString()
+              };
+              
+              // Add Profee to providers array
+              providers.push(profeeProvider);
+              console.log('Added Profee as a provider with markup:', profeeMarkupPercentage * 100 + '%');
+
+              // Add TorFX as a provider using the mid-market rate and our markup matrix
+              const getTorFXMarkup = (fromCurr, toCurr) => {
+                // Major pairs
+                const majorPairs = ['USD', 'EUR', 'GBP', 'AUD', 'CAD', 'NZD', 'CHF', 'JPY', 'SGD'];
+                if (majorPairs.includes(fromCurr) && majorPairs.includes(toCurr)) {
+                  return 0.01; // 1.0%
+                }
+                
+                // Tier 2 pairs
+                const tier2Pairs = ['INR', 'ZAR', 'MXN', 'PLN', 'SEK', 'NOK', 'DKK', 'HUF', 'CZK', 'ILS', 'TRY', 'THB', 'PHP', 'MYR', 'RON', 'BGN', 'KRW', 'HKD', 'CNY', 'CLP', 'COP', 'SAR', 'AED', 'QAR', 'KWD', 'NGN', 'BRL', 'RUB', 'ARS', 'EGP', 'IDR'];
+                if ((majorPairs.includes(fromCurr) && tier2Pairs.includes(toCurr)) || 
+                    (tier2Pairs.includes(fromCurr) && majorPairs.includes(toCurr)) ||
+                    (tier2Pairs.includes(fromCurr) && tier2Pairs.includes(toCurr))) {
+                  return 0.015; // 1.5%
+                }
+                
+                // Exotic pairs
+                return 0.02; // 2.0%
+              };
+
+              const getTorFXDeliveryTime = (fromCurr, toCurr) => {
+                // Major pairs
+                const majorPairs = ['USD', 'EUR', 'GBP', 'AUD', 'CAD', 'NZD', 'CHF', 'JPY', 'SGD'];
+                if (majorPairs.includes(fromCurr) && majorPairs.includes(toCurr)) {
+                  return {
+                    text: 'Same day to 1 business day',
+                    hours: { min: 0, max: 24 }
+                  };
+                }
+                
+                // Tier 2 pairs
+                const tier2Pairs = ['INR', 'ZAR', 'MXN', 'PLN', 'SEK', 'NOK', 'DKK', 'HUF', 'CZK', 'ILS', 'TRY', 'THB', 'PHP', 'MYR', 'RON', 'BGN', 'KRW', 'HKD', 'CNY', 'CLP', 'COP', 'SAR', 'AED', 'QAR', 'KWD', 'NGN', 'BRL', 'RUB', 'ARS', 'EGP', 'IDR'];
+                if ((majorPairs.includes(fromCurr) && tier2Pairs.includes(toCurr)) || 
+                    (tier2Pairs.includes(fromCurr) && majorPairs.includes(toCurr)) ||
+                    (tier2Pairs.includes(fromCurr) && tier2Pairs.includes(toCurr))) {
+                  return {
+                    text: '1-2 business days',
+                    hours: { min: 24, max: 48 }
+                  };
+                }
+                
+                // Exotic pairs
+                return {
+                  text: '1-3 business days',
+                  hours: { min: 24, max: 72 }
+                };
+              };
+
+              const torfxMarkupPercentage = getTorFXMarkup(fromCurrency, toCurrency);
+              const torfxDeliveryTime = getTorFXDeliveryTime(fromCurrency, toCurrency);
+              
+              // Calculate TorFX's effective rate using the markup
+              const torfxEffectiveRate = midMarketRate * (1 - torfxMarkupPercentage);
+              
+              // Calculate amount received (amount converted at effective rate)
+              const torfxAmountReceived = parseFloat(amount) * torfxEffectiveRate;
+              
+              // Calculate margin cost
+              const torfxMarginCost = parseFloat(amount) * (midMarketRate - torfxEffectiveRate);
+              
+              // Create TorFX provider object
+              const torfxProvider = {
+                providerId: 'provider-torfx',
+                providerCode: 'torfx',
+                providerName: 'TorFX',
+                providerLogo: '/images/providers/torfx.png',
+                baseRate: midMarketRate,
+                effectiveRate: torfxEffectiveRate,
+                transferFee: 0, // TorFX typically has no transfer fee
+                marginPercentage: torfxMarkupPercentage * 100,
+                marginCost: torfxMarginCost,
+                totalCost: torfxMarginCost, // No transfer fee, so total cost is just margin cost
+                amountReceived: torfxAmountReceived > 0 ? torfxAmountReceived : 0,
+                sourceCountry: fromCurrency === 'GBP' ? 'GB' : fromCurrency === 'USD' ? 'US' : fromCurrency === 'EUR' ? 'EU' : null,
+                targetCountry: toCurrency === 'GBP' ? 'GB' : toCurrency === 'USD' ? 'US' : toCurrency === 'EUR' ? 'EU' : null,
+                transferTimeHours: torfxDeliveryTime.hours,
+                transferTime: torfxDeliveryTime.text,
+                rating: 4.4, // Default TorFX rating
+                methods: ['bank_transfer'],
+                realTimeApi: false,
+                timestamp: new Date().toISOString()
+              };
+              
+              // Add TorFX to providers array
+              providers.push(torfxProvider);
+              console.log('Added TorFX as a provider with markup:', torfxMarkupPercentage * 100 + '%');
             }
             
             // Set the provider results and sort them
@@ -218,33 +559,59 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
     if (providerResults.length > 0) {
       const fetchRatings = async () => {
         setRatingsLoading(true);
-        const ratingsMap = {};
+        const googleRatingsMap = {};
+        const trustpilotRatingsMap = {};
         
-        // Use Promise.allSettled to fetch all ratings concurrently
-        const ratingPromises = providerResults.map(provider => 
+        // Use Promise.allSettled to fetch all Google ratings concurrently
+        const googleRatingPromises = providerResults.map(provider => 
           apiService.getProviderRating(provider.providerId || provider.providerCode) // Use providerId or code as identifier
             .then(rating => ({ id: provider.providerId, rating }))
             .catch(err => ({ id: provider.providerId, rating: null, error: err })) // Store null on error
         );
         
-        const results = await Promise.allSettled(ratingPromises);
+        // Use Promise.allSettled to fetch all Trustpilot ratings concurrently
+        const trustpilotRatingPromises = providerResults.map(provider => 
+          apiService.getTrustpilotRating(provider.providerId || provider.providerCode) // Use providerId or code as identifier
+            .then(rating => ({ id: provider.providerId, rating }))
+            .catch(err => ({ id: provider.providerId, rating: null, error: err })) // Store null on error
+        );
         
-        results.forEach(result => {
+        // Wait for all rating requests to complete
+        const [googleResults, trustpilotResults] = await Promise.all([
+          Promise.allSettled(googleRatingPromises),
+          Promise.allSettled(trustpilotRatingPromises)
+        ]);
+        
+        // Process Google rating results
+        googleResults.forEach(result => {
           if (result.status === 'fulfilled' && result.value) {
-            ratingsMap[result.value.id] = result.value.rating;
+            googleRatingsMap[result.value.id] = result.value.rating;
           } else if (result.status === 'rejected' || (result.status === 'fulfilled' && !result.value)) {
             // Handle cases where the promise was rejected or resolved without a value
-            // We might need to find the providerId differently if the promise structure is complex
-            // For now, assume we can get the ID even on failure from the initial mapping
-            const failedProvider = providerResults.find((p, index) => index === results.indexOf(result));
+            const failedProvider = providerResults.find((p, index) => index === googleResults.indexOf(result));
             if(failedProvider) {
-              ratingsMap[failedProvider.providerId] = null; // Explicitly set null for failed/missing ratings
+              googleRatingsMap[failedProvider.providerId] = null; // Explicitly set null for failed/missing ratings
             }
-            console.error("Failed to fetch rating for a provider:", result.reason || 'No rating returned');
+            console.error("Failed to fetch Google rating for a provider:", result.reason || 'No rating returned');
           }
         });
         
-        setProviderRatings(ratingsMap);
+        // Process Trustpilot rating results
+        trustpilotResults.forEach(result => {
+          if (result.status === 'fulfilled' && result.value) {
+            trustpilotRatingsMap[result.value.id] = result.value.rating;
+          } else if (result.status === 'rejected' || (result.status === 'fulfilled' && !result.value)) {
+            // Handle cases where the promise was rejected or resolved without a value
+            const failedProvider = providerResults.find((p, index) => index === trustpilotResults.indexOf(result));
+            if(failedProvider) {
+              trustpilotRatingsMap[failedProvider.providerId] = null; // Explicitly set null for failed/missing ratings
+            }
+            console.error("Failed to fetch Trustpilot rating for a provider:", result.reason || 'No rating returned');
+          }
+        });
+        
+        setProviderRatings(googleRatingsMap);
+        setTrustpilotRatings(trustpilotRatingsMap);
         setRatingsLoading(false);
       };
 
@@ -555,6 +922,10 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
                         e.target.src = '/images/providers/westernunion.png';
                         // If that fails, try without the leading slash
                         e.target.onerror = () => { e.target.src = 'images/providers/westernunion.png'; };
+                      } else if (providerName.includes('torfx')) { // Add specific case for TorFX
+                        e.target.src = '/images/providers/torfx.png';
+                        // If that fails, try without the leading slash
+                        e.target.onerror = () => { e.target.src = 'images/providers/torfx.png'; };
                       } else {
                         // Default fallback
                         e.target.src = '/images/providers/default.png';
@@ -728,6 +1099,7 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
               code={provider.providerCode}
               // Pass fetched rating and loading state
               fetchedRating={providerRatings[provider.providerId]}
+              trustpilotRating={trustpilotRatings[provider.providerId]}
               ratingsLoading={ratingsLoading}
             />
           ))}

@@ -387,12 +387,12 @@ const SearchForm = ({ onSearch, initialData }) => {
                   minHeight: '48px'
                 }}
               >
-                <div className="block sm:hidden text-center space-y-2">
+                <div className="block sm:hidden text-center">
                   <div 
-                    className="text-[14px] leading-tight overflow-hidden whitespace-nowrap relative"
+                    className="text-[14px] leading-tight overflow-hidden whitespace-nowrap relative mb-1"
                     style={{ 
                       fontFamily: 'Poppins, sans-serif',
-                      minHeight: '32px'
+                      minHeight: '20px'
                     }}
                   >
                     <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-800 text-transparent bg-clip-text">
@@ -407,8 +407,9 @@ const SearchForm = ({ onSearch, initialData }) => {
                       }}
                     />
                   </div>
-                  <div className="text-sm leading-tight">Compare instantly & see the</div>
-                  <div className="text-sm leading-tight">real cost before you send.</div>
+                  <div className="text-[13px] leading-[1.2] font-medium text-gray-600">
+                    Compare instantly & see the <span className="font-semibold text-gray-800">real cost</span> before you send.
+                  </div>
                 </div>
                 <div className="hidden sm:block space-y-3">
                   <div 

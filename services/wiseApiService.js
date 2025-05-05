@@ -586,51 +586,151 @@ const getPriceComparison = async (
   targetCountry = null,
   providerType = null
 ) => {
+  const cacheKey = `compare:${sourceCurrency}-${targetCurrency}-${amount}-${sourceCountry || ''}-${targetCountry || ''}-${providerType || ''}`;
+  const cachedData = cache.get(cacheKey);
+  
+  if (cachedData) {
+    console.log('[WiseAPI] Returning cached comparison data');
+    return cachedData;
+  }
+
+  console.log('[WiseAPI] Fetching comparison data from Wise API');
+
+  const params = {
+    sourceCurrency,
+    targetCurrency,
+    sendAmount: amount,
+    sourceCountry: sourceCountry || undefined,
+    targetCountry: targetCountry || undefined,
+    providerType: providerType || undefined,
+  };
+
   try {
-    // Build cache key
-    const cacheKey = `comparison_${sourceCurrency}_${targetCurrency}_${amount}_${sourceCountry || 'all'}_${targetCountry || 'all'}_${providerType || 'all'}`;
-    
-    // Check cache first
-    const cachedData = cache.get(cacheKey);
-    if (cachedData) {
-      console.log(`[WiseAPI] Using cached comparison data for ${sourceCurrency}-${targetCurrency}`);
-      return cachedData;
+    const response = await http.get('/v3/comparisons', { params });
+    let comparisonData = response.data;
+
+    // --- Start of TorFX Integration ---
+    if (comparisonData && comparisonData.providers && comparisonData.providers.length > 0) {
+      let midMarketRate = null;
+
+      // Try to find Wise in the results to determine the mid-market rate
+      const wiseProviderResult = comparisonData.providers.find(p =>
+        p.alias?.toLowerCase() === 'wise' || p.name?.toLowerCase()?.includes('wise')
+      );
+
+      if (wiseProviderResult && wiseProviderResult.quotes && wiseProviderResult.quotes.length > 0) {
+        // Assume the first quote's rate is close enough to mid-market for Wise
+        // (Wise usually has minimal markup shown explicitly)
+        const wiseQuote = wiseProviderResult.quotes[0];
+        midMarketRate = wiseQuote.rate;
+        console.log('[WiseAPI] Determined mid-market rate from Wise result:', midMarketRate);
+      } else {
+         // Fallback: if Wise isn't in the results, try to infer from the first provider
+         // This is less reliable and assumes the first provider has a listed rate
+         if (comparisonData.providers[0].quotes && comparisonData.providers[0].quotes.length > 0) {
+            midMarketRate = comparisonData.providers[0].quotes[0].rate;
+            console.warn('[WiseAPI] Wise provider not found, using first provider rate as approximation for mid-market:', midMarketRate);
+         }
+      }
+
+
+      if (midMarketRate) {
+        // Define TorFX helper functions (copied from frontend)
+        const getTorFXMarkup = (fromCurr, toCurr) => {
+          const majorCurrencies = ['USD', 'EUR', 'GBP', 'AUD', 'CAD', 'NZD', 'CHF', 'JPY', 'SGD'];
+          const tier2Currencies = ['INR', 'ZAR', 'MXN', 'PLN', 'SEK', 'NOK', 'DKK', 'HUF', 'CZK', 'ILS', 'TRY', 'THB', 'PHP', 'MYR', 'RON', 'BGN', 'KRW', 'HKD', 'CNY', 'CLP', 'COP', 'SAR', 'AED', 'QAR', 'KWD', 'NGN', 'BRL', 'RUB', 'ARS', 'EGP', 'IDR'];
+          if (majorCurrencies.includes(fromCurr) && majorCurrencies.includes(toCurr)) return 0.01;
+          if ((majorCurrencies.includes(fromCurr) && tier2Currencies.includes(toCurr)) || (majorCurrencies.includes(toCurr) && tier2Currencies.includes(fromCurr))) return 0.015;
+          return 0.02;
+        };
+
+        const getTorFXDeliveryTime = (fromCurr, toCurr) => {
+          const majorCurrencies = ['USD', 'EUR', 'GBP', 'AUD', 'CAD', 'NZD', 'CHF', 'JPY', 'SGD'];
+          const tier2Currencies = ['INR', 'ZAR', 'MXN', 'PLN', 'SEK', 'NOK', 'DKK', 'HUF', 'CZK', 'ILS', 'TRY', 'THB', 'PHP', 'MYR', 'RON', 'BGN', 'KRW', 'HKD', 'CNY', 'CLP', 'COP', 'SAR', 'AED', 'QAR', 'KWD', 'NGN', 'BRL', 'RUB', 'ARS', 'EGP', 'IDR'];
+          if (majorCurrencies.includes(fromCurr) && majorCurrencies.includes(toCurr)) return { text: 'Same day to 1 business day', hours: { min: 0, max: 24 } };
+          if ((majorCurrencies.includes(fromCurr) && tier2Currencies.includes(toCurr)) || (majorCurrencies.includes(toCurr) && tier2Currencies.includes(fromCurr))) return { text: '1–2 business days', hours: { min: 24, max: 48 } };
+          return { text: '1–3 business days', hours: { min: 24, max: 72 } };
+        };
+
+        // Check minimum amount (£100 equivalent)
+        const checkMinimumAmount = () => {
+          const numericAmount = parseFloat(amount);
+          if (isNaN(numericAmount)) return false;
+
+          if (sourceCurrency.toUpperCase() === 'GBP') {
+            return numericAmount >= 100;
+          } else {
+            // Approximate GBP equivalent using the determined mid-market rate
+            // We need a GBP rate. If source is not GBP, we need Wise GBP -> source rate.
+            // This simplification assumes direct conversion is possible and uses the current pair's rate.
+            // A more robust solution would fetch the specific GBP->sourceCurrency rate.
+            // For now, let's assume if it's not GBP, we *can't* accurately check the minimum.
+            // Consider improving this logic later. For now, only allow GBP source for TorFX minimum check.
+            console.warn('[WiseAPI] TorFX minimum amount check skipped for non-GBP source currency due to rate complexity.');
+            return false; // Temporarily disable for non-GBP until rate fetching is improved
+          }
+        };
+
+
+        // Add TorFX if conditions met
+        // TODO: Improve minimum amount check for non-GBP currencies
+        if (checkMinimumAmount() || sourceCurrency.toUpperCase() !== 'GBP') { // Allow if check passes OR if it's non-GBP (temporarily bypassing check)
+            const torFXMarkup = getTorFXMarkup(sourceCurrency.toUpperCase(), targetCurrency.toUpperCase());
+            const deliveryTime = getTorFXDeliveryTime(sourceCurrency.toUpperCase(), targetCurrency.toUpperCase());
+            const torFXRate = midMarketRate * (1 - torFXMarkup);
+            const receivedAmount = parseFloat(amount) * torFXRate;
+
+            const torFXProvider = {
+              id: 'torfx', // Use a simple ID
+              name: 'TorFX',
+              alias: 'torfx',
+              logo: '/images/providers/torfx.svg', // Assuming the logo path is accessible
+              quotes: [{ // Structure similar to Wise API response
+                  rate: torFXRate,
+                  fee: 0, // TorFX has no fees
+                  markup: torFXMarkup,
+                  sourceAmount: parseFloat(amount),
+                  receivedAmount: receivedAmount,
+                  estimatedDelivery: deliveryTime.text,
+                  // Add other relevant fields if needed, mirroring Wise structure
+                  baseRate: midMarketRate, // Store the base rate used for calculation
+                  transferFee: 0,
+                  marginPercentage: torFXMarkup * 100,
+                  marginCost: parseFloat(amount) * (midMarketRate - torFXRate),
+                  totalCost: parseFloat(amount) * (midMarketRate - torFXRate),
+                  transferTimeHours: deliveryTime.hours,
+                  transferTime: deliveryTime.text,
+                  rating: 4.5, // Default static rating
+                  methods: ['bank_transfer'],
+                  realTimeApi: false, // Manually added provider
+                  timestamp: new Date().toISOString(),
+                  sourceCountry: sourceCountry || undefined,
+                  targetCountry: targetCountry || undefined
+              }],
+              // Add top-level provider details if needed
+              providerId: `provider-torfx`, // Keep consistent frontend ID
+              providerCode: 'torfx',
+              providerName: 'TorFX',
+              providerLogo: '/images/providers/torfx.svg',
+            };
+
+            // Add TorFX to the comparison data providers list
+            comparisonData.providers.push(torFXProvider);
+            console.log('[WiseAPI] Added TorFX provider to comparison results.');
+        } else {
+           console.log('[WiseAPI] TorFX minimum amount not met for GBP transfer, skipping.');
+        }
+      } else {
+        console.warn('[WiseAPI] Could not determine mid-market rate, skipping TorFX addition.');
+      }
     }
-    
-    // Set up query parameters
-    const params = {
-      sourceCurrency: sourceCurrency.toUpperCase(),
-      targetCurrency: targetCurrency.toUpperCase(),
-      sendAmount: amount
-    };
-    
-    // Add optional parameters if provided
-    if (sourceCountry) params.sourceCountry = sourceCountry.toUpperCase();
-    if (targetCountry) params.targetCountry = targetCountry.toUpperCase();
-    if (providerType) params.providerType = providerType;
-    
-    // Log the request details
-    console.log(`[WiseAPI] Fetching comparison data for ${sourceCurrency}-${targetCurrency}, amount: ${amount}`);
-    console.log(`[WiseAPI] Request URL: https://api.transferwise.com/v3/comparisons/?${new URLSearchParams(params).toString()}`);
-    
-    // Make the API request - use the official Wise comparison API directly
-    const response = await axios.get('https://api.transferwise.com/v3/comparisons/', { 
-      params,
-      timeout: 10000 // 10 second timeout
-    });
-    
-    // Validate the response
-    if (!response.data || typeof response.data !== 'object') {
-      throw new Error('Invalid response from Wise comparison API');
-    }
-    
-    // Process and transform the response data
-    const comparisonData = response.data;
-    
-    // Cache the results
+    // --- End of TorFX Integration ---
+
+    // Cache the modified results
     cache.set(cacheKey, comparisonData);
-    
+    console.log('[WiseAPI] Comparison data fetched and cached');
     return comparisonData;
+
   } catch (error) {
     console.error(`Error getting price comparison from Wise API: ${error.message}`);
     throw error;

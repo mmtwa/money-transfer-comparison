@@ -29,6 +29,28 @@ code {
   to { opacity: 1; }
 }
 
+@keyframes slideUp {
+  from { transform: translateY(50px); }
+  to { transform: translateY(0); }
+}
+
+.animate-in {
+  animation: fadeIn 0.3s ease forwards, slideUp 0.3s ease forwards;
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.slide-in-from-bottom-4 {
+  animation: slideUp 0.3s ease forwards;
+}
+
+/* Disable scrolling when popup is open */
+body.popup-open {
+  overflow: hidden;
+}
+
 /* Add anti-flashing CSS for icons and dynamic components */
 [data-lucide] {
   opacity: 0;

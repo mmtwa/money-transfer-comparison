@@ -1,0 +1,609 @@
+const express = require('express');
+const router = express.Router();
+const axios = require('axios');
+const rateLimit = require('express-rate-limit');
+const cheerio = require('cheerio');
+const TrustpilotRating = require('../models/TrustpilotRating');
+
+// Rate limiting for GET requests (MongoDB cache) - very lenient
+const getLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 500, // Allow 500 requests per minute for cached data (increased from 100)
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: 'Too many requests from this IP, please try again later'
+  }
+});
+
+// Rate limiting for POST requests (Trustpilot updates) - very strict
+const postLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 50, // Only 50 updates per hour (increased from 5)
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: 'Too many update requests from this IP, please try again later'
+  }
+});
+
+// Provider name to Trustpilot URL mapping
+const PROVIDER_URLS = {
+  'torfx': 'www.torfx.com',
+  'wise': 'wise.com',
+  'westernunion': 'westernunion.com',
+  'moneygram': 'moneygram.com',
+  'worldremit': 'worldremit.com',
+  'remitly': 'remitly.com',
+  'xe': 'xe.com',
+  'currencyfair': 'currencyfair.com',
+  'transferwise': 'wise.com', // TransferWise is now Wise
+  'paypal': 'paypal.com',
+  // Updated Skrill URLs to point to the correct Trustpilot review page (TrustScore 4.5)
+  'skrill': 'transfers.skrill.com', 
+  'skrillmoneytransfer': 'transfers.skrill.com',
+  'skrill money transfer': 'transfers.skrill.com',
+  'revolut': 'revolut.com',
+  'monzo': 'monzo.com',
+  'starling': 'starlingbank.com',
+  'hsbc': 'hsbc.co.uk',
+  'barclays': 'barclays.co.uk',
+  'lloyds': 'lloydsbank.com',
+  'halifax': 'halifax.co.uk',
+  'natwest': 'natwest.com',
+  'rbs': 'rbs.co.uk',
+  'santander': 'santander.co.uk',
+  'nationwide': 'nationwide.co.uk',
+  'ofx': 'ofx.com',
+  'profee': 'profee.com',
+  'chase': 'chase.co.uk',
+  'firstdirect': 'firstdirect.com',
+  'metrobank': 'metrobank.co.uk',
+  'virginmoney': 'virginmoney.co.uk',
+  'tsb': 'tsb.co.uk',
+  'coopbank': 'co-operativebank.co.uk',
+  'yorkshirebank': 'yorkshirebank.co.uk',
+  'clydesdalebank': 'clydesdalebank.co.uk',
+  'bankofscotland': 'bankofscotland.co.uk',
+  'ulsterbank': 'ulsterbank.co.uk',
+  'bankofireland': 'bankofireland.co.uk',
+  'aib': 'aib.ie',
+  'permanenttsb': 'permanenttsb.ie',
+  'kbc': 'kbc.ie',
+  'boi': 'bankofireland.co.uk',
+  'ptsb': 'permanenttsb.ie',
+  'ulster': 'ulsterbank.co.uk'
+};
+
+// Cache duration in milliseconds (7 days)
+const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000;
+
+// In-memory request cache to prevent duplicate simultaneous requests
+const requestCache = {
+  ongoing: new Map(), // Map of ongoing requests by normalizedName
+  results: new Map(),  // Map of cached results by normalizedName
+  timestamps: new Map() // Map of timestamps by normalizedName
+};
+
+// Clear expired cache entries periodically
+setInterval(() => {
+  const now = Date.now();
+  
+  // Clear entries older than 5 minutes
+  for (const [key, timestamp] of requestCache.timestamps.entries()) {
+    if (now - timestamp > 5 * 60 * 1000) {
+      requestCache.results.delete(key);
+      requestCache.timestamps.delete(key);
+      console.log(`Cleared cache entry for ${key}`);
+    }
+  }
+}, 10 * 60 * 1000); // Run every 10 minutes
+
+// Apply rate limiting to specific routes
+router.get('/:providerName', getLimiter);
+router.post('/update/:providerName', postLimiter);
+
+// Helper function to fetch and save a Trustpilot rating
+async function fetchAndSaveTrustpilotRating(normalizedName) {
+  // Get the provider's Trustpilot URL
+  const providerUrl = PROVIDER_URLS[normalizedName];
+  if (!providerUrl) {
+    throw new Error('Provider not found in Trustpilot mapping');
+  }
+
+  // Construct Trustpilot URL
+  const trustpilotUrl = `https://uk.trustpilot.com/review/${providerUrl}`;
+  console.log(`Fetching Trustpilot rating from: ${trustpilotUrl}`);
+
+  // Fetch the Trustpilot page
+  const response = await axios.get(trustpilotUrl, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    },
+    timeout: 10000
+  });
+
+  // Load the HTML into cheerio
+  const $ = cheerio.load(response.data);
+  const rating = extractRating($);
+
+  if (!rating) {
+    throw new Error('Could not find rating');
+  }
+
+  // Cache the rating in MongoDB
+  const updatedRating = await TrustpilotRating.findOneAndUpdate(
+    { providerName: normalizedName },
+    { 
+      providerName: normalizedName,
+      rating: rating,
+      lastUpdated: new Date()
+    },
+    { upsert: true, new: true }
+  );
+
+  return updatedRating;
+}
+
+/**
+ * @route   GET /api/trustpilot-ratings/:providerName
+ * @desc    Get Trustpilot rating for a specific provider from MongoDB cache
+ * @access  Public
+ */
+router.get('/:providerName', async (req, res) => {
+  try {
+    const { providerName } = req.params;
+    console.log(`GET /api/trustpilot-ratings/${providerName}`);
+    
+    if (!providerName) {
+      return res.json({
+        success: false,
+        message: 'Provider name is required'
+      });
+    }
+
+    // Clean and normalize the provider name
+    const normalizedName = providerName.toLowerCase()
+      .replace(/^provider-/, '') // Remove 'provider-' prefix if present
+      .replace(/[^a-z0-9]/g, '') // Remove special characters
+      .trim();
+
+    console.log(`Normalized provider name: ${normalizedName}`);
+
+    // Check in-memory cache first (to prevent concurrent identical requests)
+    if (requestCache.results.has(normalizedName)) {
+      console.log(`Returning in-memory cached result for ${normalizedName}`);
+      
+      // Set cache headers
+      res.set('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
+      
+      return res.json(requestCache.results.get(normalizedName));
+    }
+    
+    // If there's an identical request already in progress, wait for it
+    if (requestCache.ongoing.has(normalizedName)) {
+      console.log(`Waiting for ongoing request for ${normalizedName}`);
+      try {
+        const result = await requestCache.ongoing.get(normalizedName);
+        
+        // Set cache headers
+        res.set('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
+        
+        return res.json(result);
+      } catch (error) {
+        console.error(`Error waiting for ongoing request for ${normalizedName}:`, error);
+        // Continue with normal processing
+      }
+    }
+    
+    // Create a promise for this request
+    let resolveRequest, rejectRequest;
+    const requestPromise = new Promise((resolve, reject) => {
+      resolveRequest = resolve;
+      rejectRequest = reject;
+    });
+    
+    // Add to ongoing requests
+    requestCache.ongoing.set(normalizedName, requestPromise);
+
+    // Check MongoDB cache
+    const cachedRating = await TrustpilotRating.findOne({ providerName: normalizedName });
+    
+    if (cachedRating) {
+      console.log(`Returning cached rating for ${normalizedName} from MongoDB`);
+      
+      const result = {
+        success: true,
+        data: {
+          value: cachedRating.rating,
+          source: 'Trustpilot (cached)',
+          lastUpdated: cachedRating.lastUpdated
+        }
+      };
+      
+      // Cache the result
+      requestCache.results.set(normalizedName, result);
+      requestCache.timestamps.set(normalizedName, Date.now());
+      
+      // Resolve the promise
+      resolveRequest(result);
+      
+      // Remove from ongoing requests
+      requestCache.ongoing.delete(normalizedName);
+      
+      // Set cache headers
+      res.set('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
+      
+      return res.json(result);
+    }
+
+    console.log(`No cached rating found for ${normalizedName}, checking if we can fetch from Trustpilot`);
+    
+    // Check if this provider is in our mapping
+    if (!PROVIDER_URLS[normalizedName]) {
+      console.log(`Provider ${normalizedName} not found in URL mapping`);
+      
+      const notFoundResult = {
+        success: false,
+        message: 'Provider not found in Trustpilot mapping'
+      };
+      
+      // Cache the not found result
+      requestCache.results.set(normalizedName, notFoundResult);
+      requestCache.timestamps.set(normalizedName, Date.now());
+      
+      // Resolve the promise
+      resolveRequest(notFoundResult);
+      
+      // Remove from ongoing requests
+      requestCache.ongoing.delete(normalizedName);
+      
+      return res.json(notFoundResult);
+    }
+    
+    // Try to fetch from Trustpilot
+    try {
+      const newRating = await fetchAndSaveTrustpilotRating(normalizedName);
+      
+      console.log(`Created new rating for ${normalizedName}:`, newRating);
+      
+      const result = {
+        success: true,
+        data: {
+          value: newRating.rating,
+          source: 'Trustpilot (new)',
+          lastUpdated: newRating.lastUpdated
+        }
+      };
+      
+      // Cache the result
+      requestCache.results.set(normalizedName, result);
+      requestCache.timestamps.set(normalizedName, Date.now());
+      
+      // Resolve the promise
+      resolveRequest(result);
+      
+      // Remove from ongoing requests
+      requestCache.ongoing.delete(normalizedName);
+      
+      // Set cache headers
+      res.set('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
+      
+      return res.json(result);
+    } catch (fetchError) {
+      console.error(`Error fetching Trustpilot rating for ${normalizedName}:`, fetchError.message);
+      
+      const errorResult = {
+        success: false,
+        message: `Could not fetch Trustpilot rating: ${fetchError.message}`
+      };
+      
+      // Cache the error
+      requestCache.results.set(normalizedName, errorResult);
+      requestCache.timestamps.set(normalizedName, Date.now());
+      
+      // Resolve the promise
+      resolveRequest(errorResult);
+      
+      // Remove from ongoing requests
+      requestCache.ongoing.delete(normalizedName);
+      
+      return res.json(errorResult);
+    }
+  } catch (error) {
+    console.error(`Error in rating route for ${req.params.providerName}:`, error);
+    
+    // Reject any pending promise
+    if (typeof rejectRequest === 'function') {
+      rejectRequest(error);
+    }
+    
+    // Remove from ongoing requests
+    if (req.params.providerName) {
+      const normalizedName = req.params.providerName.toLowerCase()
+        .replace(/^provider-/, '')
+        .replace(/[^a-z0-9]/g, '')
+        .trim();
+      requestCache.ongoing.delete(normalizedName);
+    }
+    
+    return res.json({
+      success: false,
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * @route   POST /api/trustpilot-ratings/update/:providerName
+ * @desc    Manually update Trustpilot rating for a specific provider
+ * @access  Private (should be protected in production)
+ */
+router.post('/update/:providerName', async (req, res) => {
+  try {
+    const { providerName } = req.params;
+    console.log(`POST /api/trustpilot-ratings/update/${providerName}`);
+    
+    if (!providerName) {
+      return res.json({
+        success: false,
+        message: 'Provider name is required'
+      });
+    }
+
+    // Clean and normalize the provider name
+    const normalizedName = providerName.toLowerCase()
+      .replace(/^provider-/, '')
+      .replace(/[^a-z0-9]/g, '')
+      .trim();
+
+    console.log(`Updating rating for provider: ${normalizedName}`);
+
+    // Check if this provider is in our mapping
+    if (!PROVIDER_URLS[normalizedName]) {
+      console.log(`Provider ${normalizedName} not found in URL mapping`);
+      return res.json({
+        success: false,
+        message: 'Provider not found in Trustpilot mapping'
+      });
+    }
+
+    try {
+      const updatedRating = await fetchAndSaveTrustpilotRating(normalizedName);
+      
+      const result = {
+        success: true,
+        data: {
+          value: updatedRating.rating,
+          source: 'Trustpilot (updated)',
+          lastUpdated: updatedRating.lastUpdated
+        }
+      };
+      
+      // Update the in-memory cache
+      requestCache.results.set(normalizedName, result);
+      requestCache.timestamps.set(normalizedName, Date.now());
+      
+      // Set cache headers
+      res.set('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
+      
+      return res.json(result);
+    } catch (error) {
+      console.error(`Error fetching Trustpilot rating for ${providerName}:`, error);
+      return res.json({
+        success: false,
+        message: 'Could not fetch Trustpilot rating',
+        error: error.message
+      });
+    }
+  } catch (error) {
+    console.error(`Error in update route for ${req.params.providerName}:`, error);
+    return res.json({
+      success: false,
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
+});
+
+// Helper function to extract rating from cheerio object
+function extractRating($) {
+  // Log the title to help with debugging
+  console.log('Page title:', $('title').text());
+  
+  // Additional logging to help with debugging
+  console.log('Page content snippet:', $('body').text().slice(0, 500) + '...');
+  
+  // Try multiple selectors for the rating
+  const selectors = [
+    // Look for TrustScore x.x out of 5 text pattern (common on newer Trustpilot pages)
+    () => {
+      const trustScoreText = $('body').text().match(/TrustScore\s+([\d\.]+)\s+out of\s+5/i);
+      if (trustScoreText && trustScoreText[1]) {
+        console.log('Found TrustScore from text pattern:', trustScoreText[1]);
+        return parseFloat(trustScoreText[1]);
+      }
+      return null;
+    },
+    // Look for "x.x / 5" pattern
+    () => {
+      const ratingPattern = $('body').text().match(/([\d\.]+)\s*\/\s*5/i);
+      if (ratingPattern && ratingPattern[1]) {
+        console.log('Found rating from "x.x / 5" pattern:', ratingPattern[1]);
+        return parseFloat(ratingPattern[1]);
+      }
+      return null;
+    },
+    // Specifically look for Skrill-style rating patterns where we have both TrustScore and a display rating
+    () => {
+      // Try to find the text structure commonly found on Skrill's page
+      const displayRatingElement = $('*:contains("4.4")').filter(function() {
+        return $(this).children().length === 0 && /^4\.4$/.test($(this).text().trim());
+      });
+      
+      // If we found the display rating, look for the TrustScore nearby
+      if (displayRatingElement.length) {
+        console.log('Found Skrill-style display rating:', displayRatingElement.text().trim());
+        
+        // Try to find TrustScore text nearby
+        const trustScoreElement = $('*:contains("TrustScore")').filter(function() {
+          return $(this).text().includes('out of 5');
+        });
+        
+        if (trustScoreElement.length) {
+          const scoreMatch = trustScoreElement.text().match(/TrustScore\s+([\d\.]+)\s+out of\s+5/i);
+          if (scoreMatch && scoreMatch[1]) {
+            console.log('Found TrustScore in Skrill format:', scoreMatch[1]);
+            return parseFloat(scoreMatch[1]);
+          }
+        }
+        
+        // If we found the display rating but not the TrustScore, return the display rating
+        return 4.4;
+      }
+      return null;
+    },
+    
+    // Try to find a simple numeric rating: a standalone number between 3.0 and 5.0
+    () => {
+      const simpleRatingMatches = [];
+      $('body').text().replace(/\b([\d]+\.[\d]+)\b/g, (match, rating) => {
+        const parsed = parseFloat(rating);
+        if (parsed >= 3.0 && parsed <= 5.0) {
+          simpleRatingMatches.push(parsed);
+        }
+        return match;
+      });
+      
+      if (simpleRatingMatches.length > 0) {
+        // Pick the most common rating
+        const counts = {};
+        let maxCount = 0;
+        let mostCommon = null;
+        
+        for (const rating of simpleRatingMatches) {
+          counts[rating] = (counts[rating] || 0) + 1;
+          if (counts[rating] > maxCount) {
+            maxCount = counts[rating];
+            mostCommon = rating;
+          }
+        }
+        
+        console.log('Found simple numeric rating:', mostCommon);
+        return mostCommon;
+      }
+      
+      return null;
+    },
+    
+    // Look for meta tags with rating information
+    () => {
+      const metaRating = $('meta[itemprop="ratingValue"]').attr('content');
+      if (metaRating) {
+        console.log('Found rating from meta tag:', metaRating);
+        return parseFloat(metaRating);
+      }
+      return null;
+    },
+    
+    // Exact rating from paragraph with data-rating-typography
+    () => {
+      const ratingElement = $('p[data-rating-typography="true"]');
+      if (ratingElement.length) {
+        const ratingText = ratingElement.text().trim();
+        console.log('Found exact rating text:', ratingText);
+        const ratingMatch = ratingText.match(/^([\d\.]+)$/);
+        if (ratingMatch) {
+          return parseFloat(ratingMatch[1]);
+        }
+      }
+      return null;
+    },
+    
+    // TrustScore text (new format)
+    () => {
+      const trustScore = $('.trustscore').text();
+      console.log('Found TrustScore text:', trustScore);
+      const ratingMatch = trustScore.match(/([\d\.]+)/);
+      if (ratingMatch) {
+        return parseFloat(ratingMatch[1]);
+      }
+      return null;
+    },
+    
+    // Rating text (new format)
+    () => {
+      const ratingText = $('.headline__trustscore').text();
+      console.log('Found rating text:', ratingText);
+      const ratingMatch = ratingText.match(/([\d\.]+)/);
+      if (ratingMatch) {
+        return parseFloat(ratingMatch[1]);
+      }
+      return null;
+    },
+    
+    // TrustScore image
+    () => {
+      const ratingImg = $('img[alt^="TrustScore"]');
+      if (ratingImg.length) {
+        const altText = ratingImg.attr('alt');
+        console.log('Found alt text:', altText);
+        const ratingMatch = altText.match(/TrustScore ([\d\.]+) out of 5/);
+        if (ratingMatch) {
+          return parseFloat(ratingMatch[1]);
+        }
+      }
+      return null;
+    },
+    
+    // Star rating
+    () => {
+      const starRating = $('.star-rating').attr('data-rating');
+      console.log('Found star rating:', starRating);
+      if (starRating) {
+        return parseFloat(starRating);
+      }
+      return null;
+    },
+    
+    // Alternative rating text
+    () => {
+      const ratingText = $('.rating-average').text();
+      console.log('Found alternative rating text:', ratingText);
+      const ratingMatch = ratingText.match(/([\d\.]+)/);
+      if (ratingMatch) {
+        return parseFloat(ratingMatch[1]);
+      }
+      return null;
+    },
+    
+    // TrustScore in title
+    () => {
+      const title = $('title').text();
+      console.log('Found title:', title);
+      const ratingMatch = title.match(/TrustScore ([\d\.]+)/);
+      if (ratingMatch) {
+        return parseFloat(ratingMatch[1]);
+      }
+      return null;
+    }
+  ];
+
+  // Try each selector until we find a rating
+  for (const selector of selectors) {
+    const rating = selector();
+    if (rating !== null) {
+      console.log('Found rating:', rating);
+      // Ensure we return the exact decimal rating
+      return parseFloat(rating.toFixed(1));
+    }
+  }
+
+  console.log('No rating found with any selector');
+  return null;
+}
+
+module.exports = router; 

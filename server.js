@@ -33,6 +33,8 @@ const rateRoutes = require('./routes/rates');
 const userRoutes = require('./routes/users');
 const wiseRoutes = require('./routes/wiseRates');
 const googleRatingsRoutes = require('./routes/googleRatings');
+const providerInfoRoutes = require('./routes/providerInfo');
+const trustpilotRatingsRoutes = require('./routes/trustpilotRatings');
 
 // Initialize Express app
 const app = express();
@@ -157,6 +159,8 @@ app.use('/api/rates', rateRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/wise', wiseRoutes);
 app.use('/api/google-ratings', googleRatingsRoutes);
+app.use('/api/provider-info', providerInfoRoutes);
+app.use('/api/trustpilot-ratings', trustpilotRatingsRoutes);
 
 // Define the v1/rates endpoint for historical rates
 app.use('/v1/rates', (req, res, next) => {

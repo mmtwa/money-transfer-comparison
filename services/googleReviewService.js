@@ -32,8 +32,13 @@ class GoogleReviewService {
         return null;
       }
 
-      // Clean the provider name for search
-      const searchQuery = `${providerName} money transfer`;
+      // Clean the provider name for search - Use a simpler query for Torfx
+      let searchQuery;
+      if (providerName.toLowerCase() === 'torfx') {
+        searchQuery = 'Torfx'; // Simpler query for Torfx
+      } else {
+        searchQuery = `${providerName} money transfer`;
+      }
       console.log(`Searching for place ID for: "${searchQuery}"`);
       
       const response = await axios.get(`${API_BASE_URL}/findplacefromtext/json`, {

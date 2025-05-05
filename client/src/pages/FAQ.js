@@ -42,6 +42,14 @@ const FAQ = () => {
       answer: "We cover most major money transfer providers, but we may not include every provider in the market. We regularly update our provider list to ensure comprehensive coverage."
     },
     {
+      question: "What does Indicative mean?",
+      answer: "When we show 'Indicative' rates, it means these are estimated rates based on current market conditions. The final rate you receive may vary slightly depending on the exact time of your transfer and the provider's specific terms. We always recommend checking the final rate with your chosen provider before completing the transaction."
+    },
+    {
+      question: "How do you determine which provider is best?",
+      answer: "We rank providers based on the total amount the recipient will receive after all fees and exchange rate margins are applied. This gives you the clearest picture of which provider offers the best value for your specific transfer."
+    },
+    {
       question: "Are the exchange rates shown guaranteed?",
       answer: "The exchange rates we display are pulled in real-time from our providers, but rates can fluctuate quickly. The final rate will be confirmed when you proceed to the provider's website to complete your transaction."
     },

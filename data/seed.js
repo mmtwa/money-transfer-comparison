@@ -1,4 +1,3 @@
-
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const Provider = require('../models/Provider');
@@ -19,12 +18,13 @@ mongoose.connect(process.env.MONGODB_URI, {
 // Import sample data
 const providers = [
   {
-    name: 'TransferWise',
-    code: 'transferwise',
-    logo: '/wiselogo.png',
+    name: 'Wise',
+    code: 'wise',
+    logo: '/images/providers/wise.png',
     description: 'International money transfer service',
-    baseUrl: 'https://api.transferwise.com',
-    apiKey: 'your-transferwise-api-key',
+    baseUrl: 'https://api.wise.com',
+    apiKey: process.env.WISE_CLIENT_ID,
+    apiSecret: process.env.WISE_CLIENT_SECRET,
     transferFeeStructure: {
       type: 'percentage',
       percentage: 0.5,
@@ -38,92 +38,6 @@ const providers = [
     supportedCurrencies: ['USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD', 'INR'],
     methods: ['bank_transfer', 'debit_card', 'credit_card'],
     rating: 4.8,
-    active: true
-  },
-  {
-    name: 'XE Money Transfer',
-    code: 'xe',
-    logo: 'https://example.com/logos/xe.png',
-    description: 'Send money worldwide',
-    baseUrl: 'https://api.xe.com',
-    apiKey: 'your-xe-api-key',
-    apiSecret: 'your-xe-api-secret',
-    transferFeeStructure: {
-      type: 'flat',
-      amount: 0.0
-    },
-    exchangeRateMargin: 0.01,
-    transferTimeHours: {
-      min: 48,
-      max: 72
-    },
-    supportedCurrencies: ['USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD'],
-    methods: ['bank_transfer'],
-    rating: 4.5,
-    active: true
-  },
-  {
-    name: 'Western Union',
-    code: 'westernunion',
-    logo: 'https://example.com/logos/westernunion.png',
-    description: 'Global money transfers',
-    baseUrl: 'https://api.westernunion.com',
-    apiKey: 'your-westernunion-api-key',
-    transferFeeStructure: {
-      type: 'percentage',
-      percentage: 2.5,
-      minimum: 5.99
-    },
-    exchangeRateMargin: 0.025,
-    transferTimeHours: {
-      min: 0,
-      max: 24
-    },
-    supportedCurrencies: ['USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD', 'INR'],
-    methods: ['bank_transfer', 'cash_pickup', 'mobile_wallet'],
-    rating: 4.0,
-    active: true
-  },
-  {
-    name: 'OFX',
-    code: 'ofx',
-    logo: 'https://example.com/logos/ofx.png',
-    description: 'International money transfers',
-    baseUrl: 'https://api.ofx.com',
-    apiKey: 'your-ofx-api-key',
-    transferFeeStructure: {
-      type: 'flat',
-      amount: 0.0
-    },
-    exchangeRateMargin: 0.008,
-    transferTimeHours: {
-      min: 72,
-      max: 120
-    },
-    supportedCurrencies: ['USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD'],
-    methods: ['bank_transfer'],
-    rating: 4.4,
-    active: true
-  },
-  {
-    name: 'Remitly',
-    code: 'remitly',
-    logo: 'https://example.com/logos/remitly.png',
-    description: 'Fast international transfers',
-    baseUrl: 'https://api.remitly.com',
-    apiKey: 'your-remitly-api-key',
-    transferFeeStructure: {
-      type: 'flat',
-      amount: 2.99
-    },
-    exchangeRateMargin: 0.015,
-    transferTimeHours: {
-      min: 0,
-      max: 48
-    },
-    supportedCurrencies: ['USD', 'EUR', 'GBP', 'INR'],
-    methods: ['bank_transfer', 'mobile_wallet'],
-    rating: 4.2,
     active: true
   }
 ];

@@ -14,6 +14,10 @@ import TransferFees from '../pages/guides/TransferFees';
 import FamilyRemittances from '../pages/guides/FamilyRemittances';
 import BusinessTransfers from '../pages/guides/BusinessTransfers';
 import SecurityTips from '../pages/guides/SecurityTips';
+import RegularTransfers from '../pages/guides/frequency/RegularTransfers';
+import PeriodicTransfers from '../pages/guides/frequency/PeriodicTransfers';
+import OneTimeTransfers from '../pages/guides/frequency/OneTimeTransfers';
+import OccasionalTransfers from '../pages/guides/frequency/OccasionalTransfers';
 import SendMoneyToIndiaGuide from '../pages/guides/send-money-to-india';
 import SendMoneyToPhilippinesGuide from '../pages/guides/send-money-to-philippines';
 import SendMoneyToMexicoGuide from '../pages/guides/send-money-to-mexico';
@@ -33,6 +37,27 @@ import CookiePolicy from '../pages/CookiePolicy';
 import LegalDisclosure from '../pages/LegalDisclosure';
 import Careers from '../pages/Careers';
 import Press from '../pages/Press';
+import HighValueTransfers from '../pages/guides/HighValueTransfers';
+import MidValueTransfers from '../pages/guides/MidValueTransfers';
+import LowValueTransfers from '../pages/guides/LowValueTransfers';
+import MicroTransfers from '../pages/guides/MicroTransfers';
+import BuyingPropertyAbroad from '../pages/guides/BuyingPropertyAbroad';
+import StudyingAbroad from '../pages/guides/StudyingAbroad';
+import SendingToFamily from '../pages/guides/SendingToFamily';
+import DigitalNomads from '../pages/guides/DigitalNomads';
+import BusinessPurpose from '../pages/guides/BusinessPurpose';
+import UkAsia from '../pages/guides/corridors/UkAsia';
+import UsLatam from '../pages/guides/corridors/UsLatam';
+import EuAfrica from '../pages/guides/corridors/EuAfrica';
+import AusPacific from '../pages/guides/corridors/AusPacific';
+import GulfAsia from '../pages/guides/corridors/GulfAsia';
+import CostOptimizing from '../pages/guides/criteria/CostOptimizing';
+import Convenience from '../pages/guides/criteria/Convenience';
+import Security from '../pages/guides/criteria/Security';
+import Service from '../pages/guides/criteria/Service';
+import DigitalNative from '../pages/guides/method/DigitalNative';
+import DigitalAdapter from '../pages/guides/method/DigitalAdapter';
+import Traditional from '../pages/guides/method/Traditional';
 
 /**
  * Main container component for the money transfer comparison app
@@ -77,6 +102,8 @@ const MoneyCompare = ({ initialPath }) => {
       setCurrentPage('guide-business-transfers');
     } else if (path === '/guides/security-tips') {
       setCurrentPage('guide-security-tips');
+    } else if (path === '/guides/high-value') {
+      setCurrentPage('guide-high-value');
     } else if (path === '/guides/send-money-to-india') {
       setCurrentPage('guide-send-money-to-india');
     } else if (path === '/guides/send-money-to-philippines') {
@@ -101,6 +128,54 @@ const MoneyCompare = ({ initialPath }) => {
       setCurrentPage('guide-send-money-to-bangladesh');
     } else if (path === '/guides/send-money-to-canada') {
       setCurrentPage('guide-send-money-to-canada');
+    } else if (path === '/guides/mid-value') {
+      setCurrentPage('guide-mid-value');
+    } else if (path === '/guides/low-value') {
+      setCurrentPage('guide-low-value');
+    } else if (path === '/guides/micro') {
+      setCurrentPage('guide-micro');
+    } else if (path === '/guides/purpose/property') {
+      setCurrentPage('guide-property');
+    } else if (path === '/guides/purpose/study') {
+      setCurrentPage('guide-study');
+    } else if (path === '/guides/purpose/family') {
+      setCurrentPage('guide-family');
+    } else if (path === '/guides/purpose/nomad') {
+      setCurrentPage('guide-nomad');
+    } else if (path === '/guides/purpose/business') {
+      setCurrentPage('guide-business');
+    } else if (path === '/guides/frequency/regular') {
+      setCurrentPage('guide-regular-transfers');
+    } else if (path === '/guides/frequency/periodic') {
+      setCurrentPage('guide-periodic-transfers');
+    } else if (path === '/guides/frequency/one-time') {
+      setCurrentPage('guide-one-time-transfers');
+    } else if (path === '/guides/frequency/occasional') {
+      setCurrentPage('guide-occasional-transfers');
+    } else if (path === '/guides/corridors/uk-asia') {
+      setCurrentPage('guide-uk-asia');
+    } else if (path === '/guides/corridors/us-latam') {
+      setCurrentPage('guide-us-latam');
+    } else if (path === '/guides/corridors/eu-africa') {
+      setCurrentPage('guide-eu-africa');
+    } else if (path === '/guides/corridors/aus-pacific') {
+      setCurrentPage('guide-aus-pacific');
+    } else if (path === '/guides/corridors/gulf-asia') {
+      setCurrentPage('guide-gulf-asia');
+    } else if (path === '/guides/criteria/cost') {
+      setCurrentPage('guide-cost-optimizing');
+    } else if (path === '/guides/criteria/convenience') {
+      setCurrentPage('guide-convenience');
+    } else if (path === '/guides/criteria/security') {
+      setCurrentPage('guide-security');
+    } else if (path === '/guides/criteria/service') {
+      setCurrentPage('guide-service');
+    } else if (path === '/guides/method/digital-native') {
+      setCurrentPage('guide-digital-native');
+    } else if (path === '/guides/method/digital-adapter') {
+      setCurrentPage('guide-digital-adapter');
+    } else if (path === '/guides/method/traditional') {
+      setCurrentPage('guide-traditional');
     } else if (path === '/faq') {
       setCurrentPage('faq');
     } else if (path === '/historical-rates') {
@@ -122,65 +197,113 @@ const MoneyCompare = ({ initialPath }) => {
   
   // Handle popstate event (browser back/forward buttons)
   useEffect(() => {
-    const handlePopState = (event) => {
-      // If coming back from results page to homepage
-      if (window.location.pathname === '/') {
+    const handlePopState = () => {
+      const path = window.location.pathname;
+      if (path === '/') {
         setCurrentPage('home');
-      } else if (window.location.pathname === '/about') {
+      } else if (path === '/about') {
         setCurrentPage('about');
-      } else if (window.location.pathname === '/guides') {
+      } else if (path === '/guides') {
         setCurrentPage('guides');
-      } else if (window.location.pathname === '/guides/getting-started') {
+      } else if (path === '/guides/getting-started') {
         setCurrentPage('guide-getting-started');
-      } else if (window.location.pathname === '/guides/exchange-rates') {
+      } else if (path === '/guides/exchange-rates') {
         setCurrentPage('guide-exchange-rates');
-      } else if (window.location.pathname === '/guides/transfer-fees') {
+      } else if (path === '/guides/transfer-fees') {
         setCurrentPage('guide-transfer-fees');
-      } else if (window.location.pathname === '/guides/family-remittances') {
+      } else if (path === '/guides/family-remittances') {
         setCurrentPage('guide-family-remittances');
-      } else if (window.location.pathname === '/guides/business-transfers') {
+      } else if (path === '/guides/business-transfers') {
         setCurrentPage('guide-business-transfers');
-      } else if (window.location.pathname === '/guides/security-tips') {
+      } else if (path === '/guides/security-tips') {
         setCurrentPage('guide-security-tips');
-      } else if (window.location.pathname === '/guides/send-money-to-india') {
+      } else if (path === '/guides/send-money-to-india') {
         setCurrentPage('guide-send-money-to-india');
-      } else if (window.location.pathname === '/guides/send-money-to-philippines') {
+      } else if (path === '/guides/send-money-to-philippines') {
         setCurrentPage('guide-send-money-to-philippines');
-      } else if (window.location.pathname === '/guides/send-money-to-mexico') {
+      } else if (path === '/guides/send-money-to-mexico') {
         setCurrentPage('guide-send-money-to-mexico');
-      } else if (window.location.pathname === '/guides/send-money-to-pakistan') {
+      } else if (path === '/guides/send-money-to-pakistan') {
         setCurrentPage('guide-send-money-to-pakistan');
-      } else if (window.location.pathname === '/guides/send-money-to-nigeria') {
+      } else if (path === '/guides/send-money-to-nigeria') {
         setCurrentPage('guide-send-money-to-nigeria');
-      } else if (window.location.pathname === '/guides/send-money-to-poland') {
+      } else if (path === '/guides/send-money-to-poland') {
         setCurrentPage('guide-send-money-to-poland');
-      } else if (window.location.pathname === '/guides/send-money-to-romania') {
+      } else if (path === '/guides/send-money-to-romania') {
         setCurrentPage('guide-send-money-to-romania');
-      } else if (window.location.pathname === '/guides/send-money-to-china') {
+      } else if (path === '/guides/send-money-to-china') {
         setCurrentPage('guide-send-money-to-china');
-      } else if (window.location.pathname === '/guides/send-money-to-morocco') {
+      } else if (path === '/guides/send-money-to-morocco') {
         setCurrentPage('guide-send-money-to-morocco');
-      } else if (window.location.pathname === '/guides/send-money-to-vietnam') {
+      } else if (path === '/guides/send-money-to-vietnam') {
         setCurrentPage('guide-send-money-to-vietnam');
-      } else if (window.location.pathname === '/guides/send-money-to-bangladesh') {
+      } else if (path === '/guides/send-money-to-bangladesh') {
         setCurrentPage('guide-send-money-to-bangladesh');
-      } else if (window.location.pathname === '/guides/send-money-to-canada') {
+      } else if (path === '/guides/send-money-to-canada') {
         setCurrentPage('guide-send-money-to-canada');
-      } else if (window.location.pathname === '/faq') {
+      } else if (path === '/guides/mid-value') {
+        setCurrentPage('guide-mid-value');
+      } else if (path === '/guides/low-value') {
+        setCurrentPage('guide-low-value');
+      } else if (path === '/guides/micro') {
+        setCurrentPage('guide-micro');
+      } else if (path === '/guides/purpose/property') {
+        setCurrentPage('guide-property');
+      } else if (path === '/guides/purpose/study') {
+        setCurrentPage('guide-study');
+      } else if (path === '/guides/purpose/family') {
+        setCurrentPage('guide-family');
+      } else if (path === '/guides/purpose/nomad') {
+        setCurrentPage('guide-nomad');
+      } else if (path === '/guides/purpose/business') {
+        setCurrentPage('guide-business');
+      } else if (path === '/guides/frequency/regular') {
+        setCurrentPage('guide-regular-transfers');
+      } else if (path === '/guides/frequency/periodic') {
+        setCurrentPage('guide-periodic-transfers');
+      } else if (path === '/guides/frequency/one-time') {
+        setCurrentPage('guide-one-time-transfers');
+      } else if (path === '/guides/frequency/occasional') {
+        setCurrentPage('guide-occasional-transfers');
+      } else if (path === '/guides/corridors/uk-asia') {
+        setCurrentPage('guide-uk-asia');
+      } else if (path === '/guides/corridors/us-latam') {
+        setCurrentPage('guide-us-latam');
+      } else if (path === '/guides/corridors/eu-africa') {
+        setCurrentPage('guide-eu-africa');
+      } else if (path === '/guides/corridors/aus-pacific') {
+        setCurrentPage('guide-aus-pacific');
+      } else if (path === '/guides/corridors/gulf-asia') {
+        setCurrentPage('guide-gulf-asia');
+      } else if (path === '/guides/criteria/cost') {
+        setCurrentPage('guide-cost-optimizing');
+      } else if (path === '/guides/criteria/convenience') {
+        setCurrentPage('guide-convenience');
+      } else if (path === '/guides/criteria/security') {
+        setCurrentPage('guide-security');
+      } else if (path === '/guides/criteria/service') {
+        setCurrentPage('guide-service');
+      } else if (path === '/guides/method/digital-native') {
+        setCurrentPage('guide-digital-native');
+      } else if (path === '/guides/method/digital-adapter') {
+        setCurrentPage('guide-digital-adapter');
+      } else if (path === '/guides/method/traditional') {
+        setCurrentPage('guide-traditional');
+      } else if (path === '/faq') {
         setCurrentPage('faq');
-      } else if (window.location.pathname === '/historical-rates') {
+      } else if (path === '/historical-rates') {
         setCurrentPage('historical-rates');
-      } else if (window.location.pathname === '/privacy-policy') {
+      } else if (path === '/privacy-policy') {
         setCurrentPage('privacy-policy');
-      } else if (window.location.pathname === '/terms-of-service') {
+      } else if (path === '/terms-of-service') {
         setCurrentPage('terms-of-service');
-      } else if (window.location.pathname === '/cookie-policy') {
+      } else if (path === '/cookie-policy') {
         setCurrentPage('cookie-policy');
-      } else if (window.location.pathname === '/legal-disclosure') {
+      } else if (path === '/legal-disclosure') {
         setCurrentPage('legal-disclosure');
-      } else if (window.location.pathname === '/careers') {
+      } else if (path === '/careers') {
         setCurrentPage('careers');
-      } else if (window.location.pathname === '/press') {
+      } else if (path === '/press') {
         setCurrentPage('press');
       }
     };
@@ -529,6 +652,30 @@ const MoneyCompare = ({ initialPath }) => {
             />
           </div>
         );
+      case 'guide-high-value':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <HighValueTransfers />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+            />
+          </div>
+        );
       case 'guide-send-money-to-india':
         return (
           <div className="flex flex-col min-h-screen">
@@ -835,6 +982,560 @@ const MoneyCompare = ({ initialPath }) => {
             />
           </div>
         );
+      case 'guide-mid-value':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <MidValueTransfers />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+            />
+          </div>
+        );
+      case 'guide-low-value':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <LowValueTransfers />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+            />
+          </div>
+        );
+      case 'guide-micro':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <MicroTransfers />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+            />
+          </div>
+        );
+      case 'guide-property':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <BuyingPropertyAbroad />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+            />
+          </div>
+        );
+      case 'guide-study':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <StudyingAbroad />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+            />
+          </div>
+        );
+      case 'guide-family':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <SendingToFamily />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+            />
+          </div>
+        );
+      case 'guide-nomad':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <DigitalNomads />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+            />
+          </div>
+        );
+      case 'guide-business':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <BusinessPurpose />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+            />
+          </div>
+        );
+      case 'guide-regular-transfers':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <RegularTransfers />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+            />
+          </div>
+        );
+      case 'guide-periodic-transfers':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <PeriodicTransfers />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+            />
+          </div>
+        );
+      case 'guide-one-time-transfers':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <OneTimeTransfers />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+            />
+          </div>
+        );
+      case 'guide-occasional-transfers':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <OccasionalTransfers />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+            />
+          </div>
+        );
+      case 'guide-uk-asia':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <UkAsia />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+            />
+          </div>
+        );
+      case 'guide-us-latam':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <UsLatam />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+            />
+          </div>
+        );
+      case 'guide-eu-africa':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <EuAfrica />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+            />
+          </div>
+        );
+      case 'guide-aus-pacific':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <AusPacific />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+            />
+          </div>
+        );
+      case 'guide-gulf-asia':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <GulfAsia />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+            />
+          </div>
+        );
+      case 'guide-cost-optimizing':
+        return <CostOptimizing />;
+      case 'guide-convenience':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <Convenience />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+            />
+          </div>
+        );
+      case 'guide-security':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <Security />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+            />
+          </div>
+        );
+      case 'guide-service':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <Service />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+            />
+          </div>
+        );
+      case 'guide-digital-native':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <DigitalNative />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+            />
+          </div>
+        );
+      case 'guide-digital-adapter':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <DigitalAdapter />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+            />
+          </div>
+        );
+      case 'guide-traditional':
+        return (
+          <div className="flex flex-col min-h-screen">
+            <Header 
+              onLogoClick={handleBackToHome} 
+              onAboutClick={navigateToAboutUs}
+              onGuidesClick={navigateToGuides}
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onMenuToggle={() => {}}
+            />
+            <Traditional />
+            <Footer 
+              onAboutClick={navigateToAboutUs} 
+              onGuidesClick={navigateToGuides} 
+              onFaqClick={navigateToFaq}
+              onHistoricalRatesClick={navigateToHistoricalRates}
+              onPrivacyClick={navigateToPrivacyPolicy}
+              onTermsClick={navigateToTermsOfService}
+              onCookiesClick={navigateToCookiePolicy}
+              onLegalDisclosureClick={navigateToLegalDisclosure}
+            />
+          </div>
+        );
       case 'faq':
         return (
           <div className="flex flex-col min-h-screen">
@@ -1059,6 +1760,7 @@ const MoneyCompare = ({ initialPath }) => {
         <Route path="/guides/family-remittances" element={renderPageContent()} />
         <Route path="/guides/business-transfers" element={renderPageContent()} />
         <Route path="/guides/security-tips" element={renderPageContent()} />
+        <Route path="/guides/high-value" element={renderPageContent()} />
         <Route path="/guides/send-money-to-india" element={renderPageContent()} />
         <Route path="/guides/send-money-to-philippines" element={renderPageContent()} />
         <Route path="/guides/send-money-to-mexico" element={renderPageContent()} />
@@ -1071,6 +1773,30 @@ const MoneyCompare = ({ initialPath }) => {
         <Route path="/guides/send-money-to-vietnam" element={renderPageContent()} />
         <Route path="/guides/send-money-to-bangladesh" element={renderPageContent()} />
         <Route path="/guides/send-money-to-canada" element={renderPageContent()} />
+        <Route path="/guides/mid-value" element={renderPageContent()} />
+        <Route path="/guides/low-value" element={renderPageContent()} />
+        <Route path="/guides/micro" element={renderPageContent()} />
+        <Route path="/guides/purpose/property" element={renderPageContent()} />
+        <Route path="/guides/purpose/study" element={renderPageContent()} />
+        <Route path="/guides/purpose/family" element={renderPageContent()} />
+        <Route path="/guides/purpose/nomad" element={renderPageContent()} />
+        <Route path="/guides/purpose/business" element={renderPageContent()} />
+        <Route path="/guides/frequency/regular" element={renderPageContent()} />
+        <Route path="/guides/frequency/periodic" element={renderPageContent()} />
+        <Route path="/guides/frequency/one-time" element={renderPageContent()} />
+        <Route path="/guides/frequency/occasional" element={renderPageContent()} />
+        <Route path="/guides/corridors/uk-asia" element={renderPageContent()} />
+        <Route path="/guides/corridors/us-latam" element={renderPageContent()} />
+        <Route path="/guides/corridors/eu-africa" element={renderPageContent()} />
+        <Route path="/guides/corridors/aus-pacific" element={renderPageContent()} />
+        <Route path="/guides/corridors/gulf-asia" element={renderPageContent()} />
+        <Route path="/guides/criteria/cost" element={renderPageContent()} />
+        <Route path="/guides/criteria/convenience" element={renderPageContent()} />
+        <Route path="/guides/criteria/security" element={renderPageContent()} />
+        <Route path="/guides/criteria/service" element={renderPageContent()} />
+        <Route path="/guides/method/digital-native" element={renderPageContent()} />
+        <Route path="/guides/method/digital-adapter" element={renderPageContent()} />
+        <Route path="/guides/method/traditional" element={renderPageContent()} />
         <Route path="/faq" element={renderPageContent()} />
         <Route path="/historical-rates" element={renderPageContent()} />
         <Route path="/privacy-policy" element={renderPageContent()} />

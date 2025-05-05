@@ -215,11 +215,21 @@ const LiveHistoricalRates = () => {
       
       const { fromCurrency, toCurrency, fromDate, toDate, group } = params;
       
+      // Validate dates
       const now = new Date();
       const today = now.toISOString().split('T')[0];
-      const validToDate = new Date(toDate) > now ? today : toDate;
+      
+      // Ensure toDate is not in the future
+      let validToDate = toDate;
+      if (new Date(toDate) > now) {
+        console.warn(`Adjusting future toDate ${toDate} to current date`);
+        validToDate = today;
+      }
+      
+      // Ensure fromDate is not in the future and not after toDate
       let validFromDate = fromDate;
       if (new Date(fromDate) > now || new Date(fromDate) > new Date(validToDate)) {
+        console.warn(`Adjusting invalid fromDate ${fromDate}`);
         const thirtyDaysAgo = new Date(now);
         thirtyDaysAgo.setDate(now.getDate() - 30);
         validFromDate = thirtyDaysAgo.toISOString().split('T')[0];
@@ -229,29 +239,40 @@ const LiveHistoricalRates = () => {
       const formattedToDate = formatDateForApi(validToDate);
       
       console.log(`Requesting historical rates from ${formattedFromDate} to ${formattedToDate}`);
+      console.log(`API URL: ${apiService.getApiBaseUrl()}/rates/historical`);
       
-      const response = await apiService.getHistoricalRates(
-        fromCurrency,
-        toCurrency,
-        formattedFromDate,
-        formattedToDate,
-        group
-      );
-      
-      if (response.data && response.data.success && response.data.data) {
-        // Sort and set the primary historical data
-        const sortedData = [...response.data.data].sort((a, b) => new Date(a.time) - new Date(b.time));
-        setHistoricalData(sortedData);
+      try {
+        const response = await apiService.getHistoricalRates(
+          fromCurrency,
+          toCurrency,
+          formattedFromDate,
+          formattedToDate,
+          group
+        );
         
-        // Fetch current live rate separately
-        fetchCurrentRate(fromCurrency, toCurrency);
-      } else {
-        setError('Failed to fetch historical rate data');
+        if (response.data && response.data.success && response.data.data) {
+          // Sort and set the primary historical data
+          const sortedData = [...response.data.data].sort((a, b) => new Date(a.time) - new Date(b.time));
+          setHistoricalData(sortedData);
+          
+          // Fetch current live rate separately
+          fetchCurrentRate(fromCurrency, toCurrency);
+        } else {
+          setError('Failed to fetch historical rate data');
+          setHistoricalData([]); // Clear data on error
+        }
+      } catch (apiError) {
+        console.error('API Error:', apiError);
+        if (apiError.message === 'Network Error') {
+          setError('Unable to connect to the server. Please check if the server is running.');
+        } else {
+          setError(apiError.response?.data?.message || apiError.message || 'Failed to fetch historical rate data');
+        }
         setHistoricalData([]); // Clear data on error
       }
     } catch (err) {
-      console.error('Error fetching historical rates:', err);
-      setError(err.response?.data?.message || err.message || 'Failed to fetch historical rate data');
+      console.error('Error in fetchHistoricalRates:', err);
+      setError('An unexpected error occurred. Please try again later.');
       setHistoricalData([]); // Clear data on error
     } finally {
       setIsLoading(false);

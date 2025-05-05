@@ -1,0 +1,75 @@
+.trustpilot-rating {
+  margin-top: 10px;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+}
+
+.trustpilot-rating-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.trustpilot-rating-header svg {
+  margin-right: 5px;
+  font-size: 16px;
+}
+
+.trustpilot-rating-text {
+  font-weight: 500;
+  color: #2d3748;
+}
+
+.trustpilot-rating-stars {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.trustpilot-rating-stars svg {
+  font-size: 14px;
+}
+
+.trustpilot-rating-value {
+  font-weight: 600;
+  margin-left: 5px;
+  margin-right: 3px;
+  color: #2d3748;
+}
+
+.trustpilot-rating-count {
+  color: #6c757d;
+  font-size: 12px;
+}
+
+.trustpilot-rating.loading {
+  color: #6c757d;
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.trustpilot-rating.error {
+  color: #6c757d;
+  opacity: 0.7;
+}
+
+/* Add hover effect */
+.trustpilot-rating:hover {
+  background-color: #f1f3f5;
+  transition: background-color 0.2s ease;
+}
+
+/* Add animation for loading state */
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+.trustpilot-rating.loading {
+  animation: pulse 1.5s infinite;
+} 

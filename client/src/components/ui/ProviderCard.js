@@ -1,8 +1,9 @@
 import React from 'react';
 import { ExternalLink, Check, ThumbsUp, ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import { formatAmount, getCurrencySymbol } from '../../utils/currency';
-import GoogleRating from './GoogleRating';
-import './GoogleRating.css';
+import TrustpilotRating from './TrustpilotRating';
+import './TrustpilotRating.css';
+import ProviderDetailsPopup from './ProviderDetailsPopup';
 
 // Map of provider codes to their website URLs - defined at module level
 // so it persists between renders and can be updated
@@ -48,6 +49,7 @@ let websiteMap = {
   'ofx': 'https://www.ofx.com/en-gb/money-transfer/',
   'paypal': 'https://www.paypal.com/uk/digital-wallet/send-receive-money/send-money',
   'postfinance': 'https://www.postfinance.com',
+  'Profee': 'https://www.profee.com', 
   'qnb-finansbank': 'https://www.qnb-finansbank.com',
   'rbc': 'https://www.rbc.com',
   'rbs': 'https://www.natwest.com/banking-with-natwest/how-to/send-money-abroad.html',
@@ -61,6 +63,7 @@ let websiteMap = {
   'swedbank-ab': 'https://www.swedbank-ab.com',
   'td-bank': 'https://www.td-bank.com',
   'transfergo': 'https://www.transfergo.com/send-money-abroad',
+  'torfx': 'https://www.torfx.com',
   'transferwise': 'https://www.wise.com',
   'unicredit': 'https://www.unicredit.com',
   'western-union': 'https://www.westernunion.com/gb/en/web/send-money/start',
@@ -118,9 +121,11 @@ const ProviderCard = ({
   exchangeRateMargin,
   features = [],
   fetchedRating,
+  trustpilotRating,
   ratingsLoading
 }) => {
   const [isLoaded, setIsLoaded] = React.useState(false);
+  const [showDetailsPopup, setShowDetailsPopup] = React.useState(false);
 
   // Debug provider data - log once when component mounts
   React.useEffect(() => {
@@ -139,17 +144,16 @@ const ProviderCard = ({
     return () => clearTimeout(timer);
   }, []);
 
-  // The provider code to use for the Google rating
-  // Extract from provider ID or use code directly, falling back to name
+  // The provider code to use for the Trustpilot rating
   const getProviderCode = () => {
     // First check if we have a direct code
     if (provider?.code) {
-      return provider.code;
+      return provider.code.toLowerCase();
     }
     
     // Then check for providerCode 
     if (provider?.providerCode) {
-      return provider.providerCode;
+      return provider.providerCode.toLowerCase();
     }
     
     // Check if providerId is in the format "provider-{code}"
@@ -157,7 +161,7 @@ const ProviderCard = ({
       const extractedCode = provider.providerId.split('provider-')[1];
       // Only use the extracted code if it's not numeric
       if (isNaN(extractedCode)) {
-        return extractedCode;
+        return extractedCode.toLowerCase();
       }
     }
     
@@ -171,6 +175,7 @@ const ProviderCard = ({
   };
   
   const providerCode = getProviderCode();
+  console.log('Using provider code for Trustpilot:', providerCode);
 
   // Generate rating visualization elements
   const renderRating = (ratingValue) => {
@@ -285,6 +290,19 @@ const ProviderCard = ({
     </span>
   );
 
+  // Handle opening and closing the details popup
+  const openDetailsPopup = () => {
+    setShowDetailsPopup(true);
+    // Prevent body scrolling when popup is open
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeDetailsPopup = () => {
+    setShowDetailsPopup(false);
+    // Restore body scrolling
+    document.body.style.overflow = '';
+  };
+
   return (
     <>
       {/* Shimmer animation style - only rendered if not already present from ResultsView */}
@@ -329,40 +347,33 @@ const ProviderCard = ({
                 alt={`${provider?.name || name || 'Provider'} logo`} 
                 className="h-32 w-32 object-contain"
                 onError={(e) => {
-                  // Try to fix the path if it starts with "/"
-                  if ((provider?.logo || logo || '').startsWith('/')) {
-                    const imgSrc = provider?.logo || logo;
-                    // Try without the leading slash
-                    e.target.src = imgSrc.substring(1);
-                  } else {
-                    // Fall back to a default provider logo based on provider name
-                    const providerName = (provider?.name || name || '').toLowerCase();
-                    if (providerName.includes('wise')) {
-                      e.target.src = '/images/providers/wise.png';
-                      // If that fails, try without the leading slash
-                      e.target.onerror = () => { e.target.src = 'images/providers/wise.png'; };
-                    } else if (providerName.includes('xe')) {
-                      e.target.src = '/images/providers/xe.png';
-                      // If that fails, try without the leading slash
-                      e.target.onerror = () => { e.target.src = 'images/providers/xe.png'; };
-                    } else if (providerName.includes('western') || providerName.includes('union')) {
-                      e.target.src = '/images/providers/westernunion.png';
-                      // If that fails, try without the leading slash
-                      e.target.onerror = () => { e.target.src = 'images/providers/westernunion.png'; };
-                    } else {
-                      // Default fallback
-                      e.target.src = '/images/providers/default.png';
-                      // If that fails, try without the leading slash
-                      e.target.onerror = () => { e.target.src = 'images/providers/default.png'; };
-                    }
+                  // Add specific fallbacks for XE, TorFX, Wise, Western Union, then default
+                  const code = (provider?.providerCode || '').toLowerCase();
+                  let fallbackUrl = '/images/providers/default.png';
+                  if (code === 'xe') {
+                    fallbackUrl = '/images/providers/xe.png';
+                  } else if (code === 'torfx') {
+                    fallbackUrl = '/images/providers/torfx.png';
+                  } else if (code === 'wise') {
+                    fallbackUrl = '/images/providers/wise.png';
+                  } else if (code === 'western-union' || code === 'westernunion') {
+                    fallbackUrl = '/images/providers/westernunion.png';
                   }
+                  // Prevent infinite onError loop
+                  e.target.onerror = null;
+                  // Try absolute first, then relative as fallback
+                  e.target.src = fallbackUrl;
+                  e.target.onerror = () => { e.target.src = fallbackUrl.startsWith('/') ? fallbackUrl.substring(1) : '/' + fallbackUrl; };
                 }}
               />
             </div>
-            {/* Use GoogleRating component instead of renderRating */}
+            {/* Pass the trustpilotRating prop to the TrustpilotRating component */}
             {providerCode && (
               <div className="mt-2 mb-2">
-                <GoogleRating providerName={providerCode} />
+                <TrustpilotRating 
+                  providerName={providerCode} 
+                  preloadedRating={trustpilotRating}
+                />
               </div>
             )}
             {/* Fallback to the old rating display if no providerCode is available */}
@@ -370,6 +381,19 @@ const ProviderCard = ({
           </div>
           
           <div className="text-right">
+            {/* Add Indicative label for TorFX, XE, and Profee */}
+            {(
+              provider?.providerCode?.toLowerCase() === 'torfx' ||
+              provider?.providerCode?.toLowerCase() === 'xe' ||
+              provider?.providerCode?.toLowerCase() === 'profee' ||
+              (provider?.name || name || '').toLowerCase().includes('torfx') ||
+              (provider?.name || name || '').toLowerCase().includes('xe') ||
+              (provider?.name || name || '').toLowerCase().includes('profee')
+            ) && (
+              <div className="text-xs font-medium text-amber-600 bg-amber-50 py-1 px-2 rounded-full mb-2 inline-block">
+                Indicative
+              </div>
+            )}
             <div className="text-xs uppercase font-medium text-indigo-600">They receive</div>
             <div className="text-2xl font-bold">
               <span className="text-shimmer">
@@ -449,7 +473,9 @@ const ProviderCard = ({
           
           {/* Features */}
           <div className="mt-5 flex flex-wrap items-center">
+            {/* Temporarily hidden until needed
             <div className="text-xs text-gray-500 font-medium mr-2">Features:</div>
+            */}
             <div className="flex flex-wrap">
               {(provider?.features || features).map((feature, idx) => (
                 <span key={idx} className="flex items-center text-xs text-indigo-700 mr-3 mb-1">
@@ -464,10 +490,15 @@ const ProviderCard = ({
         </div>
         
         {/* Card Footer - CTA */}
-        <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
-          <button className="text-sm text-indigo-600 hover:text-indigo-800 hover:underline flex items-center">
+        <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-end">
+          {/* Temporarily hidden until fetching is sorted
+          <button 
+            className="text-sm text-indigo-600 hover:text-indigo-800 hover:underline flex items-center"
+            onClick={openDetailsPopup}
+          >
             See full details
           </button>
+          */}
           
           <a 
             href={getProviderWebsite(provider?.providerCode || provider?.code || provider?.name || name || '')} 
@@ -480,6 +511,23 @@ const ProviderCard = ({
           </a>
         </div>
       </div>
+
+      {/* Provider Details Popup */}
+      {showDetailsPopup && (
+        <ProviderDetailsPopup 
+          provider={provider || { 
+            name, 
+            code: name?.toLowerCase().replace(/\s+/g, '-'), 
+            logo, 
+            rate, 
+            transferFee, 
+            transferTime 
+          }} 
+          onClose={closeDetailsPopup}
+          fromCurrency={fromCurrency}
+          toCurrency={toCurrency}
+        />
+      )}
     </>
   );
 };

@@ -251,26 +251,18 @@ class ProviderService {
     
     const results = [];
     
-    // Ensure providerRates is a regular object, not a Map
-    const ratesObject = providerRates instanceof Map 
-      ? Object.fromEntries(providerRates) 
-      : providerRates;
-    
-    for (const [code, rate] of Object.entries(ratesObject)) {
-      console.log(`[CalculateResults] Processing provider ${code} with rate ${rate}`);
-      
+    for (const [code, rate] of Object.entries(providerRates)) {
       const provider = this.providers[code];
-      if (!rate || !provider) {
-        console.log(`[CalculateResults] Skipping provider ${code} - invalid rate or provider not found`);
+      if (!provider) {
+        console.warn(`[CalculateResults] Provider ${code} not found in providers list`);
         continue;
       }
       
-      console.log(`[CalculateResults] Provider ${provider.name} found, calculating fees...`);
+      console.log(`[CalculateResults] Processing provider ${provider.name}`);
       
-      // Calculate transfer fee based on the provider's fee structure or use the fee from the API
+      // Calculate transfer fee
       let transferFee = 0;
-      let transferTime = provider.transferTimeHours || { min: 24, max: 48 };
-      let deliveryTimeText = `${transferTime.min}-${transferTime.max} hours`;
+      let deliveryTimeText = '';
       
       // For Wise, check if we have a fee from the API
       if (code === 'wise' && provider.transferFees && provider.transferFees[`${fromCurrency}_${targetCurrency}_${amount}`]) {
@@ -308,49 +300,44 @@ class ProviderService {
       // Calculate amount received - for Wise, subtract the fee from the targetAmount
       let amountReceived = amount * effectiveRate;
       
-      if (code === 'wise') {
-        // For Wise, subtract the fee from the amount received if it's in target currency
-        // or just use the amountReceived from the API if we have it
-        if (provider.amountReceived && provider.amountReceived[`${fromCurrency}_${targetCurrency}_${amount}`]) {
-          amountReceived = provider.amountReceived[`${fromCurrency}_${targetCurrency}_${amount}`];
-          console.log(`[CalculateResults] Using Wise API amount received: ${amountReceived}`);
+      // Calculate total cost including fees
+      const totalCost = amount + transferFee;
+      
+      // Calculate effective rate including fees
+      const effectiveRateWithFees = amountReceived / totalCost;
+      
+      // Format delivery time text if not already set
+      if (!deliveryTimeText) {
+        const minHours = provider.transferTimeHours.min;
+        const maxHours = provider.transferTimeHours.max;
+        
+        if (minHours === maxHours) {
+          deliveryTimeText = `${minHours} hour${minHours !== 1 ? 's' : ''}`;
         } else {
-          // If we don't have the specific amount received, subtract the fee from the calculated amount
-          amountReceived = amountReceived - transferFee;
-          console.log(`[CalculateResults] Calculated Wise amount received by subtracting fee: ${amountReceived}`);
+          deliveryTimeText = `${minHours}-${maxHours} hours`;
         }
       }
       
-      // Calculate total cost
-      const baseRate = rate / (1 - provider.exchangeRateMargin);
-      const marginCost = amount * (baseRate - effectiveRate);
-      const totalCost = transferFee + marginCost;
-      
-      const result = {
-        providerId: provider.id,
-        providerCode: code,
-        providerName: provider.name,
-        providerLogo: provider.logo,
-        baseRate: baseRate,
-        effectiveRate: effectiveRate,
-        transferFee: transferFee,
-        marginPercentage: provider.exchangeRateMargin * 100,
-        marginCost: marginCost,
-        totalCost: totalCost,
-        amountReceived: amountReceived,
-        transferTimeHours: provider.transferTimeHours,
-        transferTime: deliveryTimeText,
-        rating: provider.rating,
-        methods: provider.methods,
-        realTimeApi: provider.apiEnabled,
-        timestamp: new Date().toISOString()
-      };
-      
-      console.log(`[CalculateResults] Added provider ${provider.name} to results with amount received: ${amountReceived}, fee: ${transferFee}, delivery time: ${deliveryTimeText}`);
-      results.push(result);
+      results.push({
+        provider: {
+          id: provider.id,
+          name: provider.name,
+          logo: provider.logo,
+          rating: provider.rating
+        },
+        rate: effectiveRate,
+        effectiveRateWithFees,
+        amountReceived,
+        transferFee,
+        totalCost,
+        deliveryTime: deliveryTimeText,
+        methods: provider.methods
+      });
     }
     
-    console.log(`[CalculateResults] Returning ${results.length} provider results`);
+    // Sort results by amount received (highest first)
+    results.sort((a, b) => b.amountReceived - a.amountReceived);
+    
     return results;
   }
   
@@ -360,31 +347,10 @@ class ProviderService {
     try {
       switch (provider.apiHandler.toLowerCase()) {
         case 'wise':
-        case 'transferwise':
           return await this.fetchWiseRate(provider, fromCurrency, targetCurrency, amount);
-        case 'xe':
-          try {
-            return await this.fetchXERate(provider, fromCurrency, targetCurrency);
-          } catch (xeError) {
-            console.error(`Error fetching XE rate: ${xeError.message}`);
-            return null;
-          }
-        case 'westernunion':
-          try {
-            return await this.fetchWesternUnionRate(provider, fromCurrency, targetCurrency, amount);
-          } catch (wuError) {
-            console.error(`Error fetching Western Union rate: ${wuError.message}`);
-            return null;
-          }
         default:
-          // If no specific handler, try the generic rate handler
-          console.log(`No specific handler for provider: ${provider.apiHandler}, trying generic handler`);
-          try {
-            return await this.fetchGenericRate(fromCurrency, targetCurrency);
-          } catch (genericError) {
-            console.error(`Error fetching generic rate: ${genericError.message}`);
-            return null;
-          }
+          console.log(`No specific handler for provider: ${provider.apiHandler}`);
+          return null;
       }
     } catch (error) {
       console.error(`Error fetching rate from ${provider.name}:`, error.message);
@@ -394,140 +360,62 @@ class ProviderService {
   
   async fetchWiseRate(provider, fromCurrency, targetCurrency, amount) {
     try {
-      console.log(`[fetchWiseRate] Attempting to get rate and fee for ${fromCurrency} to ${targetCurrency} from Wise`);
+      console.log(`[fetchWiseRate] Attempting to get rate for ${fromCurrency} to ${targetCurrency}`);
       
-      // First try to get rate and fee together from the exchange rate API
-      try {
-        const rateData = await wiseApiService.getExchangeRate(fromCurrency, targetCurrency, amount);
-        console.log(`[fetchWiseRate] Wise API returned rate: ${rateData.rate} and fee: ${rateData.fee} for ${fromCurrency} to ${targetCurrency}`);
-        
-        // Store fee information in provider object for later use
-        if (!provider.transferFees) {
-          provider.transferFees = {};
-        }
-        
-        // Store the fee for this specific currency pair and amount
-        const feeKey = `${fromCurrency}_${targetCurrency}_${amount}`;
-        provider.transferFees[feeKey] = rateData.fee;
-        
-        // Store delivery time information if available
+      // Use the Wise API service to get the rate
+      const rateInfo = await wiseApiService.getExchangeRate(fromCurrency, targetCurrency, amount);
+      
+      if (!rateInfo || !rateInfo.rate) {
+        throw new Error('No rate returned from Wise API');
+      }
+      
+      // Store the fee for later use in calculations
+      if (!provider.transferFees) {
+        provider.transferFees = {};
+      }
+      
+      const feeKey = `${fromCurrency}_${targetCurrency}_${amount}`;
+      provider.transferFees[feeKey] = rateInfo.fee || 0;
+      
+      // Store delivery time if available
+      if (rateInfo.deliveryTime) {
         if (!provider.deliveryTimes) {
           provider.deliveryTimes = {};
         }
-        
-        if (rateData.deliveryTime) {
-          // Use the deliveryTime field from the updated wiseApiService
-          provider.deliveryTimes[`${fromCurrency}_${targetCurrency}`] = rateData.deliveryTime;
-          console.log(`[fetchWiseRate] Stored delivery time: ${rateData.deliveryTime} for ${fromCurrency} to ${targetCurrency}`);
-        } else if (rateData.estimatedDelivery) {
-          // Fallback to estimatedDelivery field for backward compatibility
-          provider.deliveryTimes[`${fromCurrency}_${targetCurrency}`] = rateData.estimatedDelivery;
-          console.log(`[fetchWiseRate] Stored delivery time: ${rateData.estimatedDelivery} for ${fromCurrency} to ${targetCurrency}`);
-        }
-        
-        // Store amount received if available
-        if (rateData.targetAmount) {
-          if (!provider.amountReceived) {
-            provider.amountReceived = {};
-          }
-          
-          provider.amountReceived[`${fromCurrency}_${targetCurrency}_${amount}`] = rateData.targetAmount;
-          console.log(`[fetchWiseRate] Stored amount received: ${rateData.targetAmount} for ${fromCurrency} to ${targetCurrency}`);
-        }
-        
-        // Return the rate
-        return rateData.rate;
-      } catch (error) {
-        console.error(`[fetchWiseRate] Error getting rate and fee: ${error.message}`);
-        
-        // If there was an error, try to get at least the delivery time estimate
-        try {
-          const deliveryTime = wiseApiService.getEstimatedDeliveryTime(fromCurrency, targetCurrency);
-          
-          // Store this fallback delivery time
-          if (!provider.deliveryTimes) {
-            provider.deliveryTimes = {};
-          }
-          
-          provider.deliveryTimes[`${fromCurrency}_${targetCurrency}`] = deliveryTime;
-          console.log(`[fetchWiseRate] Stored fallback delivery time: ${deliveryTime} for ${fromCurrency} to ${targetCurrency}`);
-        } catch (timeError) {
-          console.error(`[fetchWiseRate] Error getting fallback delivery time: ${timeError.message}`);
-        }
-        
-        throw error;
+        provider.deliveryTimes[`${fromCurrency}_${targetCurrency}`] = rateInfo.deliveryTime;
       }
+      
+      return rateInfo.rate;
     } catch (error) {
-      console.error(`[fetchWiseRate] Error fetching Wise rate: ${error.message}`);
+      console.error('[fetchWiseRate] Error:', error.message);
       throw error;
     }
   }
   
-  async fetchXERate(provider, fromCurrency, targetCurrency) {
-    try {
-      console.log(`[fetchXERate] Attempting to get rate for ${fromCurrency} to ${targetCurrency}`);
-      
-      // XE API is not implemented, throw an error
-      throw new Error(`XE API is not implemented. Please configure the XE API credentials and implement the API handler.`);
-    } catch (error) {
-      console.error('[fetchXERate] Error:', error.message);
-      throw error;
-    }
-  }
-  
-  async fetchWesternUnionRate(provider, fromCurrency, targetCurrency, amount) {
-    try {
-      console.log(`[fetchWesternUnionRate] Attempting to get rate for ${fromCurrency} to ${targetCurrency}`);
-      
-      // Western Union API is not implemented, throw an error
-      throw new Error(`Western Union API is not implemented. Please configure the Western Union API credentials and implement the API handler.`);
-    } catch (error) {
-      console.error('[fetchWesternUnionRate] Error:', error.message);
-      throw error;
-    }
-  }
-  
-  async fetchGenericRate(fromCurrency, targetCurrency) {
-    try {
-      // Using a public exchange rate API for providers without specific implementations
-      const response = await axios.get(`https://api.exchangerate-api.com/v4/latest/${fromCurrency}`);
-      
-      if (response.data && response.data.rates && response.data.rates[targetCurrency]) {
-        return response.data.rates[targetCurrency];
-      } else {
-        throw new Error('Rate not found');
-      }
-    } catch (error) {
-      console.error('Generic rate API error:', error.message);
-      throw error;
-    }
-  }
-
-  // Clear cache for specific provider or currency pair
   async clearCache(fromCurrency = null, targetCurrency = null) {
-    // Clear memory cache
-    if (fromCurrency && targetCurrency) {
-      const keys = memoryCache.keys();
-      keys.forEach(key => {
-        if (key.includes(`${fromCurrency}_${targetCurrency}`)) {
-          memoryCache.del(key);
-        }
-      });
-    } else {
+    try {
+      if (fromCurrency && targetCurrency) {
+        // Clear specific currency pair
+        await RateCache.deleteMany({
+          fromCurrency,
+          toCurrency: targetCurrency
+        });
+        console.log(`Cleared cache for ${fromCurrency} to ${targetCurrency}`);
+      } else {
+        // Clear all cache
+        await RateCache.deleteMany({});
+        console.log('Cleared all rate cache');
+      }
+      
+      // Clear memory cache
       memoryCache.flushAll();
+      console.log('Cleared memory cache');
+      
+      return true;
+    } catch (error) {
+      console.error('Error clearing cache:', error);
+      return false;
     }
-    
-    // Clear database cache
-    if (fromCurrency && targetCurrency) {
-      await RateCache.deleteMany({ 
-        fromCurrency, 
-        toCurrency: targetCurrency 
-      });
-    } else {
-      await RateCache.deleteMany({});
-    }
-    
-    console.log('Cache cleared');
   }
 }
 
