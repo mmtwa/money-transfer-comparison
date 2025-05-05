@@ -210,18 +210,23 @@ const AboutUs = () => {
                       
                       {/* URL bar showing referral code */}
                       <div className="ml-4 flex-1 bg-white rounded-md border border-gray-300 py-1 px-3 flex items-center relative overflow-hidden group">
-                        <motion.div 
-                          className="mx-2 text-sm font-mono text-gray-600 overflow-hidden whitespace-nowrap flex-1"
-                          initial={{ x: 0 }}
-                          animate={{ x: [0, -50, 0] }}
-                          transition={{ 
-                            repeat: Infinity, 
-                            duration: 15,
-                            ease: "linear"
-                          }}
-                        >
-                          https://competitor-site.com/send-money?affiliate=<span className="text-red-500 font-semibold">REF123456789</span>&utm_source=<span className="text-red-500 font-semibold">affiliate</span>&utm_medium=<span className="text-red-500 font-semibold">partner</span>&utm_campaign=<span className="text-red-500 font-semibold">money-transfer</span>&commission=<span className="text-red-500 font-semibold">15percent</span>
-                        </motion.div>
+                        <div className="w-full overflow-hidden">
+                          <motion.div 
+                            className="text-xs md:text-sm font-mono text-gray-600 whitespace-nowrap"
+                            initial={{ x: 0 }}
+                            animate={{ x: [0, -120, 0] }}
+                            transition={{ 
+                              repeat: Infinity, 
+                              duration: 8,
+                              ease: "linear"
+                            }}
+                          >
+                            <span className="hidden md:inline">https://competitor-site.com/send-money</span>
+                            <span className="md:hidden">competitor-site.com/send-money</span>
+                            <span className="text-red-500 font-semibold">?affiliate=<span className="text-red-500 font-semibold">REF123456789</span></span>
+                            <span className="hidden md:inline">&utm_source=<span className="text-red-500 font-semibold">affiliate</span>&utm_medium=<span className="text-red-500 font-semibold">partner</span>&utm_campaign=<span className="text-red-500 font-semibold">money-transfer</span>&commission=<span className="text-red-500 font-semibold">15percent</span></span>
+                          </motion.div>
+                        </div>
                         
                         {/* Red cross overlay that animates in */}
                         <motion.div 
@@ -241,11 +246,11 @@ const AboutUs = () => {
                     {/* Content area showing affiliate banners crossed out */}
                     <div className="p-4 bg-gray-50 h-52 relative">
                       <div className="absolute inset-0 p-4 flex flex-col gap-4">
-                        <div className="h-16 bg-gradient-to-r from-indigo-300 to-purple-300 rounded-md flex items-center justify-center px-4 opacity-80">
-                          <span className="text-white font-bold">HIDDEN REFERRAL ID URL</span>
+                        <div className="h-16 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-md flex items-center justify-center px-4">
+                          <span className="text-white font-bold text-lg">HIDDEN REFERRAL ID URL</span>
                         </div>
-                        <div className="h-16 bg-gradient-to-r from-blue-300 to-teal-300 rounded-md flex items-center justify-center px-4 opacity-80">
-                          <span className="text-white font-bold">SPONSORED RECOMMENDATION</span>
+                        <div className="h-16 bg-gradient-to-r from-blue-600 to-teal-600 rounded-md flex items-center justify-center px-4">
+                          <span className="text-white font-bold text-lg">SPONSORED RECOMMENDATION</span>
                         </div>
                       </div>
                       
@@ -256,28 +261,20 @@ const AboutUs = () => {
                           whileInView={{ scale: 1, rotate: -15 }}
                           viewport={{ once: true }}
                           transition={{ delay: 0.8, duration: 0.7, type: "spring", bounce: 0.4 }}
-                          className="absolute left-6 top-1/2 -translate-y-1/2 origin-center" 
-                        >
+                          className="absolute left-6 top-1/2 -translate-y-1/2 origin-center" style={{ transform: 'rotate(-15deg)' }}>
                           <div className="relative">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-32 w-32 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                              <circle cx="12" cy="12" r="10" />
-                              <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-32 w-32 text-red-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                              <circle cx="12" cy="12" r="10"></circle>
+                              <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
                             </svg>
-                            
                             <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="text-base font-bold text-red-600 bg-white/90 px-2 py-0.5 rounded transform -rotate-15">
-                                NOT ON OUR SITE
-                              </span>
+                              <span className="text-base font-bold text-red-700 bg-white px-2 py-0.5 rounded transform -rotate-15 shadow-md">NOT ON OUR SITE</span>
                             </div>
-                            
-                            {/* Rubber stamp effect - small ink splatters */}
-                            <div className="absolute -top-2 -left-2 w-3 h-3 bg-red-500/40 rounded-full"></div>
-                            <div className="absolute -bottom-1 left-3 w-2 h-2 bg-red-500/30 rounded-full"></div>
-                            <div className="absolute top-1 -right-1 w-2.5 h-2.5 bg-red-500/35 rounded-full"></div>
-                            <div className="absolute -bottom-2 -right-1 w-1.5 h-1.5 bg-red-500/30 rounded-full"></div>
-                            
-                            {/* Stamp ink effect - uneven edges */}
-                            <div className="absolute inset-0 border-4 border-red-500/30 rounded-full"></div>
+                            <div className="absolute -top-2 -left-2 w-3 h-3 bg-red-600 rounded-full"></div>
+                            <div className="absolute -bottom-1 left-3 w-2 h-2 bg-red-600 rounded-full"></div>
+                            <div className="absolute top-1 -right-1 w-2.5 h-2.5 bg-red-600 rounded-full"></div>
+                            <div className="absolute -bottom-2 -right-1 w-1.5 h-1.5 bg-red-600 rounded-full"></div>
+                            <div className="absolute inset-0 border-4 border-red-600 rounded-full"></div>
                           </div>
                         </motion.div>
                       </div>

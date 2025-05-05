@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import ResponsiveImage from '../../components/common/ResponsiveImage';
+import useScrollProgress from '../../hooks/useScrollProgress';
 
 /**
  * GuideDetail component - template for all guide articles
@@ -17,13 +18,53 @@ const GuideDetail = ({
   readTime,
   relatedGuides = []
 }) => {
+  const progress = useScrollProgress();
+
   // Scroll to top when component mounts
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
+  // Calculate the gradient color based on progress
+  const getGradientColor = () => {
+    if (progress <= 0) return '#6366f1';
+    if (progress >= 100) return '#3CBF7A';
+    
+    // Interpolate between purple and green based on progress
+    const startColor = [99, 102, 241]; // #6366f1
+    const endColor = [60, 191, 122];   // #3CBF7A
+    
+    const r = Math.round(startColor[0] + (endColor[0] - startColor[0]) * (progress / 100));
+    const g = Math.round(startColor[1] + (endColor[1] - startColor[1]) * (progress / 100));
+    const b = Math.round(startColor[2] + (endColor[2] - startColor[2]) * (progress / 100));
+    
+    return `rgb(${r}, ${g}, ${b})`;
+  };
+
+  // Debug progress value
+  useEffect(() => {
+    console.log('Scroll progress:', progress);
+  }, [progress]);
+
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-900">
+      {/* Progress Bar - Positioned at 72px to match mobile menu */}
+      <div 
+        className="fixed top-[72px] left-0 h-2 z-[9999] transition-all duration-300 shadow-lg"
+        style={{ 
+          width: `${progress}%`,
+          opacity: progress > 0 ? 1 : 0,
+          position: 'fixed',
+          top: '72px',
+          left: 0,
+          right: 0,
+          height: '4px',
+          backgroundColor: getGradientColor(),
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+          zIndex: 9999
+        }}
+      />
+
       {/* Hero Section */}
       <section className="py-16 md:py-20 border-b border-gray-100 bg-gradient-to-b from-indigo-50 to-white">
         <div className="container mx-auto px-4">

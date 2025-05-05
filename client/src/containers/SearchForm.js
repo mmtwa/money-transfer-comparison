@@ -359,12 +359,12 @@ const SearchForm = ({ onSearch, initialData }) => {
 
         <div className="px-6 pb-6 pt-3 md:px-8 md:pb-8 md:pt-4">
           <h2 className="mb-4 text-left">
-            <div className="flex flex-col items-center sm:items-start mb-2">
+            <div className="flex flex-col items-center sm:items-start space-y-4">
               <div
                 className="text-2xl sm:text-2xl md:text-3xl lg:text-3xl font-semibold tracking-tight leading-tight overflow-hidden whitespace-nowrap relative"
                 style={{ 
                   fontFamily: 'Poppins, sans-serif', 
-                  minHeight: '40px' // Reserve height
+                  minHeight: '36px'
                 }}
               >
                 <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-800 text-transparent bg-clip-text">
@@ -381,19 +381,59 @@ const SearchForm = ({ onSearch, initialData }) => {
               </div>
               
               <div
-                className="text-xs sm:text-sm md:text-base lg:text-lg font-medium tracking-tight leading-tight mt-2 text-gray-700 overflow-hidden"
+                className="text-xs sm:text-sm md:text-base lg:text-lg font-medium tracking-tight leading-tight text-gray-700 overflow-hidden"
                 style={{ 
                   fontFamily: 'Poppins, sans-serif', 
-                  minHeight: '48px' // Reserve height
+                  minHeight: '48px'
                 }}
               >
-                <div className="block sm:hidden text-center">
-                  <div className="text-base leading-tight">Worried about transfer fees?</div>
+                <div className="block sm:hidden text-center space-y-2">
+                  <div 
+                    className="text-[14px] leading-tight overflow-hidden whitespace-nowrap relative"
+                    style={{ 
+                      fontFamily: 'Poppins, sans-serif',
+                      minHeight: '32px'
+                    }}
+                  >
+                    <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-800 text-transparent bg-clip-text">
+                      Truly Independent. Transparently Better.
+                    </span>
+                    <div 
+                      className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-30"
+                      style={{ 
+                        transform: "translateX(-100%)",
+                        animation: "shimmer 2s infinite linear",
+                        filter: "blur(5px)" 
+                      }}
+                    />
+                  </div>
                   <div className="text-sm leading-tight">Compare instantly & see the</div>
                   <div className="text-sm leading-tight">real cost before you send.</div>
                 </div>
-                <div className="hidden sm:block">
-                  Worried about transfer fees?<br />Compare instantly & see the <span className="font-semibold">real cost</span> before you send money.
+                <div className="hidden sm:block space-y-3">
+                  <div 
+                    className="text-base leading-tight overflow-hidden whitespace-nowrap relative"
+                    style={{ 
+                      fontFamily: 'Poppins, sans-serif',
+                      minHeight: '36px'
+                    }}
+                  >
+                    <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-800 text-transparent bg-clip-text">
+                      Truly Independent. Transparently Better.
+                    </span>
+                    <div 
+                      className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-30"
+                      style={{ 
+                        transform: "translateX(-100%)",
+                        animation: "shimmer 2s infinite linear",
+                        filter: "blur(5px)" 
+                      }}
+                    />
+                  </div>
+                  <div className="text-sm leading-tight">
+                    <div>Compare instantly & see the <span className="font-semibold">real cost</span> before</div>
+                    <div>you send money.</div>
+                  </div>
                 </div>
               </div>
             </div>
