@@ -46,6 +46,131 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
+    <loc>https://www.mymoneytransfers.com/guides/high-value</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/mid-value</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/low-value</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/micro</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/purpose/property</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/purpose/study</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/purpose/family</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/purpose/nomad</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/purpose/business</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/frequency/regular</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/frequency/periodic</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/frequency/one-time</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/frequency/occasional</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/corridors/uk-asia</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/corridors/us-latam</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/corridors/eu-africa</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/corridors/aus-pacific</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/corridors/gulf-asia</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/criteria/cost</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/criteria/convenience</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/criteria/security</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/criteria/service</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/method/digital-native</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/method/digital-adapter</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/method/traditional</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
     <loc>https://www.mymoneytransfers.com/guides/send-money-to-india</loc>
     <priority>0.8</priority>
     <changefreq>monthly</changefreq>
@@ -86,6 +211,26 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
+    <loc>https://www.mymoneytransfers.com/guides/send-money-to-morocco</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/send-money-to-vietnam</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/send-money-to-bangladesh</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.mymoneytransfers.com/guides/send-money-to-canada</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
     <loc>https://www.mymoneytransfers.com/faq</loc>
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
@@ -107,11 +252,6 @@
   </url>
   <url>
     <loc>https://www.mymoneytransfers.com/cookie-policy</loc>
-    <priority>0.5</priority>
-    <changefreq>monthly</changefreq>
-  </url>
-  <url>
-    <loc>https://www.mymoneytransfers.com/legal-disclosure</loc>
     <priority>0.5</priority>
     <changefreq>monthly</changefreq>
   </url>
