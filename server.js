@@ -135,13 +135,10 @@ if (fs.existsSync(path.join(sourceDir, 'wiselogo.png'))) {
   );
 }
 
-// Serve static assets for both development and production
-app.use('/images', express.static(path.join(__dirname, 'client/public/images')));
-app.use(express.static(path.join(__dirname, 'client/public')));
-
-// In production, also serve the build directory
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, 'client/build')));
+// Serve static assets - FOR DEVELOPMENT ONLY
+if (process.env.NODE_ENV !== 'production') {
+  app.use('/images', express.static(path.join(__dirname, 'client/public/images')));
+  app.use(express.static(path.join(__dirname, 'client/public')));
 }
 
 // Rate limiting
@@ -189,6 +186,7 @@ app.use('/v1/rates', (req, res, next) => {
 // Serve static files
 app.use('/images', express.static(path.join(__dirname, 'client', 'build', 'images')));
 app.use('/images/providers', express.static(path.join(__dirname, 'client', 'build', 'images', 'providers')));
+app.use(express.static(path.join(__dirname, 'client', 'build')));
 
 // Serve sitemap.xml with correct content type
 app.get('/sitemap.xml', (req, res) => {
