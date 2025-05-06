@@ -135,10 +135,13 @@ if (fs.existsSync(path.join(sourceDir, 'wiselogo.png'))) {
   );
 }
 
-// Serve static assets - FOR DEVELOPMENT ONLY
-if (process.env.NODE_ENV !== 'production') {
-  app.use('/images', express.static(path.join(__dirname, 'client/public/images')));
-  app.use(express.static(path.join(__dirname, 'client/public')));
+// Serve static assets for both development and production
+app.use('/images', express.static(path.join(__dirname, 'client/public/images')));
+app.use(express.static(path.join(__dirname, 'client/public')));
+
+// In production, also serve the build directory
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, 'client/build')));
 }
 
 // Rate limiting
