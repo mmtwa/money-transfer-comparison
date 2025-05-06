@@ -27,6 +27,67 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
   const tier2Currencies = ['INR', 'ZAR', 'MXN', 'PLN', 'SEK', 'NOK', 'DKK', 'HUF', 'CZK', 'ILS', 'TRY', 'THB', 'PHP', 'MYR', 'RON', 'BGN', 'KRW', 'HKD', 'CNY', 'CLP', 'COP', 'SAR', 'AED', 'QAR', 'KWD', 'NGN', 'BRL', 'RUB', 'ARS', 'EGP', 'IDR'];
   const exoticCurrencies = ['NGN', 'KWD', 'QAR', 'ARS', 'EGP', 'IDR', 'CLP', 'COP', 'RUB', 'BRL', 'TRY'];
   
+  // Function to determine Panda Remit markup based on currency pair
+  const getPandaRemitMarkup = (fromCurr, toCurr) => {
+    // Major pairs (USD, EUR, GBP, AUD, CAD, SGD, JPY, CNY, HKD, CHF, NZD)
+    const pandaMajorCurrencies = ['USD', 'EUR', 'GBP', 'AUD', 'CAD', 'SGD', 'JPY', 'CNY', 'HKD', 'CHF', 'NZD'];
+    if (pandaMajorCurrencies.includes(fromCurr) && pandaMajorCurrencies.includes(toCurr)) {
+      return 0.005; // 0.5%
+    }
+    
+    // Special pairs with major sending currencies to specific receiving currencies
+    const pandaSendingMajor = ['USD', 'EUR', 'GBP', 'AUD', 'CAD'];
+    const pandaReceivingSpecial = ['INR', 'PHP', 'THB', 'IDR', 'VND', 'MYR', 'PKR', 'NGN', 'ZAR', 'BRL', 'MXN', 'PLN', 'SEK', 'NOK', 'DKK', 'HUF', 'CZK', 'ILS', 'KRW', 'HKD', 'CNY', 'CLP', 'COP', 'SAR', 'AED', 'QAR', 'KWD', 'RON', 'BGN', 'EGP', 'ARS'];
+    
+    if ((pandaSendingMajor.includes(fromCurr) && pandaReceivingSpecial.includes(toCurr)) || 
+        (pandaReceivingSpecial.includes(fromCurr) && pandaSendingMajor.includes(toCurr))) {
+      return 0.0085; // Average of 0.7% to 1.0% = 0.85%
+    }
+    
+    // Exotic pairs
+    const pandaExoticCurrencies = ['NGN', 'KWD', 'QAR', 'ARS', 'EGP', 'IDR', 'CLP', 'COP', 'RUB', 'BRL', 'TRY'];
+    if (pandaExoticCurrencies.includes(fromCurr) || pandaExoticCurrencies.includes(toCurr)) {
+      return 0.0125; // Average of 1.0% to 1.5% = 1.25%
+    }
+    
+    // Default fallback
+    return 0.01; // 1.0% as default
+  };
+  
+  // Function to determine Panda Remit fee based on currency
+  const getPandaRemitFee = (amount, currency) => {
+    // Fee of $6.99 or equivalent in other currencies
+    switch(currency) {
+      case 'USD':
+        return 6.99;
+      case 'EUR':
+        return 6.99; // Assuming 1:1 for simplicity
+      case 'GBP':
+        return 6.99; // Assuming 1:1 for simplicity
+      default:
+        // For other currencies, use USD equivalent
+        return 6.99;
+    }
+  };
+  
+  // Function to determine Panda Remit delivery time based on currency pair
+  const getPandaRemitDeliveryTime = (fromCurr, toCurr) => {
+    // Major pairs (USD, EUR, GBP, AUD, CAD, SGD, JPY, CNY, HKD, CHF, NZD)
+    const pandaMajorCurrencies = ['USD', 'EUR', 'GBP', 'AUD', 'CAD', 'SGD', 'JPY', 'CNY', 'HKD', 'CHF', 'NZD'];
+    if (pandaMajorCurrencies.includes(fromCurr) && pandaMajorCurrencies.includes(toCurr)) {
+      return {
+        text: 'Instant to a few hours',
+        hours: { min: 0, max: 5 }
+      };
+    }
+    
+    // All other pairs
+    return {
+      text: 'Minutes to 1 business day',
+      hours: { min: 0, max: 24 }
+    };
+  };
+  
   // Function to determine XE markup based on currency pair
   const getXEMarkup = (fromCurr, toCurr) => {
     // If both currencies are major, use 0.7%
@@ -510,6 +571,137 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
               // Add TorFX to providers array
               providers.push(torfxProvider);
               console.log('Added TorFX as a provider with markup:', torfxMarkupPercentage * 100 + '%');
+
+              // Add Panda Remit as a provider using the mid-market rate and our markup matrix
+              const pandaRemitMarkupPercentage = getPandaRemitMarkup(fromCurrency, toCurrency);
+              const pandaRemitFee = getPandaRemitFee(amount, fromCurrency);
+              const pandaRemitDeliveryTime = getPandaRemitDeliveryTime(fromCurrency, toCurrency);
+              
+              // Calculate Panda Remit's effective rate using the markup
+              const pandaRemitEffectiveRate = midMarketRate * (1 - pandaRemitMarkupPercentage);
+              
+              // Calculate amount received (amount converted at effective rate minus the fee)
+              const pandaRemitAmountBeforeFee = parseFloat(amount) * pandaRemitEffectiveRate;
+              const pandaRemitAmountReceived = pandaRemitAmountBeforeFee - (pandaRemitFee * pandaRemitEffectiveRate); // Convert fee to target currency
+              
+              // Calculate margin cost
+              const pandaRemitMarginCost = parseFloat(amount) * (midMarketRate - pandaRemitEffectiveRate);
+              
+              // Create Panda Remit provider object
+              const pandaRemitProvider = {
+                providerId: 'provider-pandaremit',
+                providerCode: 'pandaremit',
+                providerName: 'Panda Remit',
+                providerLogo: '/images/providers/pandaremit.png',
+                baseRate: midMarketRate,
+                effectiveRate: pandaRemitEffectiveRate,
+                transferFee: pandaRemitFee,
+                marginPercentage: pandaRemitMarkupPercentage * 100,
+                marginCost: pandaRemitMarginCost,
+                totalCost: pandaRemitFee + pandaRemitMarginCost,
+                amountReceived: pandaRemitAmountReceived > 0 ? pandaRemitAmountReceived : 0, // Ensure amount is not negative
+                sourceCountry: fromCurrency === 'GBP' ? 'GB' : fromCurrency === 'USD' ? 'US' : fromCurrency === 'EUR' ? 'EU' : null,
+                targetCountry: toCurrency === 'GBP' ? 'GB' : toCurrency === 'USD' ? 'US' : toCurrency === 'EUR' ? 'EU' : null,
+                transferTimeHours: pandaRemitDeliveryTime.hours,
+                transferTime: pandaRemitDeliveryTime.text,
+                rating: 4.6, // Default Panda Remit rating
+                methods: ['bank_transfer'],
+                realTimeApi: false, // Not from real-time API
+                isIndicative: true, // Add indicative flag
+                timestamp: new Date().toISOString()
+              };
+              
+              // Add Panda Remit to providers array
+              providers.push(pandaRemitProvider);
+              console.log('Added Panda Remit as a provider with markup:', pandaRemitMarkupPercentage * 100 + '%');
+
+              // Add Regency FX as a provider using the mid-market rate and our markup matrix
+              const getRegencyFXMarkup = (fromCurr, toCurr) => {
+                // Major pairs (USD, EUR, GBP, AUD, CAD, NZD, CHF, JPY, SGD, HKD)
+                const majorPairs = ['USD', 'EUR', 'GBP', 'AUD', 'CAD', 'NZD', 'CHF', 'JPY', 'SGD', 'HKD'];
+                if (majorPairs.includes(fromCurr) && majorPairs.includes(toCurr)) {
+                  return 0.004; // 0.4%
+                }
+                
+                // Other supported pairs (SEK, NOK, MXN, INR, ZAR, DKK, PLN, THB, HUF, CZK, ILS, AED, SAR, MYR, RON, BGN, CNY)
+                const otherPairs = ['SEK', 'NOK', 'MXN', 'INR', 'ZAR', 'DKK', 'PLN', 'THB', 'HUF', 'CZK', 'ILS', 'AED', 'SAR', 'MYR', 'RON', 'BGN', 'CNY'];
+                if ((majorPairs.includes(fromCurr) && otherPairs.includes(toCurr)) || 
+                    (otherPairs.includes(fromCurr) && majorPairs.includes(toCurr)) ||
+                    (otherPairs.includes(fromCurr) && otherPairs.includes(toCurr))) {
+                  return 0.012; // 1.2%
+                }
+                
+                // Default to higher markup for unsupported pairs
+                return 0.02; // 2.0%
+              };
+
+              const getRegencyFXDeliveryTime = (fromCurr, toCurr) => {
+                // Major pairs
+                const majorPairs = ['USD', 'EUR', 'GBP', 'AUD', 'CAD', 'NZD', 'CHF', 'JPY', 'SGD', 'HKD'];
+                if (majorPairs.includes(fromCurr) && majorPairs.includes(toCurr)) {
+                  return {
+                    text: 'Same day to 1 business day',
+                    hours: { min: 0, max: 24 }
+                  };
+                }
+                
+                // Other supported pairs
+                const otherPairs = ['SEK', 'NOK', 'MXN', 'INR', 'ZAR', 'DKK', 'PLN', 'THB', 'HUF', 'CZK', 'ILS', 'AED', 'SAR', 'MYR', 'RON', 'BGN', 'CNY'];
+                if ((majorPairs.includes(fromCurr) && otherPairs.includes(toCurr)) || 
+                    (otherPairs.includes(fromCurr) && majorPairs.includes(toCurr)) ||
+                    (otherPairs.includes(fromCurr) && otherPairs.includes(toCurr))) {
+                  return {
+                    text: '1-2 business days',
+                    hours: { min: 24, max: 48 }
+                  };
+                }
+                
+                // Default to longer delivery time for unsupported pairs
+                return {
+                  text: '1-3 business days',
+                  hours: { min: 24, max: 72 }
+                };
+              };
+
+              const regencyFXMarkupPercentage = getRegencyFXMarkup(fromCurrency, toCurrency);
+              const regencyFXDeliveryTime = getRegencyFXDeliveryTime(fromCurrency, toCurrency);
+              
+              // Calculate Regency FX's effective rate using the markup
+              const regencyFXEffectiveRate = midMarketRate * (1 - regencyFXMarkupPercentage);
+              
+              // Calculate amount received (amount converted at effective rate)
+              const regencyFXAmountReceived = parseFloat(amount) * regencyFXEffectiveRate;
+              
+              // Calculate margin cost
+              const regencyFXMarginCost = parseFloat(amount) * (midMarketRate - regencyFXEffectiveRate);
+              
+              // Create Regency FX provider object
+              const regencyFXProvider = {
+                providerId: 'provider-regencyfx',
+                providerCode: 'regencyfx',
+                providerName: 'Regency FX',
+                providerLogo: '/images/providers/regencyfx.png',
+                baseRate: midMarketRate,
+                effectiveRate: regencyFXEffectiveRate,
+                transferFee: 0, // Regency FX has no transfer fee
+                marginPercentage: regencyFXMarkupPercentage * 100,
+                marginCost: regencyFXMarginCost,
+                totalCost: regencyFXMarginCost, // No transfer fee, so total cost is just margin cost
+                amountReceived: regencyFXAmountReceived > 0 ? regencyFXAmountReceived : 0,
+                sourceCountry: fromCurrency === 'GBP' ? 'GB' : fromCurrency === 'USD' ? 'US' : fromCurrency === 'EUR' ? 'EU' : null,
+                targetCountry: toCurrency === 'GBP' ? 'GB' : toCurrency === 'USD' ? 'US' : toCurrency === 'EUR' ? 'EU' : null,
+                transferTimeHours: regencyFXDeliveryTime.hours,
+                transferTime: regencyFXDeliveryTime.text,
+                rating: 4.7, // Default Regency FX rating
+                methods: ['bank_transfer'],
+                realTimeApi: false,
+                isIndicative: true, // Add indicative flag
+                timestamp: new Date().toISOString()
+              };
+              
+              // Add Regency FX to providers array
+              providers.push(regencyFXProvider);
+              console.log('Added Regency FX as a provider with markup:', regencyFXMarkupPercentage * 100 + '%');
             }
             
             // Set the provider results and sort them
@@ -926,6 +1118,10 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
                         e.target.src = '/images/providers/torfx.png';
                         // If that fails, try without the leading slash
                         e.target.onerror = () => { e.target.src = 'images/providers/torfx.png'; };
+                      } else if (providerName.includes('panda') || providerName.includes('remit')) { // Add specific case for Panda Remit
+                        e.target.src = '/images/providers/pandaremit.png';
+                        // If that fails, try without the leading slash
+                        e.target.onerror = () => { e.target.src = 'images/providers/pandaremit.png'; };
                       } else {
                         // Default fallback
                         e.target.src = '/images/providers/default.png';

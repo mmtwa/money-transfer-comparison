@@ -94,7 +94,7 @@ const Guides = () => {
       <GuidesMenu />
 
       {/* Main Content with Cards */}
-      <section className="py-12 relative">
+      <section id="money-transfer-basics" className="py-12 relative">
         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-indigo-300 to-transparent"></div>
         
         <div className="container mx-auto px-4">
@@ -223,6 +223,583 @@ const Guides = () => {
 
             {/* Interactive Country Guide Selector */}
             <CountryGuideSelector />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Value of Transfer Section */}
+      <section className="py-12 relative">
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-amber-300 to-transparent"></div>
+        
+        <div className="container mx-auto px-4">
+          <motion.div 
+            className="max-w-6xl mx-auto"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">Value of Transfer</h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Find the best transfer options based on the amount you're sending
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {[
+                {
+                  title: "High Value Transfers",
+                  path: "/guides/high-value",
+                  description: "Strategies and providers for large transfers, including bulk payments and property purchases.",
+                  icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+                  color: "from-amber-500 to-orange-600"
+                },
+                {
+                  title: "Mid-Range Transfers",
+                  path: "/guides/mid-value",
+                  description: "Optimal solutions for medium-sized transfers, balancing cost and convenience.",
+                  icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+                  color: "from-orange-500 to-red-600"
+                },
+                {
+                  title: "Low Value Transfers",
+                  path: "/guides/low-value",
+                  description: "Cost-effective options for smaller transfers, focusing on minimal fees.",
+                  icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+                  color: "from-red-500 to-pink-600"
+                },
+                {
+                  title: "Micro Transfers",
+                  path: "/guides/micro",
+                  description: "Solutions for very small transfers, perfect for testing services or sending small amounts.",
+                  icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+                  color: "from-pink-500 to-rose-600"
+                }
+              ].map((guide, index) => (
+                <motion.div
+                  key={guide.path}
+                  className="group relative"
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1, duration: 0.5 }}
+                  whileHover={{ y: -5 }}
+                >
+                  <div className="bg-white rounded-2xl p-8 h-full border border-gray-100 shadow-lg shadow-amber-100/20 hover:shadow-xl hover:shadow-amber-200/30 transition-all duration-300 flex flex-col relative overflow-hidden">
+                    <div className={`absolute top-0 left-0 h-1 w-full bg-gradient-to-r opacity-60 group-hover:opacity-100 transition-opacity duration-300 ${guide.color}`}></div>
+                    
+                    <div className="mb-6">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-r ${guide.color} text-white shadow-lg shadow-amber-500/20`}>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={guide.icon} />
+                        </svg>
+                      </div>
+                    </div>
+                    
+                    <Link to={guide.path}>
+                      <h2 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-amber-600 transition-colors duration-300 hover:text-amber-600 text-left">
+                        {guide.title}
+                      </h2>
+                    </Link>
+                    
+                    <p className="text-gray-600 mb-8 flex-grow text-left">
+                      {guide.description}
+                    </p>
+                    
+                    <Link 
+                      to={guide.path} 
+                      className="mt-auto inline-flex items-center font-medium text-amber-600 group-hover:text-amber-700 transition-colors"
+                    >
+                      <span>Read guide</span>
+                      <span className="ml-1 inline-block transform group-hover:translate-x-1 transition-transform duration-300">→</span>
+                    </Link>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Transfer Purpose Section */}
+      <section className="py-12 bg-gray-50 relative">
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-purple-300 to-transparent"></div>
+        
+        <div className="container mx-auto px-4">
+          <motion.div 
+            className="max-w-6xl mx-auto"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">Transfer Purpose</h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Specialized guides for different transfer purposes and scenarios
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[
+                {
+                  title: "Buying Property Abroad",
+                  path: "/guides/purpose/property",
+                  description: "Complete guide to transferring funds for international property purchases, including legal requirements and timing considerations.",
+                  icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6",
+                  color: "from-purple-500 to-pink-600"
+                },
+                {
+                  title: "Studying Abroad",
+                  path: "/guides/purpose/study",
+                  description: "Managing tuition payments, living expenses, and other costs for international education.",
+                  icon: "M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253",
+                  color: "from-pink-500 to-rose-600"
+                },
+                {
+                  title: "Sending to Family",
+                  path: "/guides/purpose/family",
+                  description: "Best practices for regular family remittances, including tax implications and documentation.",
+                  icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z",
+                  color: "from-rose-500 to-red-600"
+                },
+                {
+                  title: "Digital Nomads",
+                  path: "/guides/purpose/nomad",
+                  description: "Managing international finances while working remotely, including tax considerations and banking solutions.",
+                  icon: "M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
+                  color: "from-red-500 to-orange-600"
+                },
+                {
+                  title: "Business Purposes",
+                  path: "/guides/purpose/business",
+                  description: "Solutions for business payments, including bulk transfers, payroll, and supplier payments.",
+                  icon: "M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
+                  color: "from-orange-500 to-amber-600"
+                }
+              ].map((guide, index) => (
+                <motion.div
+                  key={guide.path}
+                  className="group relative"
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1, duration: 0.5 }}
+                  whileHover={{ y: -5 }}
+                >
+                  <div className="bg-white rounded-2xl p-8 h-full border border-gray-100 shadow-lg shadow-purple-100/20 hover:shadow-xl hover:shadow-purple-200/30 transition-all duration-300 flex flex-col relative overflow-hidden">
+                    <div className={`absolute top-0 left-0 h-1 w-full bg-gradient-to-r opacity-60 group-hover:opacity-100 transition-opacity duration-300 ${guide.color}`}></div>
+                    
+                    <div className="mb-6">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-r ${guide.color} text-white shadow-lg shadow-purple-500/20`}>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={guide.icon} />
+                        </svg>
+                      </div>
+                    </div>
+                    
+                    <Link to={guide.path}>
+                      <h2 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-purple-600 transition-colors duration-300 hover:text-purple-600 text-left">
+                        {guide.title}
+                      </h2>
+                    </Link>
+                    
+                    <p className="text-gray-600 mb-8 flex-grow text-left">
+                      {guide.description}
+                    </p>
+                    
+                    <Link 
+                      to={guide.path} 
+                      className="mt-auto inline-flex items-center font-medium text-purple-600 group-hover:text-purple-700 transition-colors"
+                    >
+                      <span>Read guide</span>
+                      <span className="ml-1 inline-block transform group-hover:translate-x-1 transition-transform duration-300">→</span>
+                    </Link>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Transfer Frequency Section */}
+      <section className="py-12 relative">
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-blue-300 to-transparent"></div>
+        
+        <div className="container mx-auto px-4">
+          <motion.div 
+            className="max-w-6xl mx-auto"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">Transfer Frequency</h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Find the best solutions based on how often you need to transfer money
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {[
+                {
+                  title: "Regular Transfers",
+                  path: "/guides/frequency/regular",
+                  description: "Solutions for frequent transfers, including subscription services and automated payments.",
+                  icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
+                  color: "from-blue-600 to-cyan-600"
+                },
+                {
+                  title: "Periodic Transfers",
+                  path: "/guides/frequency/periodic",
+                  description: "Options for monthly or quarterly transfers, with scheduling and automation features.",
+                  icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
+                  color: "from-cyan-500 to-blue-600"
+                },
+                {
+                  title: "One-Time Transfers",
+                  path: "/guides/frequency/one-time",
+                  description: "Best options for occasional transfers, focusing on simplicity and speed.",
+                  icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
+                  color: "from-blue-500 to-indigo-600"
+                },
+                {
+                  title: "Occasional Transfers",
+                  path: "/guides/frequency/occasional",
+                  description: "Flexible solutions for irregular transfers, with no commitment required.",
+                  icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
+                  color: "from-indigo-500 to-purple-600"
+                }
+              ].map((guide, index) => (
+                <motion.div
+                  key={guide.path}
+                  className="group relative"
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1, duration: 0.5 }}
+                  whileHover={{ y: -5 }}
+                >
+                  <div className="bg-white rounded-2xl p-8 h-full border border-gray-100 shadow-lg shadow-blue-100/20 hover:shadow-xl hover:shadow-blue-200/30 transition-all duration-300 flex flex-col relative overflow-hidden">
+                    <div className={`absolute top-0 left-0 h-1 w-full bg-gradient-to-r opacity-60 group-hover:opacity-100 transition-opacity duration-300 ${guide.color}`}></div>
+                    
+                    <div className="mb-6">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-r ${guide.color} text-white shadow-lg shadow-blue-500/20`}>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={guide.icon} />
+                        </svg>
+                      </div>
+                    </div>
+                    
+                    <Link to={guide.path}>
+                      <h2 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-blue-600 transition-colors duration-300 hover:text-blue-600 text-left">
+                        {guide.title}
+                      </h2>
+                    </Link>
+                    
+                    <p className="text-gray-600 mb-8 flex-grow text-left">
+                      {guide.description}
+                    </p>
+                    
+                    <Link 
+                      to={guide.path} 
+                      className="mt-auto inline-flex items-center font-medium text-blue-600 group-hover:text-blue-700 transition-colors"
+                    >
+                      <span>Read guide</span>
+                      <span className="ml-1 inline-block transform group-hover:translate-x-1 transition-transform duration-300">→</span>
+                    </Link>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Key Corridors Section */}
+      <section className="py-12 bg-gray-50 relative">
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-red-300 to-transparent"></div>
+        
+        <div className="container mx-auto px-4">
+          <motion.div 
+            className="max-w-6xl mx-auto"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">Key Transfer Corridors</h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Specialized guides for major international money transfer routes
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[
+                {
+                  title: "UK to Asia",
+                  path: "/guides/corridors/uk-asia",
+                  description: "Complete guide for sending money from the UK to Asian countries, including popular destinations and regulations.",
+                  icon: "M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7",
+                  color: "from-red-500 to-orange-600"
+                },
+                {
+                  title: "US to Latin America",
+                  path: "/guides/corridors/us-latam",
+                  description: "Best practices for sending money from the US to Latin American countries, including remittance options.",
+                  icon: "M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7",
+                  color: "from-orange-500 to-amber-600"
+                },
+                {
+                  title: "Europe to Africa",
+                  path: "/guides/corridors/eu-africa",
+                  description: "Comprehensive guide for European to African transfers, including mobile money options and local considerations.",
+                  icon: "M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7",
+                  color: "from-amber-500 to-yellow-600"
+                },
+                {
+                  title: "Australia to Pacific",
+                  path: "/guides/corridors/aus-pacific",
+                  description: "Solutions for sending money from Australia to Pacific nations, including island-specific considerations.",
+                  icon: "M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7",
+                  color: "from-yellow-500 to-lime-600"
+                },
+                {
+                  title: "Gulf to Asia",
+                  path: "/guides/corridors/gulf-asia",
+                  description: "Guide for transfers from Gulf countries to Asia, including worker remittances and business payments.",
+                  icon: "M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7",
+                  color: "from-lime-500 to-green-600"
+                }
+              ].map((guide, index) => (
+                <motion.div
+                  key={guide.path}
+                  className="group relative"
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1, duration: 0.5 }}
+                  whileHover={{ y: -5 }}
+                >
+                  <div className="bg-white rounded-2xl p-8 h-full border border-gray-100 shadow-lg shadow-red-100/20 hover:shadow-xl hover:shadow-red-200/30 transition-all duration-300 flex flex-col relative overflow-hidden">
+                    <div className={`absolute top-0 left-0 h-1 w-full bg-gradient-to-r opacity-60 group-hover:opacity-100 transition-opacity duration-300 ${guide.color}`}></div>
+                    
+                    <div className="mb-6">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-r ${guide.color} text-white shadow-lg shadow-red-500/20`}>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={guide.icon} />
+                        </svg>
+                      </div>
+                    </div>
+                    
+                    <Link to={guide.path}>
+                      <h2 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-red-600 transition-colors duration-300 hover:text-red-600 text-left">
+                        {guide.title}
+                      </h2>
+                    </Link>
+                    
+                    <p className="text-gray-600 mb-8 flex-grow text-left">
+                      {guide.description}
+                    </p>
+                    
+                    <Link 
+                      to={guide.path} 
+                      className="mt-auto inline-flex items-center font-medium text-red-600 group-hover:text-red-700 transition-colors"
+                    >
+                      <span>Read guide</span>
+                      <span className="ml-1 inline-block transform group-hover:translate-x-1 transition-transform duration-300">→</span>
+                    </Link>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Transfer by Criteria Section */}
+      <section className="py-12 relative">
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-indigo-300 to-transparent"></div>
+        
+        <div className="container mx-auto px-4">
+          <motion.div 
+            className="max-w-6xl mx-auto"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">Transfer by Criteria</h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Find the best transfer options based on your specific requirements
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {[
+                {
+                  title: "Cost Optimizing",
+                  path: "/guides/criteria/cost",
+                  description: "Find the most cost-effective transfer options, including fee structures and exchange rates.",
+                  icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+                  color: "from-indigo-500 to-purple-600"
+                },
+                {
+                  title: "Convenience",
+                  path: "/guides/criteria/convenience",
+                  description: "User-friendly transfer options focusing on ease of use and accessibility.",
+                  icon: "M13 10V3L4 14h7v7l9-11h-7z",
+                  color: "from-purple-500 to-pink-600"
+                },
+                {
+                  title: "Security and Trust",
+                  path: "/guides/criteria/security",
+                  description: "Secure transfer options with strong regulatory compliance and protection measures.",
+                  icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z",
+                  color: "from-pink-500 to-rose-600"
+                },
+                {
+                  title: "Service Quality",
+                  path: "/guides/criteria/service",
+                  description: "Providers known for excellent customer service and support throughout the transfer process.",
+                  icon: "M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z",
+                  color: "from-rose-500 to-red-600"
+                }
+              ].map((guide, index) => (
+                <motion.div
+                  key={guide.path}
+                  className="group relative"
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1, duration: 0.5 }}
+                  whileHover={{ y: -5 }}
+                >
+                  <div className="bg-white rounded-2xl p-8 h-full border border-gray-100 shadow-lg shadow-indigo-100/20 hover:shadow-xl hover:shadow-indigo-200/30 transition-all duration-300 flex flex-col relative overflow-hidden">
+                    <div className={`absolute top-0 left-0 h-1 w-full bg-gradient-to-r opacity-60 group-hover:opacity-100 transition-opacity duration-300 ${guide.color}`}></div>
+                    
+                    <div className="mb-6">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-r ${guide.color} text-white shadow-lg shadow-indigo-500/20`}>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={guide.icon} />
+                        </svg>
+                      </div>
+                    </div>
+                    
+                    <Link to={guide.path}>
+                      <h2 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-indigo-600 transition-colors duration-300 hover:text-indigo-600 text-left">
+                        {guide.title}
+                      </h2>
+                    </Link>
+                    
+                    <p className="text-gray-600 mb-8 flex-grow text-left">
+                      {guide.description}
+                    </p>
+                    
+                    <Link 
+                      to={guide.path} 
+                      className="mt-auto inline-flex items-center font-medium text-indigo-600 group-hover:text-indigo-700 transition-colors"
+                    >
+                      <span>Read guide</span>
+                      <span className="ml-1 inline-block transform group-hover:translate-x-1 transition-transform duration-300">→</span>
+                    </Link>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Transfer Method Section */}
+      <section className="py-12 bg-gray-50 relative">
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-teal-300 to-transparent"></div>
+        
+        <div className="container mx-auto px-4">
+          <motion.div 
+            className="max-w-6xl mx-auto"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">Transfer Method</h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Find the best transfer options based on your preferred method of sending money
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[
+                {
+                  title: "Digital Natives",
+                  path: "/guides/method/digital-native",
+                  description: "Modern, app-based transfer solutions for tech-savvy users who prefer digital-first experiences.",
+                  icon: "M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
+                  color: "from-teal-500 to-emerald-600"
+                },
+                {
+                  title: "Digital Adapters",
+                  path: "/guides/method/digital-adapter",
+                  description: "User-friendly digital solutions with strong support for those transitioning to online transfers.",
+                  icon: "M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
+                  color: "from-emerald-500 to-green-600"
+                },
+                {
+                  title: "Traditional Users",
+                  path: "/guides/method/traditional",
+                  description: "Familiar transfer methods with strong in-person support and traditional banking options.",
+                  icon: "M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
+                  color: "from-green-500 to-teal-600"
+                }
+              ].map((guide, index) => (
+                <motion.div
+                  key={guide.path}
+                  className="group relative"
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1, duration: 0.5 }}
+                  whileHover={{ y: -5 }}
+                >
+                  <div className="bg-white rounded-2xl p-8 h-full border border-gray-100 shadow-lg shadow-teal-100/20 hover:shadow-xl hover:shadow-teal-200/30 transition-all duration-300 flex flex-col relative overflow-hidden">
+                    <div className={`absolute top-0 left-0 h-1 w-full bg-gradient-to-r opacity-60 group-hover:opacity-100 transition-opacity duration-300 ${guide.color}`}></div>
+                    
+                    <div className="mb-6">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-r ${guide.color} text-white shadow-lg shadow-teal-500/20`}>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={guide.icon} />
+                        </svg>
+                      </div>
+                    </div>
+                    
+                    <Link to={guide.path}>
+                      <h2 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-teal-600 transition-colors duration-300 hover:text-teal-600 text-left">
+                        {guide.title}
+                      </h2>
+                    </Link>
+                    
+                    <p className="text-gray-600 mb-8 flex-grow text-left">
+                      {guide.description}
+                    </p>
+                    
+                    <Link 
+                      to={guide.path} 
+                      className="mt-auto inline-flex items-center font-medium text-teal-600 group-hover:text-teal-700 transition-colors"
+                    >
+                      <span>Read guide</span>
+                      <span className="ml-1 inline-block transform group-hover:translate-x-1 transition-transform duration-300">→</span>
+                    </Link>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </motion.div>
         </div>
       </section>
@@ -653,6 +1230,9 @@ const GuidesMenu = () => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                document.getElementById('money-transfer-basics').scrollIntoView({ behavior: 'smooth' });
+              }}
               className="inline-flex items-center px-6 py-3 rounded-full bg-indigo-100 text-indigo-700 font-medium shadow-sm hover:shadow-md hover:bg-indigo-200 transition-all duration-300"
             >
               <span>Browse All Guides</span>

@@ -49,10 +49,11 @@ let websiteMap = {
   'ofx': 'https://www.ofx.com/en-gb/money-transfer/',
   'paypal': 'https://www.paypal.com/uk/digital-wallet/send-receive-money/send-money',
   'postfinance': 'https://www.postfinance.com',
-  'Profee': 'https://www.profee.com', 
+  'Profee': 'https://www.profee.com',
   'qnb-finansbank': 'https://www.qnb-finansbank.com',
   'rbc': 'https://www.rbc.com',
   'rbs': 'https://www.natwest.com/banking-with-natwest/how-to/send-money-abroad.html',
+  'regency fx': 'https://www.regencyfx.com',
   'remitly': 'https://www.remitly.com',
   'revolut': 'https://www.revolut.com/money-transfer/',
   'ria': 'https://www.riamoneytransfer.com',
@@ -386,9 +387,13 @@ const ProviderCard = ({
               provider?.providerCode?.toLowerCase() === 'torfx' ||
               provider?.providerCode?.toLowerCase() === 'xe' ||
               provider?.providerCode?.toLowerCase() === 'profee' ||
+              provider?.providerCode?.toLowerCase() === 'regencyfx' ||
+              provider?.providerCode?.toLowerCase() === 'pandaremit' ||
               (provider?.name || name || '').toLowerCase().includes('torfx') ||
               (provider?.name || name || '').toLowerCase().includes('xe') ||
-              (provider?.name || name || '').toLowerCase().includes('profee')
+              (provider?.name || name || '').toLowerCase().includes('profee') ||
+              (provider?.name || name || '').toLowerCase().includes('regency') ||
+              (provider?.name || name || '').toLowerCase().includes('panda')
             ) && (
               <div className="text-xs font-medium text-amber-600 bg-amber-50 py-1 px-2 rounded-full mb-2 inline-block">
                 Indicative

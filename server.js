@@ -38,7 +38,7 @@ const trustpilotRatingsRoutes = require('./routes/trustpilotRatings');
 
 // Initialize Express app
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 10000; // Use environment variable or default to 10000
 
 // Connect to MongoDB
 const connectDB = async () => {
@@ -160,7 +160,10 @@ app.use('/api/users', userRoutes);
 app.use('/api/wise', wiseRoutes);
 app.use('/api/google-ratings', googleRatingsRoutes);
 app.use('/api/provider-info', providerInfoRoutes);
-app.use('/api/trustpilot-ratings', trustpilotRatingsRoutes);
+app.use('/api/trustpilot-ratings', (req, res, next) => {
+  console.log('Trustpilot ratings API called:', req.method, req.url);
+  next();
+}, trustpilotRatingsRoutes);
 
 // Define the v1/rates endpoint for historical rates
 app.use('/v1/rates', (req, res, next) => {
@@ -179,6 +182,10 @@ app.use('/v1/rates', (req, res, next) => {
   
   rateRoutes.handle(req, res, next);
 });
+
+// Serve static files
+app.use('/images', express.static(path.join(__dirname, 'client', 'build', 'images')));
+app.use('/images/providers', express.static(path.join(__dirname, 'client', 'build', 'images', 'providers')));
 
 // Serve sitemap.xml with correct content type
 app.get('/sitemap.xml', (req, res) => {
@@ -207,52 +214,24 @@ app.get('/google-site-verification.html', (req, res) => {
   });
 });
 
-// Serve static assets in production
-if (process.env.NODE_ENV === 'production') {
-  // Make sure we have provider images in the build directory
-  const buildProvidersDir = path.join(__dirname, 'client', 'build', 'images', 'providers');
-  if (!fs.existsSync(buildProvidersDir)) {
-    fs.mkdirSync(buildProvidersDir, { recursive: true });
-    console.log('Created build providers directory');
-    
-    // Copy provider logos to build directory if needed
-    const sourceProvidersDir = path.join(__dirname, 'client', 'public', 'images', 'providers');
-    if (fs.existsSync(sourceProvidersDir)) {
-      fs.readdirSync(sourceProvidersDir).forEach(file => {
-        const source = path.join(sourceProvidersDir, file);
-        const dest = path.join(buildProvidersDir, file);
-        
-        fs.copyFileSync(source, dest);
-        console.log(`Copied ${file} to build directory`);
-      });
-    }
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
+// Handle all other routes
+app.get('*', (req, res, next) => {
+  // If it's an API route that doesn't exist, return 404
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({
+      success: false,
+      message: 'API endpoint not found'
+    });
   }
   
-  // Set static folder - Ensure the path is correct
-  app.use(express.static(path.join(__dirname, 'client', 'build')));
-  app.use('/images', express.static(path.join(__dirname, 'client', 'build', 'images')));
-  
-  // Add explicit route for provider images to ensure they're properly served
-  app.use('/images/providers', express.static(path.join(__dirname, 'client', 'build', 'images', 'providers')));
-  
-  // Health check endpoint for Render
-  app.get('/health', (req, res) => {
-    res.status(200).send('OK');
-  });
-  
-  // Handle all routes not captured by API - Make sure non-API routes serve index.html
-  app.get('*', (req, res) => {
-    if (!req.path.startsWith('/api')) {
-      res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
-    } else {
-      // Handle 404 for API routes that don't exist
-      res.status(404).json({
-        success: false,
-        message: 'API endpoint not found'
-      });
-    }
-  });
-}
+  // For non-API routes, serve the React app
+  res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -265,22 +244,28 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-const startServer = (port) => {
-  const server = app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-  });
+const startServer = () => {
+  try {
+    const server = app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
 
-  // Handle server errors
-  server.on('error', (err) => {
-    if (err.code === 'EADDRINUSE') {
-      console.log(`Port ${port} is already in use, trying port ${port + 1}`);
-      startServer(port + 1);
-    } else {
-      console.error('Server error:', err);
-    }
-  });
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        console.error(`Port ${PORT} is already in use. Please free up the port or use a different port.`);
+        process.exit(1);
+      } else {
+        console.error('Server error:', err);
+        process.exit(1);
+      }
+    });
+  } catch (error) {
+    console.error('Error starting server:', error);
+    process.exit(1);
+  }
 };
 
-startServer(PORT);
+// Start server
+startServer();
 
 module.exports = app; // For testing purposes

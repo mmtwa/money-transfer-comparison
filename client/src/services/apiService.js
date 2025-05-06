@@ -13,7 +13,7 @@ const getApiBaseUrl = () => {
   
   // Development (typically on port 3000, but API on another port)
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    // Try port 10000 first, then 10001, 10002, etc. based on what's running
+    // Use port 3000 instead of 10000 as the server is running on port 3000
     return `${protocol}//${hostname}:10000`;
   }
   

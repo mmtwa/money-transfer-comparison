@@ -32,6 +32,7 @@ const postLimiter = rateLimit({
 // Provider name to Trustpilot URL mapping
 const PROVIDER_URLS = {
   'torfx': 'www.torfx.com',
+  'regency fx': 'regencyfx.com',
   'wise': 'wise.com',
   'westernunion': 'westernunion.com',
   'moneygram': 'moneygram.com',
@@ -127,13 +128,21 @@ async function fetchAndSaveTrustpilotRating(normalizedName) {
 
   // Load the HTML into cheerio
   const $ = cheerio.load(response.data);
+  
+  // Debug: Log the page title and content
+  console.log('Page title:', $('title').text());
+  console.log('TrustScore text:', $('.trustscore').text());
+  console.log('Headline trustscore:', $('.headline__trustscore').text());
+  
   const rating = extractRating($);
+  console.log('Extracted rating:', rating);
 
   if (!rating) {
     throw new Error('Could not find rating');
   }
 
   // Cache the rating in MongoDB
+  console.log(`Attempting to save rating ${rating} to MongoDB for provider ${normalizedName}`);
   const updatedRating = await TrustpilotRating.findOneAndUpdate(
     { providerName: normalizedName },
     { 
@@ -143,6 +152,7 @@ async function fetchAndSaveTrustpilotRating(normalizedName) {
     },
     { upsert: true, new: true }
   );
+  console.log('MongoDB save result:', updatedRating);
 
   return updatedRating;
 }
@@ -156,8 +166,10 @@ router.get('/:providerName', async (req, res) => {
   try {
     const { providerName } = req.params;
     console.log(`GET /api/trustpilot-ratings/${providerName}`);
+    console.log('Request headers:', req.headers);
     
     if (!providerName) {
+      console.log('No provider name provided');
       return res.json({
         success: false,
         message: 'Provider name is required'
@@ -166,54 +178,25 @@ router.get('/:providerName', async (req, res) => {
 
     // Clean and normalize the provider name
     const normalizedName = providerName.toLowerCase()
-      .replace(/^provider-/, '') // Remove 'provider-' prefix if present
-      .replace(/[^a-z0-9]/g, '') // Remove special characters
+      .replace(/^provider-/, '')
+      .replace(/[^a-z0-9\s]/g, '')
       .trim();
 
     console.log(`Normalized provider name: ${normalizedName}`);
+    console.log('Provider URL mapping:', PROVIDER_URLS[normalizedName]);
 
-    // Check in-memory cache first (to prevent concurrent identical requests)
+    // Check in-memory cache first
     if (requestCache.results.has(normalizedName)) {
       console.log(`Returning in-memory cached result for ${normalizedName}`);
-      
-      // Set cache headers
-      res.set('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
-      
       return res.json(requestCache.results.get(normalizedName));
     }
     
-    // If there's an identical request already in progress, wait for it
-    if (requestCache.ongoing.has(normalizedName)) {
-      console.log(`Waiting for ongoing request for ${normalizedName}`);
-      try {
-        const result = await requestCache.ongoing.get(normalizedName);
-        
-        // Set cache headers
-        res.set('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
-        
-        return res.json(result);
-      } catch (error) {
-        console.error(`Error waiting for ongoing request for ${normalizedName}:`, error);
-        // Continue with normal processing
-      }
-    }
-    
-    // Create a promise for this request
-    let resolveRequest, rejectRequest;
-    const requestPromise = new Promise((resolve, reject) => {
-      resolveRequest = resolve;
-      rejectRequest = reject;
-    });
-    
-    // Add to ongoing requests
-    requestCache.ongoing.set(normalizedName, requestPromise);
-
     // Check MongoDB cache
     const cachedRating = await TrustpilotRating.findOne({ providerName: normalizedName });
+    console.log('MongoDB cached rating:', cachedRating);
     
     if (cachedRating) {
       console.log(`Returning cached rating for ${normalizedName} from MongoDB`);
-      
       const result = {
         success: true,
         data: {
@@ -226,15 +209,6 @@ router.get('/:providerName', async (req, res) => {
       // Cache the result
       requestCache.results.set(normalizedName, result);
       requestCache.timestamps.set(normalizedName, Date.now());
-      
-      // Resolve the promise
-      resolveRequest(result);
-      
-      // Remove from ongoing requests
-      requestCache.ongoing.delete(normalizedName);
-      
-      // Set cache headers
-      res.set('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
       
       return res.json(result);
     }
@@ -253,12 +227,6 @@ router.get('/:providerName', async (req, res) => {
       // Cache the not found result
       requestCache.results.set(normalizedName, notFoundResult);
       requestCache.timestamps.set(normalizedName, Date.now());
-      
-      // Resolve the promise
-      resolveRequest(notFoundResult);
-      
-      // Remove from ongoing requests
-      requestCache.ongoing.delete(normalizedName);
       
       return res.json(notFoundResult);
     }
@@ -282,15 +250,6 @@ router.get('/:providerName', async (req, res) => {
       requestCache.results.set(normalizedName, result);
       requestCache.timestamps.set(normalizedName, Date.now());
       
-      // Resolve the promise
-      resolveRequest(result);
-      
-      // Remove from ongoing requests
-      requestCache.ongoing.delete(normalizedName);
-      
-      // Set cache headers
-      res.set('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
-      
       return res.json(result);
     } catch (fetchError) {
       console.error(`Error fetching Trustpilot rating for ${normalizedName}:`, fetchError.message);
@@ -304,31 +263,10 @@ router.get('/:providerName', async (req, res) => {
       requestCache.results.set(normalizedName, errorResult);
       requestCache.timestamps.set(normalizedName, Date.now());
       
-      // Resolve the promise
-      resolveRequest(errorResult);
-      
-      // Remove from ongoing requests
-      requestCache.ongoing.delete(normalizedName);
-      
       return res.json(errorResult);
     }
   } catch (error) {
     console.error(`Error in rating route for ${req.params.providerName}:`, error);
-    
-    // Reject any pending promise
-    if (typeof rejectRequest === 'function') {
-      rejectRequest(error);
-    }
-    
-    // Remove from ongoing requests
-    if (req.params.providerName) {
-      const normalizedName = req.params.providerName.toLowerCase()
-        .replace(/^provider-/, '')
-        .replace(/[^a-z0-9]/g, '')
-        .trim();
-      requestCache.ongoing.delete(normalizedName);
-    }
-    
     return res.json({
       success: false,
       message: 'Internal server error',
@@ -357,7 +295,7 @@ router.post('/update/:providerName', async (req, res) => {
     // Clean and normalize the provider name
     const normalizedName = providerName.toLowerCase()
       .replace(/^provider-/, '')
-      .replace(/[^a-z0-9]/g, '')
+      .replace(/[^a-z0-9\s]/g, '') // Remove special characters but keep spaces
       .trim();
 
     console.log(`Updating rating for provider: ${normalizedName}`);
@@ -428,165 +366,41 @@ function extractRating($) {
       }
       return null;
     },
-    // Look for "x.x / 5" pattern
+    // Look for the exact rating text in the page
     () => {
-      const ratingPattern = $('body').text().match(/([\d\.]+)\s*\/\s*5/i);
-      if (ratingPattern && ratingPattern[1]) {
-        console.log('Found rating from "x.x / 5" pattern:', ratingPattern[1]);
-        return parseFloat(ratingPattern[1]);
+      const ratingText = $('body').text().match(/TrustScore\s+([\d\.]+)/i);
+      if (ratingText && ratingText[1]) {
+        console.log('Found rating from TrustScore text:', ratingText[1]);
+        return parseFloat(ratingText[1]);
       }
       return null;
     },
-    // Specifically look for Skrill-style rating patterns where we have both TrustScore and a display rating
+    // Look for the rating in the headline section
     () => {
-      // Try to find the text structure commonly found on Skrill's page
-      const displayRatingElement = $('*:contains("4.4")').filter(function() {
-        return $(this).children().length === 0 && /^4\.4$/.test($(this).text().trim());
-      });
-      
-      // If we found the display rating, look for the TrustScore nearby
-      if (displayRatingElement.length) {
-        console.log('Found Skrill-style display rating:', displayRatingElement.text().trim());
-        
-        // Try to find TrustScore text nearby
-        const trustScoreElement = $('*:contains("TrustScore")').filter(function() {
-          return $(this).text().includes('out of 5');
-        });
-        
-        if (trustScoreElement.length) {
-          const scoreMatch = trustScoreElement.text().match(/TrustScore\s+([\d\.]+)\s+out of\s+5/i);
-          if (scoreMatch && scoreMatch[1]) {
-            console.log('Found TrustScore in Skrill format:', scoreMatch[1]);
-            return parseFloat(scoreMatch[1]);
-          }
-        }
-        
-        // If we found the display rating but not the TrustScore, return the display rating
-        return 4.4;
+      const headlineRating = $('.headline__trustscore').text().trim();
+      console.log('Found headline rating:', headlineRating);
+      const ratingMatch = headlineRating.match(/([\d\.]+)/);
+      if (ratingMatch) {
+        return parseFloat(ratingMatch[1]);
       }
       return null;
     },
-    
-    // Try to find a simple numeric rating: a standalone number between 3.0 and 5.0
+    // Look for the rating in the trustscore section
     () => {
-      const simpleRatingMatches = [];
-      $('body').text().replace(/\b([\d]+\.[\d]+)\b/g, (match, rating) => {
-        const parsed = parseFloat(rating);
-        if (parsed >= 3.0 && parsed <= 5.0) {
-          simpleRatingMatches.push(parsed);
-        }
-        return match;
-      });
-      
-      if (simpleRatingMatches.length > 0) {
-        // Pick the most common rating
-        const counts = {};
-        let maxCount = 0;
-        let mostCommon = null;
-        
-        for (const rating of simpleRatingMatches) {
-          counts[rating] = (counts[rating] || 0) + 1;
-          if (counts[rating] > maxCount) {
-            maxCount = counts[rating];
-            mostCommon = rating;
-          }
-        }
-        
-        console.log('Found simple numeric rating:', mostCommon);
-        return mostCommon;
-      }
-      
-      return null;
-    },
-    
-    // Look for meta tags with rating information
-    () => {
-      const metaRating = $('meta[itemprop="ratingValue"]').attr('content');
-      if (metaRating) {
-        console.log('Found rating from meta tag:', metaRating);
-        return parseFloat(metaRating);
-      }
-      return null;
-    },
-    
-    // Exact rating from paragraph with data-rating-typography
-    () => {
-      const ratingElement = $('p[data-rating-typography="true"]');
-      if (ratingElement.length) {
-        const ratingText = ratingElement.text().trim();
-        console.log('Found exact rating text:', ratingText);
-        const ratingMatch = ratingText.match(/^([\d\.]+)$/);
-        if (ratingMatch) {
-          return parseFloat(ratingMatch[1]);
-        }
-      }
-      return null;
-    },
-    
-    // TrustScore text (new format)
-    () => {
-      const trustScore = $('.trustscore').text();
-      console.log('Found TrustScore text:', trustScore);
+      const trustScore = $('.trustscore').text().trim();
+      console.log('Found trustscore:', trustScore);
       const ratingMatch = trustScore.match(/([\d\.]+)/);
       if (ratingMatch) {
         return parseFloat(ratingMatch[1]);
       }
       return null;
     },
-    
-    // Rating text (new format)
+    // Look for meta tags with rating information
     () => {
-      const ratingText = $('.headline__trustscore').text();
-      console.log('Found rating text:', ratingText);
-      const ratingMatch = ratingText.match(/([\d\.]+)/);
-      if (ratingMatch) {
-        return parseFloat(ratingMatch[1]);
-      }
-      return null;
-    },
-    
-    // TrustScore image
-    () => {
-      const ratingImg = $('img[alt^="TrustScore"]');
-      if (ratingImg.length) {
-        const altText = ratingImg.attr('alt');
-        console.log('Found alt text:', altText);
-        const ratingMatch = altText.match(/TrustScore ([\d\.]+) out of 5/);
-        if (ratingMatch) {
-          return parseFloat(ratingMatch[1]);
-        }
-      }
-      return null;
-    },
-    
-    // Star rating
-    () => {
-      const starRating = $('.star-rating').attr('data-rating');
-      console.log('Found star rating:', starRating);
-      if (starRating) {
-        return parseFloat(starRating);
-      }
-      return null;
-    },
-    
-    // Alternative rating text
-    () => {
-      const ratingText = $('.rating-average').text();
-      console.log('Found alternative rating text:', ratingText);
-      const ratingMatch = ratingText.match(/([\d\.]+)/);
-      if (ratingMatch) {
-        return parseFloat(ratingMatch[1]);
-      }
-      return null;
-    },
-    
-    // TrustScore in title
-    () => {
-      const title = $('title').text();
-      console.log('Found title:', title);
-      const ratingMatch = title.match(/TrustScore ([\d\.]+)/);
-      if (ratingMatch) {
-        return parseFloat(ratingMatch[1]);
+      const metaRating = $('meta[itemprop="ratingValue"]').attr('content');
+      if (metaRating) {
+        console.log('Found rating from meta tag:', metaRating);
+        return parseFloat(metaRating);
       }
       return null;
     }
