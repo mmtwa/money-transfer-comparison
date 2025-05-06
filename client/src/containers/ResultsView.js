@@ -421,7 +421,7 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
                 providerId: 'provider-xe',
                 providerCode: 'xe',
                 providerName: 'XE Money Transfer',
-                providerLogo: '/images/providers/XElogo.svg',
+                providerLogo: '/images/providers/xe.webp',
                 baseRate: midMarketRate,
                 effectiveRate: xeEffectiveRate,
                 transferFee: xeFee,
@@ -680,7 +680,7 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
                 providerId: 'provider-regencyfx',
                 providerCode: 'regencyfx',
                 providerName: 'Regency FX',
-                providerLogo: '/images/providers/regencyfx.png',
+                providerLogo: '/images/providers/regencyfx.webp',
                 baseRate: midMarketRate,
                 effectiveRate: regencyFXEffectiveRate,
                 transferFee: 0, // Regency FX has no transfer fee

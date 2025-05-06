@@ -33,6 +33,7 @@ const postLimiter = rateLimit({
 const PROVIDER_URLS = {
   'torfx': 'www.torfx.com',
   'regency fx': 'regencyfx.com',
+  'pandaremit': 'pandaremit.com',
   'wise': 'wise.com',
   'westernunion': 'westernunion.com',
   'moneygram': 'moneygram.com',
