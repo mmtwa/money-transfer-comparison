@@ -3,8 +3,6 @@
   padding: 8px;
   border-radius: 6px;
   font-size: 14px;
-  background-color: #f8f9fa;
-  border: 1px solid #e9ecef;
 }
 
 .trustpilot-rating-header {
@@ -57,10 +55,19 @@
   opacity: 0.7;
 }
 
-/* Add hover effect */
-.trustpilot-rating:hover {
-  background-color: #f1f3f5;
-  transition: background-color 0.2s ease;
+/* Mobile styles */
+@media (max-width: 640px) {
+  .trustpilot-rating {
+    text-align: center;
+  }
+  
+  .trustpilot-rating-header {
+    justify-content: center;
+  }
+  
+  .trustpilot-rating-stars {
+    justify-content: center;
+  }
 }
 
 /* Add animation for loading state */

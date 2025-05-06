@@ -1,5 +1,5 @@
-import React from 'react';
-import { ExternalLink, Check, ThumbsUp, ArrowUp, ArrowDown, Minus } from 'lucide-react';
+import React, { useRef, useEffect } from 'react';
+import { ExternalLink, Check, ThumbsUp, ArrowUp, ArrowDown, Minus, Clock, Info } from 'lucide-react';
 import { formatAmount, getCurrencySymbol } from '../../utils/currency';
 import TrustpilotRating from './TrustpilotRating';
 import './TrustpilotRating.css';
@@ -127,6 +127,13 @@ const ProviderCard = ({
 }) => {
   const [isLoaded, setIsLoaded] = React.useState(false);
   const [showDetailsPopup, setShowDetailsPopup] = React.useState(false);
+  const [isHovered, setIsHovered] = React.useState(false);
+  const [showTooltip, setShowTooltip] = React.useState(false);
+  const [isInView, setIsInView] = React.useState(false);
+  const [hasAnimated, setHasAnimated] = React.useState(false);
+  const cardRef = useRef(null);
+  const receiveAmountRef = useRef(null);
+  const animationTimeoutRef = useRef(null);
 
   // Debug provider data - log once when component mounts
   React.useEffect(() => {
@@ -144,6 +151,141 @@ const ProviderCard = ({
     
     return () => clearTimeout(timer);
   }, []);
+
+  // Set up intersection observer to detect when card comes into view
+  useEffect(() => {
+    if (!cardRef.current) return;
+
+    // Function to check if we're on mobile
+    const isMobile = () => window.innerWidth <= 640;
+
+    // Helper function to apply animation only once per view
+    const triggerAnimationOnce = () => {
+      if (!hasAnimated && cardRef.current) {
+        setIsInView(true);
+        
+        // Clear any existing animation timeouts
+        if (animationTimeoutRef.current) {
+          clearTimeout(animationTimeoutRef.current);
+        }
+        
+        // Remove any existing animation classes to start fresh
+        cardRef.current.classList.remove('animate-entrance');
+        
+        // Add a small delay before animation
+        animationTimeoutRef.current = setTimeout(() => {
+          if (cardRef.current) {
+            cardRef.current.classList.add('animate-entrance');
+            setHasAnimated(true);
+            
+            // Remove animation class after it completes
+            animationTimeoutRef.current = setTimeout(() => {
+              if (cardRef.current) {
+                cardRef.current.classList.remove('animate-entrance');
+              }
+            }, 500);
+          }
+        }, 50);
+      }
+    };
+    
+    // Reset animation state when card leaves view
+    const resetAnimation = () => {
+      setIsInView(false);
+      setHasAnimated(false);
+      
+      // Clear any existing animation timeouts
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+        animationTimeoutRef.current = null;
+      }
+      
+      // Remove animation class
+      if (cardRef.current) {
+        cardRef.current.classList.remove('animate-entrance');
+      }
+    };
+
+    // Create and setup the main card observer
+    const setupObserver = () => {
+      // Clean up any existing observers
+      if (window.cardObserver && cardRef.current) {
+        window.cardObserver.unobserve(cardRef.current);
+      }
+
+      const options = {
+        root: null, // viewport
+        rootMargin: '0px',
+        threshold: isMobile() ? [0.3, 0.7] : [0.5, 0.95] // Lower thresholds for mobile
+      };
+
+      window.cardObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (isMobile()) {
+            // On mobile, find the "They receive" element within the card
+            if (!receiveAmountRef.current && cardRef.current) {
+              const receiveElem = cardRef.current.querySelector('.text-shimmer');
+              if (receiveElem) {
+                receiveAmountRef.current = receiveElem;
+              }
+            }
+
+            // If we have the receive amount element, check if it's in viewport
+            if (receiveAmountRef.current) {
+              const rect = receiveAmountRef.current.getBoundingClientRect();
+              const isReceiveAmountVisible = 
+                rect.top >= 0 &&
+                rect.left >= 0 &&
+                rect.bottom <= window.innerHeight &&
+                rect.right <= window.innerWidth;
+
+              if (isReceiveAmountVisible && !hasAnimated) {
+                triggerAnimationOnce();
+              } else if (!isReceiveAmountVisible) {
+                resetAnimation();
+              }
+            } else {
+              // Fallback if we can't find the receive amount
+              if (entry.isIntersecting && entry.intersectionRatio >= 0.5 && !hasAnimated) {
+                triggerAnimationOnce();
+              } else if (!entry.isIntersecting || entry.intersectionRatio < 0.3) {
+                resetAnimation();
+              }
+            }
+          } else {
+            // Desktop behavior - only activate when fully visible
+            if (entry.isIntersecting && entry.intersectionRatio >= 0.95 && !hasAnimated) {
+              triggerAnimationOnce();
+            } else if (!entry.isIntersecting || entry.intersectionRatio < 0.5) {
+              resetAnimation();
+            }
+          }
+        });
+      }, options);
+
+      if (cardRef.current) {
+        window.cardObserver.observe(cardRef.current);
+      }
+    };
+
+    // Initial setup
+    setupObserver();
+
+    // Update on resize to handle orientation changes or window resizing
+    window.addEventListener('resize', setupObserver);
+
+    return () => {
+      if (window.cardObserver && cardRef.current) {
+        window.cardObserver.unobserve(cardRef.current);
+      }
+      window.removeEventListener('resize', setupObserver);
+      
+      // Clear any animation timeouts
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+      }
+    };
+  }, [hasAnimated]);
 
   // The provider code to use for the Trustpilot rating
   const getProviderCode = () => {
@@ -306,7 +448,6 @@ const ProviderCard = ({
 
   return (
     <>
-      {/* Shimmer animation style - only rendered if not already present from ResultsView */}
       <style jsx="true" global="true">{`
         .text-shimmer {
           background: linear-gradient(
@@ -329,60 +470,174 @@ const ProviderCard = ({
             background-position: 200% center;
           }
         }
+
+        .card-hover {
+          transition: all 0.3s ease;
+        }
+
+        .card-hover:hover, .card-in-view {
+          transform: translateY(-4px);
+          box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        }
+        
+        .animate-entrance {
+          animation: card-entrance 0.5s ease-out;
+        }
+        
+        @keyframes card-entrance {
+          0% { transform: translateY(0); box-shadow: 0 0 0 rgba(0, 0, 0, 0); }
+          100% { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1); }
+        }
+
+        .glass-effect {
+          background: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+        }
+
+        .feature-tag {
+          transition: all 0.2s ease;
+        }
+
+        .feature-tag:hover {
+          transform: scale(1.05);
+          background: rgba(79, 70, 229, 0.1);
+        }
+
+        .tooltip {
+          position: absolute;
+          z-index: 9999;
+          background: white;
+          border-radius: 8px;
+          padding: 12px;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+          width: 280px;
+          font-size: 13px;
+          line-height: 1.4;
+          color: #4B5563;
+          border: 1px solid #E5E7EB;
+          opacity: 0;
+          visibility: hidden;
+          transition: all 0.2s ease;
+          text-align: left;
+          right: calc(100% + 12px);
+          top: 50%;
+          transform: translateY(-50%) translateX(4px);
+        }
+
+        .tooltip.show {
+          opacity: 1;
+          visibility: visible;
+          transform: translateY(-50%) translateX(0);
+        }
+
+        .tooltip::before {
+          content: '';
+          position: absolute;
+          top: 50%;
+          right: -6px;
+          transform: translateY(-50%);
+          border-width: 6px 0 6px 6px;
+          border-style: solid;
+          border-color: transparent transparent transparent white;
+        }
+
+        @media (max-width: 640px) {
+          .mobile-stack {
+            flex-direction: column;
+          }
+          
+          .mobile-center {
+            text-align: center;
+          }
+
+          .card-hover:hover, .card-in-view {
+            transform: translateY(-2px); /* Less dramatic lift on mobile */
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+          }
+          
+          @keyframes card-entrance {
+            0% { transform: translateY(0); box-shadow: 0 0 0 rgba(0, 0, 0, 0); }
+            100% { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08); }
+          }
+
+          .tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            right: auto;
+            top: auto;
+            transform: translateX(-50%) translateY(4px);
+            width: calc(100vw - 32px);
+            max-width: 320px;
+            text-align: left;
+            margin-bottom: 8px;
+          }
+
+          .tooltip.show {
+            transform: translateX(-50%) translateY(0);
+          }
+
+          .tooltip::before {
+            display: block;
+            top: auto;
+            bottom: -6px;
+            left: 50%;
+            right: auto;
+            transform: translateX(-50%);
+            border-width: 6px 6px 0 6px;
+            border-color: white transparent transparent transparent;
+          }
+        }
       `}</style>
       
       <div 
         id={id}
-        className={`rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow 
+        ref={cardRef}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className={`rounded-xl overflow-hidden card-hover glass-effect
           ${index === 0 
-            ? 'border-2 border-indigo-600 bg-white' 
-            : 'border border-gray-200 bg-white'} ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+            ? 'border-2 border-indigo-600' 
+            : 'border border-gray-200'} 
+          ${isLoaded ? 'opacity-100' : 'opacity-0'}
+          ${isInView && !isHovered ? 'card-in-view' : ''}`}
         style={{ transitionDelay: `${index * 50}ms` }}
       >
         {/* Card Header - Provider info and amount */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-100">
-          <div className="flex flex-col items-start">
-            <div className="mb-1">
+        <div className="flex flex-col sm:flex-row items-center justify-between p-6 border-b border-gray-100">
+          <div className="flex flex-col items-center sm:items-start mb-4 sm:mb-0">
+            <div className="relative group">
               <img 
                 src={provider?.logo || logo || '/images/providers/default.png'} 
                 alt={`${provider?.name || name || 'Provider'} logo`} 
-                className="h-32 w-32 object-contain"
+                className="h-32 w-32 sm:h-40 sm:w-40 object-contain transition-transform duration-300 group-hover:scale-105"
                 onError={(e) => {
-                  // Add specific fallbacks for XE, TorFX, Wise, Western Union, then default
                   const code = (provider?.providerCode || '').toLowerCase();
                   let fallbackUrl = '/images/providers/default.png';
-                  if (code === 'xe') {
-                    fallbackUrl = '/images/providers/xe.png';
-                  } else if (code === 'torfx') {
-                    fallbackUrl = '/images/providers/torfx.png';
-                  } else if (code === 'wise') {
-                    fallbackUrl = '/images/providers/wise.png';
-                  } else if (code === 'western-union' || code === 'westernunion') {
-                    fallbackUrl = '/images/providers/westernunion.png';
-                  }
-                  // Prevent infinite onError loop
+                  if (code === 'xe') fallbackUrl = '/images/providers/xe.png';
+                  else if (code === 'torfx') fallbackUrl = '/images/providers/torfx.png';
+                  else if (code === 'wise') fallbackUrl = '/images/providers/wise.png';
+                  else if (code === 'western-union' || code === 'westernunion') fallbackUrl = '/images/providers/westernunion.png';
                   e.target.onerror = null;
-                  // Try absolute first, then relative as fallback
                   e.target.src = fallbackUrl;
                   e.target.onerror = () => { e.target.src = fallbackUrl.startsWith('/') ? fallbackUrl.substring(1) : '/' + fallbackUrl; };
                 }}
               />
             </div>
-            {/* Pass the trustpilotRating prop to the TrustpilotRating component */}
+            
             {providerCode && (
-              <div className="mt-2 mb-2">
+              <div className="mt-3">
                 <TrustpilotRating 
                   providerName={providerCode} 
                   preloadedRating={trustpilotRating}
                 />
               </div>
             )}
-            {/* Fallback to the old rating display if no providerCode is available */}
             {!providerCode && renderRating(provider?.rating || rating)}
           </div>
           
-          <div className="text-right">
-            {/* Add Indicative label for TorFX, XE, and Profee */}
+          <div className="text-center sm:text-right">
             {(
               provider?.providerCode?.toLowerCase() === 'torfx' ||
               provider?.providerCode?.toLowerCase() === 'xe' ||
@@ -395,80 +650,91 @@ const ProviderCard = ({
               (provider?.name || name || '').toLowerCase().includes('regency') ||
               (provider?.name || name || '').toLowerCase().includes('panda')
             ) && (
-              <div className="text-xs font-medium text-amber-600 bg-amber-50 py-1 px-2 rounded-full mb-2 inline-block">
-                Indicative
+              <div className="relative inline-block">
+                <div 
+                  className="inline-flex items-center text-xs font-medium text-amber-600 bg-amber-50 py-1.5 px-3 rounded-full mb-3 cursor-help"
+                  onMouseEnter={() => setShowTooltip(true)}
+                  onMouseLeave={() => setShowTooltip(false)}
+                  onTouchStart={() => setShowTooltip(!showTooltip)}
+                >
+                  <Info size={14} className="mr-1.5" />
+                  Indicative Rate
+                </div>
+                <div className={`tooltip ${showTooltip ? 'show' : ''}`} style={{ pointerEvents: 'none' }}>
+                  While we do our best to get accurate rates from this provider, the rate shown is an indication based on current market variables and may change when you proceed with the transfer.
+                </div>
               </div>
             )}
-            <div className="text-xs uppercase font-medium text-indigo-600">They receive</div>
-            <div className="text-2xl font-bold">
+            <div className="text-sm uppercase font-medium text-indigo-600 tracking-wide">They receive</div>
+            <div className="text-3xl font-bold mt-1">
               <span className="text-shimmer">
                 {getCurrencySymbol(toCurrency)} {formatAmount(provider?.amountReceived || receiveAmount || 0)}
               </span>
             </div>
-            <div className="text-xs text-gray-500 mt-1 bg-indigo-50 py-0.5 px-2 rounded-full inline-block">
-              Fees: {getCurrencySymbol(fromCurrency)} {formatAmount(provider?.transferFee || transferFee || 0)}
+            <div className="text-sm text-gray-600 mt-2 bg-indigo-50 py-1 px-3 rounded-full inline-flex items-center">
+              <span className="mr-1.5">Fees:</span>
+              {getCurrencySymbol(fromCurrency)} {formatAmount(provider?.transferFee || transferFee || 0)}
             </div>
           </div>
         </div>
         
         {/* Card Body - Exchange details */}
-        <div className="p-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {/* Exchange Rate */}
-            <div className="flex items-start">
-              <div className="w-1 h-full min-h-[40px] bg-indigo-400 mr-3 self-stretch rounded-full"></div>
+            <div className="flex items-start group">
+              <div className="w-1 h-full min-h-[40px] bg-indigo-400 mr-4 self-stretch rounded-full transition-all duration-300 group-hover:bg-indigo-500"></div>
               <div className="text-left">
-                <div className="text-xs text-gray-500 font-medium mb-1">Exchange Rate</div>
-                <div className="font-bold text-left">{`1 ${fromCurrency} = ${(provider?.rate || rate || 0).toFixed(4)} ${toCurrency}`}</div>
+                <div className="text-sm text-gray-600 font-medium mb-1.5">Exchange Rate</div>
+                <div className="font-bold text-lg">{`1 ${fromCurrency} = ${(provider?.rate || rate || 0).toFixed(4)} ${toCurrency}`}</div>
               </div>
             </div>
             
             {/* Delivery Time */}
-            <div className="flex items-start">
-              <div className="w-1 h-full min-h-[40px] bg-indigo-400 mr-3 self-stretch rounded-full"></div>
+            <div className="flex items-start group">
+              <div className="w-1 h-full min-h-[40px] bg-indigo-400 mr-4 self-stretch rounded-full transition-all duration-300 group-hover:bg-indigo-500"></div>
               <div className="text-left">
-                <div className="text-xs text-gray-500 font-medium mb-1">Delivery Time</div>
-                <div>{formatTransferTime()}</div>
+                <div className="text-sm text-gray-600 font-medium mb-1.5 flex items-center">
+                  <Clock size={16} className="mr-1.5" />
+                  Delivery Time
+                </div>
+                <div className="font-medium">{formatTransferTime()}</div>
               </div>
             </div>
             
             {/* Fees */}
-            <div className="flex items-start">
-              <div className="w-1 h-full min-h-[40px] bg-indigo-400 mr-3 self-stretch rounded-full"></div>
+            <div className="flex items-start group">
+              <div className="w-1 h-full min-h-[40px] bg-indigo-400 mr-4 self-stretch rounded-full transition-all duration-300 group-hover:bg-indigo-500"></div>
               <div className="text-left">
-                <div className="text-xs text-gray-500 font-medium mb-1">Fee</div>
-                <div>{getCurrencySymbol(fromCurrency)} {formatAmount(provider?.transferFee || transferFee || 0)}</div>
+                <div className="text-sm text-gray-600 font-medium mb-1.5">Fee</div>
+                <div className="font-medium">{getCurrencySymbol(fromCurrency)} {formatAmount(provider?.transferFee || transferFee || 0)}</div>
               </div>
             </div>
             
-            {/* Rate Margin for all providers */}
-            <div className="flex items-start">
-              <div className="w-1 h-full min-h-[40px] bg-indigo-400 mr-3 self-stretch rounded-full"></div>
+            {/* Rate Margin */}
+            <div className="flex items-start group">
+              <div className="w-1 h-full min-h-[40px] bg-indigo-400 mr-4 self-stretch rounded-full transition-all duration-300 group-hover:bg-indigo-500"></div>
               <div className="text-left">
-                <div className="text-xs text-gray-500 font-medium mb-1">
-                  Rate Margin
-                </div>
+                <div className="text-sm text-gray-600 font-medium mb-1.5">Rate Margin</div>
                 <div>
                   {provider?.effectiveRate && provider?.baseRate ? (
-                    // Compare effective rate with base rate to determine if it's above or below mid-market
                     provider.effectiveRate > provider.baseRate ? (
-                      <div className="flex items-center text-green-600">
-                        <ArrowUp size={16} className="mr-1" />
+                      <div className="flex items-center text-green-600 font-medium">
+                        <ArrowUp size={16} className="mr-1.5" />
                         <span>{`${((provider.effectiveRate / provider.baseRate - 1) * 100).toFixed(2)}% above mid-market`}</span>
                       </div>
                     ) : provider.effectiveRate < provider.baseRate ? (
-                      <div className="flex items-center text-red-600">
-                        <ArrowDown size={16} className="mr-1" />
+                      <div className="flex items-center text-red-600 font-medium">
+                        <ArrowDown size={16} className="mr-1.5" />
                         <span>{`${((1 - provider.effectiveRate / provider.baseRate) * 100).toFixed(2)}% below mid-market`}</span>
                       </div>
                     ) : (
-                      <div className="flex items-center text-gray-600">
-                        <Minus size={16} className="mr-1" />
+                      <div className="flex items-center text-gray-600 font-medium">
+                        <Minus size={16} className="mr-1.5" />
                         <span>Same as mid-market</span>
                       </div>
                     )
                   ) : (
-                    // Fallback to the original margin percentage display
                     `${((provider?.exchangeRateMargin || exchangeRateMargin || 0) * 100).toFixed(2)}%`
                   )}
                 </div>
@@ -477,16 +743,14 @@ const ProviderCard = ({
           </div>
           
           {/* Features */}
-          <div className="mt-5 flex flex-wrap items-center">
-            {/* Temporarily hidden until needed
-            <div className="text-xs text-gray-500 font-medium mr-2">Features:</div>
-            */}
-            <div className="flex flex-wrap">
+          <div className="mt-6">
+            <div className="flex flex-wrap gap-2">
               {(provider?.features || features).map((feature, idx) => (
-                <span key={idx} className="flex items-center text-xs text-indigo-700 mr-3 mb-1">
-                  <IconWrapper>
-                    <Check className="w-4 h-4 text-green-500 mr-1.5" />
-                  </IconWrapper>
+                <span 
+                  key={idx} 
+                  className="feature-tag inline-flex items-center text-sm text-indigo-700 bg-indigo-50 py-1.5 px-3 rounded-full"
+                >
+                  <Check className="w-4 h-4 text-green-500 mr-1.5" />
                   {feature}
                 </span>
               ))}
@@ -495,24 +759,15 @@ const ProviderCard = ({
         </div>
         
         {/* Card Footer - CTA */}
-        <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-end">
-          {/* Temporarily hidden until fetching is sorted
-          <button 
-            className="text-sm text-indigo-600 hover:text-indigo-800 hover:underline flex items-center"
-            onClick={openDetailsPopup}
-          >
-            See full details
-          </button>
-          */}
-          
+        <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end">
           <a 
             href={getProviderWebsite(provider?.providerCode || provider?.code || provider?.name || name || '')} 
             target="_blank" 
             rel="noopener noreferrer"
-            className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center justify-center font-medium transition-colors"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 px-6 rounded-lg flex items-center justify-center font-medium transition-all duration-300 hover:shadow-lg hover:shadow-indigo-200"
           >
             Get Deal
-            <ExternalLink size={14} className="ml-1.5" />
+            <ExternalLink size={16} className="ml-2" />
           </a>
         </div>
       </div>

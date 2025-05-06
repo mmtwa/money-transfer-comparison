@@ -145,12 +145,10 @@ const Header = ({
         {(!isTransparent) && (
           <div className="hidden lg:flex absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <div className="relative inline-flex items-center w-full">
-              <span className="h-px w-8 bg-indigo-300 mr-4"></span>
               <span className="flex flex-col text-center">
                 <span className="text-indigo-700 font-medium text-sm leading-tight">Truly Independent</span>
                 <span className="text-indigo-700 font-medium text-sm leading-tight">Transparently Better</span>
               </span>
-              <span className="h-px w-8 bg-indigo-300 ml-4"></span>
             </div>
           </div>
         )}
