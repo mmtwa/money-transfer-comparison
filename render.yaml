@@ -28,6 +28,8 @@ services:
         value: https://api.wise.com
       - key: PUBLIC_URL
         value: /
+      - key: REACT_APP_API_URL
+        value: /
     autoDeploy: true
     headers:
       - path: /*
@@ -67,6 +69,9 @@ services:
         name: Cache-Control
         value: public, max-age=86400
     routes:
+      - type: rewrite
+        source: /api/*
+        destination: /api/:splat
       - type: rewrite
         source: /*
         destination: /index.html

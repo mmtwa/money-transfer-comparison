@@ -8,17 +8,15 @@ const getApiBaseUrl = () => {
   }
   
   // Then try to determine from current window location
-  // This helps if the server is on a different port than 3000
-  const { protocol, hostname } = window.location;
+  const { protocol, hostname, port } = window.location;
   
   // Development (typically on port 3000, but API on another port)
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    // Use port 3000 instead of 10000 as the server is running on port 3000
     return `${protocol}//${hostname}:10000`;
   }
   
   // Production - API is at the same host
-  return '/api';
+  return `${protocol}//${hostname}${port ? `:${port}` : ''}`;
 };
 
 // Create an axios instance with base URL for API calls
