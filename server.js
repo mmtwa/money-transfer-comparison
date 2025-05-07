@@ -32,7 +32,6 @@ const providerRoutes = require('./routes/providers');
 const rateRoutes = require('./routes/rates');
 const userRoutes = require('./routes/users');
 const wiseRoutes = require('./routes/wiseRates');
-const googleRatingsRoutes = require('./routes/googleRatings');
 const providerInfoRoutes = require('./routes/providerInfo');
 const trustpilotRatingsRoutes = require('./routes/trustpilotRatings');
 
@@ -54,8 +53,6 @@ const connectDB = async () => {
     await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      useCreateIndex: true,
-      useFindAndModify: false
     });
     
     console.log('MongoDB connected successfully');
@@ -158,7 +155,6 @@ app.use('/api/providers', providerRoutes);
 app.use('/api/rates', rateRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/wise', wiseRoutes);
-app.use('/api/google-ratings', googleRatingsRoutes);
 app.use('/api/provider-info', providerInfoRoutes);
 app.use('/api/trustpilot-ratings', (req, res, next) => {
   console.log('Trustpilot ratings API called:', req.method, req.url);

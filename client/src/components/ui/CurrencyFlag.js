@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 /**
  * Component to display a currency flag with fallback
  */
-const CurrencyFlag = ({ currency, size = 'md' }) => {
+const CurrencyFlag = ({ currency, size = 'md', className = '' }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
   const flagUrl = `/flags/${currency.toLowerCase()}.svg`;
@@ -34,7 +34,7 @@ const CurrencyFlag = ({ currency, size = 'md' }) => {
   };
   
   return (
-    <div className="flex-shrink-0 flex items-center justify-center">
+    <div className={`flex-shrink-0 flex items-center justify-center ${className}`}>
       <img 
         src={flagUrl} 
         alt={`${currency} flag`} 

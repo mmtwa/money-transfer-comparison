@@ -25,112 +25,6 @@ const AboutUs = () => {
   
   return (
     <div className="flex flex-col bg-white text-gray-900 overflow-hidden">
-      {/* Hero Statement with Video background */}
-      <section 
-        className="py-20 md:py-32 border-b border-gray-100 relative min-h-[90vh] flex items-center"
-      >
-        <div className="absolute inset-0 overflow-hidden">
-          <video 
-            autoPlay 
-            muted 
-            loop 
-            playsInline
-            className="absolute w-full h-full object-cover"
-          >
-            <source src={heroVideo} type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/40"></div>
-        </div>
-        <div className="container mx-auto px-4 relative z-10">
-          <motion.div 
-            className="max-w-5xl mx-auto"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <h1 className="text-5xl md:text-7xl lg:text-9xl font-bold mb-10 tracking-tight text-white leading-none">
-              <motion.span 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3, duration: 0.8 }}
-                className="block"
-              >We</motion.span>
-              <motion.span 
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.6, duration: 0.8 }}
-                className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-600 block"
-              >EMPOWER</motion.span>
-              <motion.span 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.9, duration: 0.8 }}
-                className="block"
-              >YOUR</motion.span>
-              <motion.span 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.2, duration: 0.8 }}
-                className="block relative"
-              >
-                TRANSFERS
-                <span className="absolute -bottom-2 left-0 w-32 h-1 bg-indigo-500"></span>
-              </motion.span>
-            </h1>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.5, duration: 0.8 }}
-            >
-              <Link 
-                to="/faq"
-                className="mt-8 inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 text-white font-medium px-6 py-3 rounded-full hover:bg-white/20 transition-all duration-300"
-              >
-                Discover How
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </Link>
-            </motion.div>
-          </motion.div>
-        </div>
-        
-        {/* Animated scroll indicator */}
-        <motion.div 
-          className="absolute bottom-10 left-0 right-0 flex justify-center"
-          animate={{ y: [0, 10, 0] }}
-          transition={{ repeat: Infinity, duration: 1.5 }}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-          </svg>
-        </motion.div>
-      </section>
-      
-      {/* Mission Statement with animated reveal */}
-      <section className="py-20 md:py-28">
-        <div className="container mx-auto px-4">
-          <motion.div 
-            className="max-w-4xl mx-auto text-center"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            <h2 className="text-sm uppercase tracking-widest text-indigo-600 mb-6 font-semibold">Our Mission</h2>
-            <p className="text-2xl md:text-4xl leading-tight font-light text-left">
-              At mymoneytransfers.com, we believe <span className="font-medium relative inline-block">
-                everyone deserves access 
-                <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-indigo-200"></span>
-              </span> to fair, transparent, 
-              and <span className="text-indigo-600 font-medium">affordable</span> international money transfer services. 
-              Our mission is simple: to help you make 
-              informed decisions when sending money abroad.
-            </p>
-          </motion.div>
-        </div>
-      </section>
-      
       {/* Our Brand Statement - Animated with visual elements */}
       <section className="py-16 md:py-28 relative overflow-hidden bg-gradient-to-br from-white via-white to-indigo-50/30">
         <div className="absolute inset-0 overflow-hidden">
@@ -402,6 +296,112 @@ const AboutUs = () => {
             </motion.div>
           </motion.div>
         </div>
+      </section>
+
+      {/* Mission Statement with animated reveal */}
+      <section className="py-20 md:py-28">
+        <div className="container mx-auto px-4">
+          <motion.div 
+            className="max-w-4xl mx-auto text-center"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <h2 className="text-sm uppercase tracking-widest text-indigo-600 mb-6 font-semibold">Our Mission</h2>
+            <p className="text-2xl md:text-4xl leading-tight font-light text-left">
+              At mymoneytransfers.com, we believe <span className="font-medium relative inline-block">
+                everyone deserves access 
+                <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-indigo-200"></span>
+              </span> to fair, transparent, 
+              and <span className="text-indigo-600 font-medium">affordable</span> international money transfer services. 
+              Our mission is simple: to help you make 
+              informed decisions when sending money abroad.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Hero Statement with Video background */}
+      <section 
+        className="py-20 md:py-32 border-b border-gray-100 relative min-h-[90vh] flex items-center"
+      >
+        <div className="absolute inset-0 overflow-hidden">
+          <video 
+            autoPlay 
+            muted 
+            loop 
+            playsInline
+            className="absolute w-full h-full object-cover"
+          >
+            <source src={heroVideo} type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/40"></div>
+        </div>
+        <div className="container mx-auto px-4 relative z-10">
+          <motion.div 
+            className="max-w-5xl mx-auto"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <h1 className="text-5xl md:text-7xl lg:text-9xl font-bold mb-10 tracking-tight text-white leading-none">
+              <motion.span 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.8 }}
+                className="block"
+              >We</motion.span>
+              <motion.span 
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.6, duration: 0.8 }}
+                className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-600 block"
+              >EMPOWER</motion.span>
+              <motion.span 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.9, duration: 0.8 }}
+                className="block"
+              >YOUR</motion.span>
+              <motion.span 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.2, duration: 0.8 }}
+                className="block relative"
+              >
+                TRANSFERS
+                <span className="absolute -bottom-2 left-0 w-32 h-1 bg-indigo-500"></span>
+              </motion.span>
+            </h1>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.5, duration: 0.8 }}
+            >
+              <Link 
+                to="/faq"
+                className="mt-8 inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 text-white font-medium px-6 py-3 rounded-full hover:bg-white/20 transition-all duration-300"
+              >
+                Discover How
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </Link>
+            </motion.div>
+          </motion.div>
+        </div>
+        
+        {/* Animated scroll indicator */}
+        <motion.div 
+          className="absolute bottom-10 left-0 right-0 flex justify-center"
+          animate={{ y: [0, 10, 0] }}
+          transition={{ repeat: Infinity, duration: 1.5 }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
+        </motion.div>
       </section>
       
       {/* Who We Serve - Visual typography section with animated cards */}

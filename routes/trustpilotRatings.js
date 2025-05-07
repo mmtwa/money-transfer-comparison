@@ -32,6 +32,7 @@ const postLimiter = rateLimit({
 // Provider name to Trustpilot URL mapping
 const PROVIDER_URLS = {
   'torfx': 'www.torfx.com',
+  'worldremit': 'www.worldremit.com',
   'regency fx': 'regencyfx.com',
   'pandaremit': 'pandaremit.com',
   'wise': 'wise.com',
@@ -185,7 +186,7 @@ router.get('/:providerName', async (req, res) => {
 
     console.log(`Normalized provider name: ${normalizedName}`);
     console.log('Provider URL mapping:', PROVIDER_URLS[normalizedName]);
-
+    
     // Check in-memory cache first
     if (requestCache.results.has(normalizedName)) {
       console.log(`Returning in-memory cached result for ${normalizedName}`);
@@ -278,8 +279,8 @@ router.get('/:providerName', async (req, res) => {
 
 /**
  * @route   POST /api/trustpilot-ratings/update/:providerName
- * @desc    Manually update Trustpilot rating for a specific provider
- * @access  Private (should be protected in production)
+ * @desc    Force update Trustpilot rating for a specific provider from Trustpilot.com
+ * @access  Public with rate limiting
  */
 router.post('/update/:providerName', async (req, res) => {
   try {
@@ -292,15 +293,15 @@ router.post('/update/:providerName', async (req, res) => {
         message: 'Provider name is required'
       });
     }
-
+    
     // Clean and normalize the provider name
     const normalizedName = providerName.toLowerCase()
       .replace(/^provider-/, '')
-      .replace(/[^a-z0-9\s]/g, '') // Remove special characters but keep spaces
+      .replace(/[^a-z0-9\s]/g, '')
       .trim();
-
-    console.log(`Updating rating for provider: ${normalizedName}`);
-
+    
+    console.log(`Normalized provider name for update: ${normalizedName}`);
+    
     // Check if this provider is in our mapping
     if (!PROVIDER_URLS[normalizedName]) {
       console.log(`Provider ${normalizedName} not found in URL mapping`);

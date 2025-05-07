@@ -1,4 +1,5 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useContext } from 'react';
+import { ActiveProviderContext } from '../../containers/ResultsView';
 import { ExternalLink, Check, ThumbsUp, ArrowUp, ArrowDown, Minus, Clock, Info } from 'lucide-react';
 import { formatAmount, getCurrencySymbol } from '../../utils/currency';
 import TrustpilotRating from './TrustpilotRating';
@@ -129,11 +130,14 @@ const ProviderCard = ({
   const [showDetailsPopup, setShowDetailsPopup] = React.useState(false);
   const [isHovered, setIsHovered] = React.useState(false);
   const [showTooltip, setShowTooltip] = React.useState(false);
+  const [isInView, setIsInView] = React.useState(false);
+  const [hasAnimated, setHasAnimated] = React.useState(false);
   const cardRef = useRef(null);
-  // Simple central registry for active card
-  if (typeof window !== 'undefined' && !window.activeCardId) {
-    window.activeCardId = null;
-  }
+  const receiveAmountRef = useRef(null);
+  const animationTimeoutRef = useRef(null);
+  
+  // Get the active provider context
+  const { activeProviderId, setActiveProviderId, scrollDirection } = useContext(ActiveProviderContext);
 
   // Debug provider data - log once when component mounts
   React.useEffect(() => {
@@ -158,166 +162,149 @@ const ProviderCard = ({
     return () => clearTimeout(timer);
   }, [name, provider]);
 
-  // Create a central control system if it doesn't exist yet
+  // Set up intersection observer to detect when card comes into view
   useEffect(() => {
-    if (typeof window !== 'undefined' && !window.cardController) {
-      // Create a global controller for all cards
-      window.cardController = {
-        activeCardId: null,
-        isProcessing: false,
-        pendingCardId: null,
-        cards: {},
-        
-        // Register a card with the controller
-        registerCard: function(id, ref) {
-          this.cards[id] = ref;
-        },
-        
-        // Unregister a card
-        unregisterCard: function(id) {
-          delete this.cards[id];
-          if (this.activeCardId === id) {
-            this.activeCardId = null;
-          }
-        },
-        
-        // Set a card as active
-        setActiveCard: function(id) {
-          // If we're already processing an activation, queue this request
-          if (this.isProcessing) {
-            this.pendingCardId = id;
-            return;
-          }
-          
-          // Don't do anything if this card is already active
-          if (id === this.activeCardId) {
-            return;
-          }
-          
-          this.isProcessing = true;
-          
-          // First deactivate any active card
-          if (this.activeCardId && this.cards[this.activeCardId]) {
-            const oldCard = this.cards[this.activeCardId];
-            oldCard.classList.remove('card-active');
-          }
-          
-          // Update active card ID
-          this.activeCardId = id;
-          
-          // If we have a new active card, activate it
-          if (id && this.cards[id]) {
-            setTimeout(() => {
-              if (this.cards[id]) {
-                this.cards[id].classList.add('card-active');
-              }
-              
-              // After animation completes, check for pending activations
-              setTimeout(() => {
-                this.isProcessing = false;
-                
-                // If we have a pending activation that's different, process it
-                if (this.pendingCardId && this.pendingCardId !== id) {
-                  const pendingId = this.pendingCardId;
-                  this.pendingCardId = null;
-                  this.setActiveCard(pendingId);
-                }
-              }, 300);
-            }, 50);
-          } else {
-            // No new active card, just finish processing
-            setTimeout(() => {
-              this.isProcessing = false;
-              
-              if (this.pendingCardId) {
-                const pendingId = this.pendingCardId;
-                this.pendingCardId = null;
-                this.setActiveCard(pendingId);
-              }
-            }, 300);
-          }
-        },
-        
-        // Find and activate the most centered card
-        updateActiveCard: function() {
-          // Get viewport center point
-          const viewportHeight = window.innerHeight;
-          const viewportCenter = viewportHeight / 2;
-          
-          let bestCardId = null;
-          let bestDistance = Infinity;
-          
-          // Find the card closest to the center
-          Object.keys(this.cards).forEach(id => {
-            const cardElement = this.cards[id];
-            if (cardElement) {
-              const rect = cardElement.getBoundingClientRect();
-              const cardCenter = rect.top + rect.height / 2;
-              const distance = Math.abs(cardCenter - viewportCenter);
-              
-              // If this card is in the viewport and closer to center than our best so far
-              if (distance < bestDistance && 
-                  rect.bottom > 0 && 
-                  rect.top < viewportHeight) {
-                bestDistance = distance;
-                bestCardId = id;
-              }
-            }
-          });
-          
-          // If we found a card close to center, and it's not currently the active card,
-          // activate it
-          if (bestCardId && bestCardId !== this.activeCardId) {
-            this.setActiveCard(bestCardId);
-          }
-        }
-      };
-    }
-  }, []);
+    if (!cardRef.current) return;
 
-  // Register this card with the controller
-  useEffect(() => {
-    if (!cardRef.current || !window.cardController) return;
+    // Get the provider ID for this card
+    const thisProviderId = id || provider?.providerId;
     
-    // Register this card
-    window.cardController.registerCard(id, cardRef.current);
-    
-    // Set up scroll handler
-    const handleScroll = () => {
-      if (window.cardController) {
-        window.cardController.updateActiveCard();
+    // Prevent the first card from jumping by adding a small delay to animation
+    const isFirstCard = index === 0;
+    const animationDelay = isFirstCard ? 50 : 0;
+
+    // Helper function to apply animation with smooth transition
+    const applyAnimation = () => {
+      if (cardRef.current && (!activeProviderId || activeProviderId === thisProviderId)) {
+        // Clear any existing timeouts
+        if (animationTimeoutRef.current) {
+          clearTimeout(animationTimeoutRef.current);
+        }
+        
+        // Only set active provider if it's not already set to this provider
+        if (activeProviderId !== thisProviderId) {
+          setActiveProviderId(thisProviderId);
+        }
+        
+        setIsInView(true);
+        
+        // Apply the CSS class with a small delay to prevent the jumping effect
+        animationTimeoutRef.current = setTimeout(() => {
+          if (cardRef.current) {
+            // Remove class first to ensure animation is fresh
+            cardRef.current.classList.remove('animate-entrance');
+            // Force a reflow to ensure the removal takes effect
+            void cardRef.current.offsetWidth;
+            // Add the class again
+            cardRef.current.classList.add('animate-entrance');
+          }
+        }, animationDelay);
       }
     };
     
-    // Throttle to improve performance
-    const throttle = (func, limit) => {
-      let inThrottle;
-      return function() {
-        const args = arguments;
-        const context = this;
-        if (!inThrottle) {
-          func.apply(context, args);
-          inThrottle = true;
-          setTimeout(() => inThrottle = false, limit);
+    // Remove animation with clean transition
+    const removeAnimation = () => {
+      if (cardRef.current) {
+        // Clear any existing timeouts
+        if (animationTimeoutRef.current) {
+          clearTimeout(animationTimeoutRef.current);
         }
-      };
+        
+        setIsInView(false);
+        
+        if (activeProviderId === thisProviderId) {
+          // Smoothly remove the effect first
+          cardRef.current.classList.remove('animate-entrance');
+          
+          // Then update the active provider after a small delay
+          animationTimeoutRef.current = setTimeout(() => {
+            setActiveProviderId(null);
+          }, 100);
+        }
+      }
     };
-    
-    const throttledScroll = throttle(handleScroll, 150);
-    
-    // Add event listener
-    window.addEventListener('scroll', throttledScroll);
-    
-    // Initial check after a delay to ensure layout is complete
-    setTimeout(handleScroll, 300);
-    
-    // Cleanup
-    return () => {
-      window.removeEventListener('scroll', throttledScroll);
-      window.cardController.unregisterCard(id);
-    };
-  }, [id]);
 
+    // Create and setup the observer for this card
+    const setupObserver = () => {
+      // Clean up any existing observers
+      if (window.cardObservers && window.cardObservers[thisProviderId]) {
+        window.cardObservers[thisProviderId].disconnect();
+      }
+
+      // Initialize the observers object if it doesn't exist
+      if (!window.cardObservers) {
+        window.cardObservers = {};
+      }
+
+      // Set precise thresholds to control when the effect activates
+      const options = {
+        root: null, // viewport
+        rootMargin: '0px',
+        threshold: [0.1, 0.25, 0.49, 0.5, 0.75, 0.95] // Multiple thresholds for precise control
+      };
+
+      window.cardObservers[thisProviderId] = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const ratio = entry.intersectionRatio;
+            
+            // Apply different thresholds based on scroll direction
+            if ((scrollDirection === 'down' && ratio >= 0.49) || 
+                (scrollDirection === 'up' && ratio >= 0.75)) {
+              // Only apply if this card should have the effect
+              if (!activeProviderId || activeProviderId === thisProviderId) {
+                applyAnimation();
+              }
+            } else if ((scrollDirection === 'down' && ratio < 0.49) || 
+                      (scrollDirection === 'up' && ratio < 0.75)) {
+              // Only remove if this card currently has the effect
+              if (activeProviderId === thisProviderId) {
+                removeAnimation();
+              }
+            }
+          } else {
+            // When completely out of view
+            if (activeProviderId === thisProviderId) {
+              removeAnimation();
+            }
+          }
+        });
+      }, options);
+
+      if (cardRef.current) {
+        window.cardObservers[thisProviderId].observe(cardRef.current);
+      }
+    };
+
+    // Initial setup
+    setupObserver();
+
+    // Update on resize to handle orientation changes or window resizing
+    window.addEventListener('resize', setupObserver);
+
+    // Capture the current ref value and provider ID to use in cleanup
+    const currentCardRef = cardRef.current;
+    const currentProviderId = thisProviderId;
+
+    return () => {
+      // Clean up observer
+      if (window.cardObservers && window.cardObservers[currentProviderId]) {
+        window.cardObservers[currentProviderId].disconnect();
+        delete window.cardObservers[currentProviderId];
+      }
+      window.removeEventListener('resize', setupObserver);
+      
+      // Clear any animation timeouts
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+      }
+      
+      // If this card has the active effect when unmounting, clear it
+      if (activeProviderId === currentProviderId) {
+        setActiveProviderId(null);
+      }
+    };
+  }, [id, provider, activeProviderId, setActiveProviderId, scrollDirection, index]);
 
   // The provider code to use for the Trustpilot rating
   const getProviderCode = () => {
@@ -501,28 +488,20 @@ const ProviderCard = ({
         @keyframes text-shine {
           to {
             background-position: 200% center;
-          }
-        }
 
-        .provider-card {
-          transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-          transform-origin: center;
-          will-change: transform, box-shadow;
-          transform: scale(1) rotate(0deg);
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-          z-index: 1;
-        }
+// Fallback if no rating is available
+if (typeof onRatingDetermined === 'function') {
+  onRatingDetermined(0); // Report 0 for sorting when no rating is available
+}
+return <div className="text-xs text-gray-400">Rating N/A</div>;
+};
 
-        .provider-card:hover {
-          transform: scale(1.01);
-          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-          z-index: 5;
-        }
-        
-        .card-active {
-          transform: scale(1.03) rotate(0.5deg);
-          box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08), 0 5px 15px rgba(0, 0, 0, 0.05);
-          z-index: 10;
+// Format transfer time for display
+const formatTransferTime = () => {
+// First check if we have a formatted transferTime string
+if (provider?.transferTime || transferTime) {
+  const timeValue = provider?.transferTime || transferTime;
+          100% { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1); }
         }
 
         .glass-effect {
@@ -587,14 +566,31 @@ const ProviderCard = ({
             text-align: center;
           }
 
-          .provider-card:hover {
-            transform: scale(1.005);
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+          .animate-entrance {
+            animation: shadowLift 0.3s forwards ease-out;
           }
-          
-          .card-active {
-            transform: scale(1.02) rotate(0.3deg); /* Less dramatic effect on mobile */
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06), 0 4px 8px rgba(0, 0, 0, 0.04);
+        
+          @keyframes shadowLift {
+            0% {
+              transform: translateY(0);
+              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+              border-color: #e5e7eb;
+            }
+            100% {
+              transform: translateY(-3px);
+              box-shadow: 0 10px 25px rgba(99, 102, 241, 0.07);
+              border-color: #e0e7ff;
+            }
+          }
+        
+          .card-hover:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.07);
+            border-color: #e0e7ff;
+          }  
+          @keyframes card-entrance {
+            0% { transform: translateY(0); box-shadow: 0 0 0 rgba(0, 0, 0, 0); }
+            100% { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08); }
           }
 
           .tooltip {
@@ -616,31 +612,207 @@ const ProviderCard = ({
 
           .tooltip::before {
             display: block;
-            top: auto;
-            bottom: -6px;
-            left: 50%;
-            right: auto;
-            transform: translateX(-50%);
-            border-width: 6px 6px 0 6px;
-            border-color: white transparent transparent transparent;
-          }
-        }
-      `}</style>
       
-      <div 
-        id={id}
-        ref={cardRef}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        className={`rounded-xl overflow-hidden provider-card glass-effect
-          ${index === 0 
-            ? 'border-2 border-indigo-600' 
-            : 'border border-gray-200'} 
-          ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
-        style={{ 
-          transitionDelay: `${index * 50}ms`,
-          position: 'relative',
-        }}
+      .mobile-center {
+        text-align: center;
+      }
+
+      .card-hover:hover, .card-in-view {
+        transform: translateY(-2px); /* Less dramatic lift on mobile */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+      }
+      
+      @keyframes card-entrance {
+        0% { transform: translateY(0); box-shadow: 0 0 0 rgba(0, 0, 0, 0); }
+        100% { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08); }
+      }
+
+      .tooltip {
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        right: auto;
+        top: auto;
+        transform: translateX(-50%) translateY(4px);
+        width: calc(100vw - 32px);
+        max-width: 320px;
+        text-align: left;
+        margin-bottom: 8px;
+      }
+
+      .tooltip.show {
+        transform: translateX(-50%) translateY(0);
+      }
+
+      .tooltip::before {
+        display: block;
+        top: auto;
+        bottom: -6px;
+        left: 50%;
+        right: auto;
+    {/* Card Header - Provider info and amount */}
+    <div className="flex flex-col sm:flex-row items-center justify-between p-6 border-b border-gray-100">
+      <div className="flex flex-col items-center sm:items-start mb-4 sm:mb-0">
+        <div className="relative group">
+          <img 
+            src={provider?.logo || logo || '/images/providers/default.png'} 
+            alt={`${provider?.name || name || 'Provider'} logo`} 
+            className="h-32 w-32 sm:h-40 sm:w-40 object-contain transition-transform duration-300 group-hover:scale-105"
+            onError={(e) => {
+              const code = (provider?.providerCode || '').toLowerCase();
+              let fallbackUrl = '/images/providers/default.png';
+              if (code === 'xe') fallbackUrl = '/images/providers/xe.png';
+              else if (code === 'torfx') fallbackUrl = '/images/providers/torfx.png';
+              else if (code === 'wise') fallbackUrl = '/images/providers/wise.png';
+              else if (code === 'western-union' || code === 'westernunion') fallbackUrl = '/images/providers/westernunion.png';
+              e.target.onerror = null;
+              e.target.src = fallbackUrl;
+              e.target.onerror = () => { e.target.src = fallbackUrl.startsWith('/') ? fallbackUrl.substring(1) : '/' + fallbackUrl; };
+            }}
+          />
+        </div>
+        
+        {providerCode && (
+          <div className="mt-3">
+            <TrustpilotRating 
+              providerName={providerCode} 
+              preloadedRating={trustpilotRating}
+              onRatingDetermined={onRatingDetermined}
+            />
+          </div>
+        )}
+        {!providerCode && renderRating(provider?.rating || rating)}
+      </div>
+      
+      <div className="text-center sm:text-right">
+        {(
+          provider?.providerCode?.toLowerCase() === 'torfx' ||
+          provider?.providerCode?.toLowerCase() === 'xe' ||
+          provider?.providerCode?.toLowerCase() === 'profee' ||
+          provider?.providerCode?.toLowerCase() === 'regencyfx' ||
+          provider?.providerCode?.toLowerCase() === 'pandaremit' ||
+          (provider?.name || name || '').toLowerCase().includes('torfx') ||
+          (provider?.name || name || '').toLowerCase().includes('xe') ||
+          (provider?.name || name || '').toLowerCase().includes('profee') ||
+          (provider?.name || name || '').toLowerCase().includes('regency') ||
+          (provider?.name || name || '').toLowerCase().includes('panda')
+        ) && (
+          <div className="relative inline-block">
+            <div 
+              className="inline-flex items-center text-xs font-medium text-amber-600 bg-amber-50 py-1.5 px-3 rounded-full mb-3 cursor-help"
+              onMouseEnter={() => setShowTooltip(true)}
+              onMouseLeave={() => setShowTooltip(false)}
+              onTouchStart={() => setShowTooltip(!showTooltip)}
+            >
+              <Info size={14} className="mr-1.5" />
+              Indicative Rate
+            </div>
+            <div className={`tooltip ${showTooltip ? 'show' : ''}`} style={{ pointerEvents: 'none' }}>
+              While we do our best to get accurate rates from this provider, the rate shown is an indication based on current market variables and may change when you proceed with the transfer.
+            </div>
+          </div>
+        )}
+        <div className="text-sm uppercase font-medium text-indigo-600 tracking-wide">They receive</div>
+        <div className="text-3xl font-bold mt-1">
+          <span className="text-shimmer">
+            {getCurrencySymbol(toCurrency)} {formatAmount(provider?.amountReceived || receiveAmount || 0)}
+          </span>
+        </div>
+        <div className="text-sm text-gray-600 mt-2 bg-indigo-50 py-1 px-3 rounded-full inline-flex items-center">
+          <span className="mr-1.5">Fees:</span>
+          {getCurrencySymbol(fromCurrency)} {formatAmount(provider?.transferFee || transferFee || 0)}
+        </div>
+      </div>
+    </div>
+    
+    {/* Card Body - Exchange details */}
+    <div className="p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        {/* Exchange Rate */}
+        <div className="flex items-start group">
+          <div className="w-1 h-full min-h-[40px] bg-indigo-400 mr-4 self-stretch rounded-full transition-all duration-300 group-hover:bg-indigo-500"></div>
+          <div className="text-left">
+            <div className="text-sm text-gray-600 font-medium mb-1.5">Exchange Rate</div>
+            <div className="font-bold text-lg">{`1 ${fromCurrency} = ${(provider?.rate || rate || 0).toFixed(4)} ${toCurrency}`}</div>
+          </div>
+        </div>
+        
+        {/* Delivery Time */}
+        <div className="flex items-start group">
+          <div className="w-1 h-full min-h-[40px] bg-indigo-400 mr-4 self-stretch rounded-full transition-all duration-300 group-hover:bg-indigo-500"></div>
+          <div className="text-left">
+            <div className="text-sm text-gray-600 font-medium mb-1.5 flex items-center">
+              <Clock size={16} className="mr-1.5" />
+              Delivery Time
+            </div>
+            <div className="font-medium">{formatTransferTime()}</div>
+          </div>
+        </div>
+        
+        {/* Fees */}
+        <div className="flex items-start group">
+          <div className="w-1 h-full min-h-[40px] bg-indigo-400 mr-4 self-stretch rounded-full transition-all duration-300 group-hover:bg-indigo-500"></div>
+          <div className="text-left">
+            <div className="text-sm text-gray-600 font-medium mb-1.5">Fee</div>
+            <div className="font-medium">{getCurrencySymbol(fromCurrency)} {formatAmount(provider?.transferFee || transferFee || 0)}</div>
+          </div>
+        </div>
+        
+        {/* Rate Margin */}
+        <div className="flex items-start group">
+          <div className="w-1 h-full min-h-[40px] bg-indigo-400 mr-4 self-stretch rounded-full transition-all duration-300 group-hover:bg-indigo-500"></div>
+          <div className="text-left">
+            <div className="text-sm text-gray-600 font-medium mb-1.5">Rate Margin</div>
+            <div>
+              {provider?.effectiveRate && provider?.baseRate ? (
+                provider.effectiveRate > provider.baseRate ? (
+                  <div className="flex items-center text-green-600 font-medium">
+                    <ArrowUp size={16} className="mr-1.5" />
+                    <span>{`${((provider.effectiveRate / provider.baseRate - 1) * 100).toFixed(2)}% above mid-market`}</span>
+                  </div>
+                ) : provider.effectiveRate < provider.baseRate ? (
+                  <div className="flex items-center text-red-600 font-medium">
+                    <ArrowDown size={16} className="mr-1.5" />
+                    <span>{`${((1 - provider.effectiveRate / provider.baseRate) * 100).toFixed(2)}% below mid-market`}</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center text-gray-600 font-medium">
+                    <Minus size={16} className="mr-1.5" />
+                    <span>Same as mid-market</span>
+                  </div>
+                )
+              ) : (
+                `${((provider?.exchangeRateMargin || exchangeRateMargin || 0) * 100).toFixed(2)}%`
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Features */}
+      <div className="mt-6">
+        <div className="flex flex-wrap gap-2">
+          {(provider?.features || features).map((feature, idx) => (
+            <span 
+              key={idx} 
+              className="feature-tag inline-flex items-center text-sm text-indigo-700 bg-indigo-50 py-1.5 px-3 rounded-full"
+            >
+              <Check className="w-4 h-4 text-green-500 mr-1.5" />
+              {feature}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+    
+    {/* Card Footer - CTA */}
+    <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end">
+      <a 
+        href={getProviderWebsite(provider?.providerCode || provider?.code || provider?.name || name || '')} 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 px-6 rounded-lg flex items-center justify-center font-medium transition-all duration-300 hover:shadow-lg hover:shadow-indigo-200"
+        style={{ transitionDelay: `${index * 50}ms` }}
       >
         {/* Card Header - Provider info and amount */}
         <div className="flex flex-col sm:flex-row items-center justify-between p-6 border-b border-gray-100">

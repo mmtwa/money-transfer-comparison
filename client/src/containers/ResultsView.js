@@ -14,13 +14,15 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
   const [sortDirection, setSortDirection] = useState('desc');
   const [showSortOptions, setShowSortOptions] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showLoadingAnimation, setShowLoadingAnimation] = useState(true);
   const [providerResults, setProviderResults] = useState([]);
   const [bestDealProvider, setBestDealProvider] = useState(null);
   const [error, setError] = useState(null);
   // State for fetched external ratings and loading status
-  const [providerRatings, setProviderRatings] = useState({});
   const [trustpilotRatings, setTrustpilotRatings] = useState({});
   const [ratingsLoading, setRatingsLoading] = useState(false);
+  // State to store the final displayed ratings that are shown on provider cards
+  const [finalDisplayedRatings, setFinalDisplayedRatings] = useState({});
   
   // XE currency classifications for different markup percentages
   const majorCurrencies = ['USD', 'EUR', 'GBP', 'AUD', 'CAD', 'NZD', 'CHF', 'JPY', 'SGD'];
@@ -235,6 +237,61 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
     };
   };
   
+  // Function to determine Torfx markup based on currency pair
+  const getTorfxMarkup = (fromCurr, toCurr) => {
+    // Major pairs (USD, EUR, GBP, AUD, CAD, NZD, CHF, JPY, SGD)
+    const majorPairs = ['USD', 'EUR', 'GBP', 'AUD', 'CAD', 'NZD', 'CHF', 'JPY', 'SGD'];
+    if (majorPairs.includes(fromCurr) && majorPairs.includes(toCurr)) {
+      return 0.004; // 0.4%
+    }
+    
+    // Tier 2 pairs (INR, ZAR, MXN, etc.)
+    const tier2Pairs = ['INR', 'ZAR', 'MXN', 'PLN', 'SEK', 'NOK', 'DKK', 'HUF', 'CZK', 'ILS', 'TRY', 'THB', 'PHP', 'MYR', 'RON', 'BGN', 'KRW', 'HKD', 'CNY', 'CLP', 'COP', 'SAR', 'AED', 'QAR', 'KWD', 'NGN', 'BRL', 'RUB', 'ARS', 'EGP', 'IDR'];
+    if ((majorPairs.includes(fromCurr) && tier2Pairs.includes(toCurr)) || 
+        (tier2Pairs.includes(fromCurr) && majorPairs.includes(toCurr)) ||
+        (tier2Pairs.includes(fromCurr) && tier2Pairs.includes(toCurr))) {
+      return 0.008; // 0.8%
+    }
+    
+    // Exotic pairs
+    return 0.012; // 1.2%
+  };
+
+  // Function to determine Torfx fee based on amount
+  const getTorfxFee = (amount, currency) => {
+    // Torfx typically has no transfer fee
+    return 0;
+  };
+
+  // Function to determine Torfx delivery time based on currency pair
+  const getTorfxDeliveryTime = (fromCurr, toCurr) => {
+    // Major pairs: 1-2 business days
+    const majorPairs = ['USD', 'EUR', 'GBP', 'AUD', 'CAD', 'NZD', 'CHF', 'JPY', 'SGD'];
+    if (majorPairs.includes(fromCurr) && majorPairs.includes(toCurr)) {
+      return {
+        text: '1-2 business days',
+        hours: { min: 24, max: 48 }
+      };
+    }
+    
+    // Tier 2 pairs: 2-3 business days
+    const tier2Pairs = ['INR', 'ZAR', 'MXN', 'PLN', 'SEK', 'NOK', 'DKK', 'HUF', 'CZK', 'ILS', 'TRY', 'THB', 'PHP', 'MYR', 'RON', 'BGN', 'KRW', 'HKD', 'CNY', 'CLP', 'COP', 'SAR', 'AED', 'QAR', 'KWD', 'NGN', 'BRL', 'RUB', 'ARS', 'EGP', 'IDR'];
+    if ((majorPairs.includes(fromCurr) && tier2Pairs.includes(toCurr)) || 
+        (tier2Pairs.includes(fromCurr) && majorPairs.includes(toCurr)) ||
+        (tier2Pairs.includes(fromCurr) && tier2Pairs.includes(toCurr))) {
+      return {
+        text: '2-3 business days',
+        hours: { min: 48, max: 72 }
+      };
+    }
+    
+    // Default to exotic timing
+    return {
+      text: '2-4 business days',
+      hours: { min: 48, max: 96 }
+    };
+  };
+  
   // Fetch data from API on component mount or when search parameters change
   useEffect(() => {
     const fetchData = async () => {
@@ -286,8 +343,7 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
           if (comparisonData && comparisonData.providers) {
             const allProviders = comparisonData.providers;
             console.log(`Found ${allProviders.length} providers from comparison API`);
-            
-            // Process all providers from comparison API
+                        // Process all providers from comparison API
             const providers = allProviders
               .filter(p => p.quotes && p.quotes.length > 0)
               // Filter out TorFX from API results since we'll add our own calculated version
@@ -307,9 +363,11 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
                 // Extract delivery time if available
                 let transferTime = 'Unknown';
                 let transferTimeHours = { min: 24, max: 72 };
+                let hasExplicitDeliveryTime = false;
                 
                 if (quote.estimatedDelivery) {
                   transferTime = quote.estimatedDelivery;
+                  hasExplicitDeliveryTime = true;
                   
                   // Try to estimate hours from the delivery time text
                   if (transferTime.includes('hour')) {
@@ -327,14 +385,25 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
                   }
                 }
                 
-                // Determine logo path, override for TorFX if SVG is provided
+                // Determine logo path - no special override needed anymore since we filter TorFX separately
                 let logoUrl = provider.logos?.normal?.svgUrl || provider.logos?.normal?.pngUrl || provider.logo;
-                const providerAlias = (provider.alias || '').toLowerCase();
-                const providerNameCheck = (provider.name || '').toLowerCase();
-
-                if ((providerAlias === 'torfx' || providerNameCheck.includes('torfx')) && logoUrl && logoUrl.endsWith('.svg')) {
-                  console.log(`Overriding TorFX SVG logo with PNG for provider ${provider.id}`);
-                  logoUrl = '/images/providers/torfx.png'; // Force PNG for TorFX
+                
+                // If provider doesn't have explicit delivery time data, use XE's delivery time
+                // Exclude providers that have their own delivery time (Profee, XE, TorFX, etc. are already excluded or have their own)
+                if (!hasExplicitDeliveryTime) {
+                  const providerAlias = (provider.alias || '').toLowerCase();
+                  const providerName = (provider.name || '').toLowerCase();
+                  
+                  // Check if this is a provider we should apply XE delivery time to
+                  if (!providerName.includes('profee') && !providerAlias.includes('profee') && 
+                      !providerName.includes('xe') && !providerAlias.includes('xe') && 
+                      !providerName.includes('torfx') && !providerAlias.includes('torfx') && 
+                      !providerName.includes('panda') && !providerAlias.includes('panda')) {
+                    // Apply XE delivery time
+                    const xeDeliveryTime = getXEDeliveryTime(fromCurrency, toCurrency);
+                    transferTime = xeDeliveryTime.text;
+                    transferTimeHours = xeDeliveryTime.hours;
+                  }
                 }
                 
                 // Basic provider object from comparison API data
@@ -342,7 +411,7 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
                   providerId: `provider-${provider.id}`,
                   providerCode: provider.alias,
                   providerName: provider.name,
-                  providerLogo: logoUrl, // Use the potentially overridden logoUrl
+                  providerLogo: logoUrl,
                   baseRate: quote.rate,
                   effectiveRate: quote.rate,
                   transferFee: quote.fee || 0,
@@ -486,61 +555,16 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
               console.log('Added Profee as a provider with markup:', profeeMarkupPercentage * 100 + '%');
 
               // Add TorFX as a provider using the mid-market rate and our markup matrix
-              const getTorFXMarkup = (fromCurr, toCurr) => {
-                // Major pairs
-                const majorPairs = ['USD', 'EUR', 'GBP', 'AUD', 'CAD', 'NZD', 'CHF', 'JPY', 'SGD'];
-                if (majorPairs.includes(fromCurr) && majorPairs.includes(toCurr)) {
-                  return 0.01; // 1.0%
-                }
-                
-                // Tier 2 pairs
-                const tier2Pairs = ['INR', 'ZAR', 'MXN', 'PLN', 'SEK', 'NOK', 'DKK', 'HUF', 'CZK', 'ILS', 'TRY', 'THB', 'PHP', 'MYR', 'RON', 'BGN', 'KRW', 'HKD', 'CNY', 'CLP', 'COP', 'SAR', 'AED', 'QAR', 'KWD', 'NGN', 'BRL', 'RUB', 'ARS', 'EGP', 'IDR'];
-                if ((majorPairs.includes(fromCurr) && tier2Pairs.includes(toCurr)) || 
-                    (tier2Pairs.includes(fromCurr) && majorPairs.includes(toCurr)) ||
-                    (tier2Pairs.includes(fromCurr) && tier2Pairs.includes(toCurr))) {
-                  return 0.015; // 1.5%
-                }
-                
-                // Exotic pairs
-                return 0.02; // 2.0%
-              };
-
-              const getTorFXDeliveryTime = (fromCurr, toCurr) => {
-                // Major pairs
-                const majorPairs = ['USD', 'EUR', 'GBP', 'AUD', 'CAD', 'NZD', 'CHF', 'JPY', 'SGD'];
-                if (majorPairs.includes(fromCurr) && majorPairs.includes(toCurr)) {
-                  return {
-                    text: 'Same day to 1 business day',
-                    hours: { min: 0, max: 24 }
-                  };
-                }
-                
-                // Tier 2 pairs
-                const tier2Pairs = ['INR', 'ZAR', 'MXN', 'PLN', 'SEK', 'NOK', 'DKK', 'HUF', 'CZK', 'ILS', 'TRY', 'THB', 'PHP', 'MYR', 'RON', 'BGN', 'KRW', 'HKD', 'CNY', 'CLP', 'COP', 'SAR', 'AED', 'QAR', 'KWD', 'NGN', 'BRL', 'RUB', 'ARS', 'EGP', 'IDR'];
-                if ((majorPairs.includes(fromCurr) && tier2Pairs.includes(toCurr)) || 
-                    (tier2Pairs.includes(fromCurr) && majorPairs.includes(toCurr)) ||
-                    (tier2Pairs.includes(fromCurr) && tier2Pairs.includes(toCurr))) {
-                  return {
-                    text: '1-2 business days',
-                    hours: { min: 24, max: 48 }
-                  };
-                }
-                
-                // Exotic pairs
-                return {
-                  text: '1-3 business days',
-                  hours: { min: 24, max: 72 }
-                };
-              };
-
-              const torfxMarkupPercentage = getTorFXMarkup(fromCurrency, toCurrency);
-              const torfxDeliveryTime = getTorFXDeliveryTime(fromCurrency, toCurrency);
+              const torfxMarkupPercentage = getTorfxMarkup(fromCurrency, toCurrency);
+              const torfxFee = getTorfxFee(amount, fromCurrency);
+              const torfxDeliveryTime = getTorfxDeliveryTime(fromCurrency, toCurrency);
               
               // Calculate TorFX's effective rate using the markup
               const torfxEffectiveRate = midMarketRate * (1 - torfxMarkupPercentage);
               
-              // Calculate amount received (amount converted at effective rate)
-              const torfxAmountReceived = parseFloat(amount) * torfxEffectiveRate;
+              // Calculate amount received (amount converted at effective rate minus the fee)
+              const torfxAmountBeforeFee = parseFloat(amount) * torfxEffectiveRate;
+              const torfxAmountReceived = torfxAmountBeforeFee - (torfxFee * torfxEffectiveRate); // Convert fee to target currency
               
               // Calculate margin cost
               const torfxMarginCost = parseFloat(amount) * (midMarketRate - torfxEffectiveRate);
@@ -553,18 +577,19 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
                 providerLogo: '/images/providers/torfx.png',
                 baseRate: midMarketRate,
                 effectiveRate: torfxEffectiveRate,
-                transferFee: 0, // TorFX typically has no transfer fee
+                transferFee: torfxFee,
                 marginPercentage: torfxMarkupPercentage * 100,
                 marginCost: torfxMarginCost,
-                totalCost: torfxMarginCost, // No transfer fee, so total cost is just margin cost
-                amountReceived: torfxAmountReceived > 0 ? torfxAmountReceived : 0,
+                totalCost: torfxFee + torfxMarginCost,
+                amountReceived: torfxAmountReceived > 0 ? torfxAmountReceived : 0, // Ensure amount is not negative
                 sourceCountry: fromCurrency === 'GBP' ? 'GB' : fromCurrency === 'USD' ? 'US' : fromCurrency === 'EUR' ? 'EU' : null,
                 targetCountry: toCurrency === 'GBP' ? 'GB' : toCurrency === 'USD' ? 'US' : toCurrency === 'EUR' ? 'EU' : null,
                 transferTimeHours: torfxDeliveryTime.hours,
                 transferTime: torfxDeliveryTime.text,
                 rating: 4.4, // Default TorFX rating
                 methods: ['bank_transfer'],
-                realTimeApi: false,
+                realTimeApi: false, // Not from real-time API
+                isIndicative: true, // Add indicative flag
                 timestamp: new Date().toISOString()
               };
               
@@ -680,7 +705,7 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
                 providerId: 'provider-regencyfx',
                 providerCode: 'regencyfx',
                 providerName: 'Regency FX',
-                providerLogo: '/images/providers/regencyfx.webp',
+                providerLogo: '/images/providers/regencyfx.png',
                 baseRate: midMarketRate,
                 effectiveRate: regencyFXEffectiveRate,
                 transferFee: 0, // Regency FX has no transfer fee
@@ -751,15 +776,7 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
     if (providerResults.length > 0) {
       const fetchRatings = async () => {
         setRatingsLoading(true);
-        const googleRatingsMap = {};
         const trustpilotRatingsMap = {};
-        
-        // Use Promise.allSettled to fetch all Google ratings concurrently
-        const googleRatingPromises = providerResults.map(provider => 
-          apiService.getProviderRating(provider.providerId || provider.providerCode) // Use providerId or code as identifier
-            .then(rating => ({ id: provider.providerId, rating }))
-            .catch(err => ({ id: provider.providerId, rating: null, error: err })) // Store null on error
-        );
         
         // Use Promise.allSettled to fetch all Trustpilot ratings concurrently
         const trustpilotRatingPromises = providerResults.map(provider => 
@@ -769,24 +786,7 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
         );
         
         // Wait for all rating requests to complete
-        const [googleResults, trustpilotResults] = await Promise.all([
-          Promise.allSettled(googleRatingPromises),
-          Promise.allSettled(trustpilotRatingPromises)
-        ]);
-        
-        // Process Google rating results
-        googleResults.forEach(result => {
-          if (result.status === 'fulfilled' && result.value) {
-            googleRatingsMap[result.value.id] = result.value.rating;
-          } else if (result.status === 'rejected' || (result.status === 'fulfilled' && !result.value)) {
-            // Handle cases where the promise was rejected or resolved without a value
-            const failedProvider = providerResults.find((p, index) => index === googleResults.indexOf(result));
-            if(failedProvider) {
-              googleRatingsMap[failedProvider.providerId] = null; // Explicitly set null for failed/missing ratings
-            }
-            console.error("Failed to fetch Google rating for a provider:", result.reason || 'No rating returned');
-          }
-        });
+        const trustpilotResults = await Promise.allSettled(trustpilotRatingPromises);
         
         // Process Trustpilot rating results
         trustpilotResults.forEach(result => {
@@ -802,7 +802,6 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
           }
         });
         
-        setProviderRatings(googleRatingsMap);
         setTrustpilotRatings(trustpilotRatingsMap);
         setRatingsLoading(false);
       };
@@ -829,7 +828,30 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
           comparison = a.amountReceived - b.amountReceived;
           break;
         case 'rating':
-          comparison = a.rating - b.rating;
+          // Use finalDisplayedRatings which are the actual ratings shown on the cards
+          const getDisplayedRating = (provider) => {
+            const providerId = provider.providerId;
+            
+            // First check if we have a final displayed rating for this provider
+            if (finalDisplayedRatings[providerId] !== undefined) {
+              return finalDisplayedRatings[providerId];
+            }
+            
+            // Next check if trustpilotRating exists and has a value property
+            if (trustpilotRatings[providerId] && 
+                typeof trustpilotRatings[providerId].value === 'number') {
+              return trustpilotRatings[providerId].value;
+            }
+            
+            // If no Trustpilot rating, use the provider's rating
+            return provider.rating || 0;
+          };
+          
+          // Get displayed ratings for both providers
+          const aDisplayedRating = getDisplayedRating(a);
+          const bDisplayedRating = getDisplayedRating(b);
+          
+          comparison = aDisplayedRating - bDisplayedRating;
           break;
         default:
           comparison = a.amountReceived - b.amountReceived;
@@ -855,13 +877,75 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
     }
   };
   
+  // Add useEffect for loading animation timing
+  useEffect(() => {
+    if (!loading) {
+      // Keep the animation visible for 2 seconds after data is loaded
+      const timer = setTimeout(() => {
+        setShowLoadingAnimation(false);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [loading]);
+  
   // Show loading state or error
-  if (loading) {
+  if (loading || showLoadingAnimation) {
     return (
-      <div className="container mx-auto flex-1 px-4 py-5 max-w-6xl flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-pulse rounded-full bg-indigo-200 h-24 w-24 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading exchange rates...</p>
+      <div className="container mx-auto flex-1 px-4 sm:px-6 md:px-8 py-5 max-w-6xl">
+        <div className="mb-4">
+          <button 
+            onClick={onBackToSearch}
+            className="text-indigo-600 hover:text-indigo-800 flex items-center transition-colors font-medium"
+          >
+            <ChevronLeft size={18} className="mr-1" /> Back to search
+          </button>
+        </div>
+        
+        <div className="flex flex-col items-center justify-center min-h-[70vh] px-4 sm:px-6 md:px-8">
+          {/* Main loading animation container */}
+          <div className="relative w-full max-w-md mx-auto">
+            {/* Animated background gradient */}
+            <div className="absolute inset-0 bg-gradient-to-r from-indigo-50 via-purple-50 to-indigo-50 rounded-3xl opacity-50 animate-gradient-x"></div>
+            
+            {/* Content container */}
+            <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-indigo-100/50">
+              {/* Animated circles */}
+              <div className="relative w-32 h-32 mx-auto mb-8">
+                {/* Outer rotating circle */}
+                <div className="absolute inset-0 border-4 border-indigo-200 rounded-full animate-[spin_3s_linear_infinite]"></div>
+                {/* Middle pulsing circle */}
+                <div className="absolute inset-4 border-4 border-indigo-400 rounded-full animate-[pulse_2s_ease-in-out_infinite]"></div>
+                {/* Inner rotating circle */}
+                <div className="absolute inset-8 border-4 border-indigo-500 rounded-full animate-[spin_2s_linear_infinite_reverse]"></div>
+                {/* Center dot with glow */}
+                <div className="absolute inset-[35%] bg-indigo-600 rounded-full animate-pulse shadow-lg shadow-indigo-200"></div>
+              </div>
+              
+              {/* Text content */}
+              <div className="text-center space-y-6">
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                    Finding the best rates
+                  </h3>
+                  <p className="text-gray-600 text-sm sm:text-base max-w-sm mx-auto">
+                    We're comparing rates from multiple providers to find you the best deal for your transfer.
+                  </p>
+                </div>
+                
+                {/* Animated progress indicators */}
+                <div className="flex justify-center items-center space-x-2">
+                  <div className="w-2 h-2 bg-indigo-500 rounded-full animate-[bounce_1s_infinite_0ms]"></div>
+                  <div className="w-2 h-2 bg-indigo-500 rounded-full animate-[bounce_1s_infinite_150ms]"></div>
+                  <div className="w-2 h-2 bg-indigo-500 rounded-full animate-[bounce_1s_infinite_300ms]"></div>
+                </div>
+                
+                {/* Progress bar */}
+                <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full animate-[progress_2s_ease-in-out_infinite]"></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -892,6 +976,19 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
     );
   }
   
+  // Callback function for ProviderCard to report back its displayed rating
+  const handleRatingDetermined = (providerId, numericRating) => {
+    if (providerId && numericRating !== undefined && numericRating !== null) {
+      setFinalDisplayedRatings(prev => {
+        // Only update if the rating is different to avoid unnecessary re-renders
+        if (prev[providerId] !== numericRating) {
+          return { ...prev, [providerId]: numericRating };
+        }
+        return prev;
+      });
+    }
+  };
+
   return (
     <>
       {/* Custom animations */}
@@ -981,6 +1078,23 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
         .gradient-bg {
           background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 50%, #c7d2fe 100%);
         }
+        
+        @keyframes progress {
+          0% { width: 0%; }
+          50% { width: 100%; }
+          100% { width: 0%; }
+        }
+        
+        @keyframes gradient-x {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        
+        .animate-gradient-x {
+          background-size: 200% 200%;
+          animation: gradient-x 3s ease infinite;
+        }
       `}</style>
       
       <div className="container mx-auto flex-1 px-4 py-5 max-w-6xl" style={{ zIndex: 100, position: 'relative' }}>
@@ -993,87 +1107,115 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
           </button>
         </div>
         
-        {/* Sticky Summary Panel */}
-        <div className="mb-5 bg-white rounded-lg shadow-md border border-gray-100 p-3 py-4 sticky top-[calc(4rem+1px)] z-40 transition-all duration-200 backdrop-blur-sm bg-white/95">
-          {/* Mobile view: 2-line layout */}
+        <div className="mb-5 bg-white/90 rounded-xl shadow-lg border border-indigo-50 p-4 sticky top-[calc(4rem+1px)] z-40 transition-all duration-300 backdrop-filter backdrop-blur-md hover:shadow-indigo-100/20">
+          {/* Mobile view: Compact design */}
           <div className="sm:hidden">
-            {/* First line: labels */}
-            <div className="grid grid-cols-3 gap-2 mb-2">
-              <div className="text-sm font-medium text-gray-700">Summary</div>
-              <div className="text-xs text-gray-500 text-center">You send</div>
-              <div className="text-xs text-gray-500 text-center">They receive</div>
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-sm font-medium text-indigo-700">Transfer Summary</h3>
+              <button 
+                onClick={onBackToSearch}
+                className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-medium hover:bg-indigo-100 transition-colors flex items-center"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 mr-1"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                Edit
+              </button>
             </div>
             
-            {/* Second line: content */}
-            <div className="grid grid-cols-3 gap-2 items-center">
-              <div>
-                <button 
-                  onClick={onBackToSearch}
-                  className="px-2 py-1 bg-white border border-indigo-500 text-indigo-600 rounded-md hover:bg-indigo-50 transition-colors text-xs"
-                >
-                  Edit
-                </button>
+            <div className="flex justify-between items-center rounded-xl bg-gradient-to-r from-indigo-50/70 to-violet-50/70 p-3 border border-indigo-100/50">
+              <div className="flex flex-col items-start">
+                <span className="text-xs text-indigo-500 font-medium mb-1">You send</span>
+                <div className="flex items-center">
+                  <CurrencyFlag currency={fromCurrency} size="sm" className="mr-4" />
+                  <span className={`font-semibold text-gray-800 ${formatAmount(amount).replace(/[,.]/g, '').length > 4 ? 'text-sm' : ''}`}>
+                    {getCurrencySymbol(fromCurrency)} {formatAmount(amount)}
+                  </span>
+                </div>
               </div>
               
-              <div className="flex items-center justify-center">
-                <CurrencyFlag currency={fromCurrency} size="sm" />
-                <span className="ml-1 font-semibold text-sm whitespace-nowrap">
-                  {getCurrencySymbol(fromCurrency)} {formatAmount(amount)}
-                </span>
+              <div className="flex items-center mx-1">
+                <div className="w-8 h-8 flex items-center justify-center rounded-full bg-indigo-100">
+                  <ArrowRight size={14} className="text-indigo-600" />
+                </div>
               </div>
               
-              <div className="flex items-center justify-center">
-                <CurrencyFlag currency={toCurrency} size="sm" />
-                <span className="ml-1 font-semibold text-sm whitespace-nowrap">
-                  {bestDealProvider 
-                    ? `${getCurrencySymbol(toCurrency)} ${formatAmount(bestDealProvider.amountReceived)}`
-                    : `Loading...`
-                  }
-                </span>
+              <div className="flex flex-col items-end">
+                <span className="text-xs text-indigo-500 font-medium mb-1">They receive</span>
+                <div className="flex items-center">
+                  <CurrencyFlag currency={toCurrency} size="sm" className="mr-4" />
+                  <span className={`font-semibold text-gray-800 ${bestDealProvider && formatAmount(bestDealProvider.amountReceived).replace(/[,.]/g, '').length > 4 ? 'text-sm' : ''}`}>
+                    {bestDealProvider 
+                      ? `${getCurrencySymbol(toCurrency)} ${formatAmount(bestDealProvider.amountReceived)}`
+                      : `Loading...`
+                    }
+                  </span>
+                </div>
               </div>
             </div>
           </div>
           
-          {/* Tablet/Desktop view: original layout */}
+          {/* Tablet/Desktop view: Enhanced layout */}
           <div className="hidden sm:block">
-            <h3 className="text-sm font-medium text-gray-700 mb-3">Summary</h3>
-            <div className="flex flex-row items-center justify-between lg:justify-center lg:relative">
-              <div className="flex flex-row items-center mr-4">
-                <div className="text-center">
-                  <div className="text-xs text-gray-500 mb-1">You send</div>
-                  <div className="flex items-center justify-center">
-                    <CurrencyFlag currency={fromCurrency} size="sm" />
-                    <span className="ml-2 font-semibold">
-                      {getCurrencySymbol(fromCurrency)} {formatAmount(amount)} {fromCurrency}
-                    </span>
+            <div className="flex justify-between items-center mb-1">
+              <h3 className="text-sm font-medium text-indigo-700">Transfer Summary</h3>
+              {bestDealProvider && (
+                <div className="hidden md:flex items-center text-xs bg-green-50 text-green-700 px-2 py-1 rounded-full">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 mr-1"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                  Best rate found
+                </div>
+              )}
+            </div>
+            
+            <div className="flex items-center justify-between lg:justify-center lg:relative">
+              <div className="relative flex flex-row items-center justify-center md:mx-auto p-4 rounded-xl bg-gradient-to-r from-indigo-50/80 to-violet-50/80 border border-indigo-100/40">
+                <div className="flex flex-col md:flex-row items-center space-x-8">
+                  <div className="text-center md:text-left">
+                    <div className="text-xs text-indigo-500 font-medium mb-1">You send</div>
+                    <div className="flex items-center justify-center">
+                      <CurrencyFlag currency={fromCurrency} size="md" className="mr-3" />
+                      <span className="text-lg font-bold text-gray-800">
+                        {getCurrencySymbol(fromCurrency)} {formatAmount(amount)}
+                      </span>
+                      <span className="ml-2 text-gray-500">{fromCurrency}</span>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="flex items-center mx-4 my-0">
-                  <ArrowRight size={16} className="text-gray-400" />
-                </div>
-                
-                <div className="text-center">
-                  <div className="text-xs text-gray-500 mb-1">They receive</div>
-                  <div className="flex items-center justify-center">
-                    <CurrencyFlag currency={toCurrency} size="sm" />
-                    <span className="ml-2 font-semibold">
-                      {bestDealProvider 
-                        ? `${getCurrencySymbol(toCurrency)} ${formatAmount(bestDealProvider.amountReceived)} ${toCurrency}`
-                        : `Loading...`
-                      }
-                    </span>
+                  
+                  <div className="my-4 md:my-0 flex items-center justify-center">
+                    <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 shadow-sm">
+                      <ArrowRight size={20} className="text-indigo-600" />
+                    </div>
+                  </div>
+                  
+                  <div className="text-center md:text-left">
+                    <div className="text-xs text-indigo-500 font-medium mb-1">They receive</div>
+                    <div className="flex items-center justify-center">
+                      <CurrencyFlag currency={toCurrency} size="md" className="mr-3" />
+                      <span className="text-lg font-bold text-gray-800">
+                        {bestDealProvider 
+                          ? `${getCurrencySymbol(toCurrency)} ${formatAmount(bestDealProvider.amountReceived)}`
+                          : `Loading...`
+                        }
+                      </span>
+                      <span className="ml-2 text-gray-500">{toCurrency}</span>
+                    </div>
                   </div>
                 </div>
               </div>
               
               <button 
                 onClick={onBackToSearch}
-                className="px-3 py-1.5 bg-white border border-indigo-500 text-indigo-600 rounded-md hover:bg-indigo-50 transition-colors text-sm w-auto lg:absolute lg:right-0"
+                className="absolute right-4 sm:right-6 md:right-8 px-3 py-1.5 bg-indigo-50 border border-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors text-sm font-medium flex items-center shadow-sm"
               >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 mr-1"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                 Edit
               </button>
             </div>
+            
+            {/* Exchange rate info */}
+            {bestDealProvider && (
+              <div className="mt-3 text-sm text-center text-gray-600">
+                <span className="font-medium">Mid-market rate:</span> 1 {fromCurrency} = {bestDealProvider.baseRate.toFixed(4)} {toCurrency}
+              </div>
+            )}
           </div>
         </div>
         
@@ -1156,116 +1298,229 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
           </div>
         )}
         
-        {/* Sorting options - Mobile friendly dropdown */}
+        {/* Improved Filter & Sort Bar - 2025 UI/UX Design */}
         <div className="mb-5 relative z-10">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-100">
-            <div className="p-3 flex justify-between items-center cursor-pointer" onClick={() => setShowSortOptions(!showSortOptions)}>
-              <div className="font-medium flex items-center">
-                <SlidersHorizontal size={16} className="mr-2 text-indigo-500" />
-                Sort by: <span className="ml-2 text-indigo-600">{sortBy === 'rate' ? 'Exchange Rate' : sortBy === 'amount' ? 'Amount Received' : sortBy === 'fees' ? 'Fees' : 'User Rating'}</span>
-                <span className="ml-2 text-gray-400">
-                  ({sortDirection === 'desc' ? 'Highest first' : 'Lowest first'})
-                </span>
-              </div>
-              <button className="text-gray-500">
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  width="16" 
-                  height="16" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  className={`transition-transform duration-200 ${showSortOptions ? 'rotate-180' : ''}`}
-                >
-                  <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-              </button>
-            </div>
-            
-            {showSortOptions && (
-              <div className="p-3 pt-0 border-t border-gray-100">
-                <div className="grid grid-cols-2 gap-2">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="p-4 sm:px-5">
+              {/* Desktop Layout */}
+              <div className="hidden md:flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <SlidersHorizontal size={18} className="text-indigo-500" />
+                  <span className="font-medium text-gray-700">Sort results by</span>
+                </div>
+                
+                <div className="flex items-center gap-2">
                   <button 
                     onClick={() => {
-                      if (sortBy === 'amount') {
-                        toggleSortDirection();
-                      } else {
-                        setSortBy('amount');
-                        setSortDirection('desc'); // Default to highest first
-                      }
+                      setSortBy('amount');
+                      setSortDirection(sortBy === 'amount' && sortDirection === 'desc' ? 'asc' : 'desc');
                     }}
-                    className={`px-3 py-2 rounded text-sm flex justify-between items-center ${sortBy === 'amount' ? 'bg-indigo-50 text-indigo-700' : 'hover:bg-gray-50'}`}
+                    className={`px-3 py-2 rounded-lg flex items-center gap-1.5 transition-all ${
+                      sortBy === 'amount' 
+                        ? 'bg-indigo-50 text-indigo-700 font-medium shadow-sm' 
+                        : 'text-gray-600 hover:bg-gray-50'
+                    }`}
                   >
-                    Amount Received
+                    Amount
                     {sortBy === 'amount' && (
                       <span className="ml-1">
-                        <ArrowUpDown size={14} />
+                        {sortDirection === 'desc' ? (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m19 9-7 7-7-7"/></svg>
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m5 15 7-7 7 7"/></svg>
+                        )}
                       </span>
                     )}
                   </button>
                   
                   <button 
                     onClick={() => {
-                      if (sortBy === 'rate') {
-                        toggleSortDirection();
-                      } else {
-                        setSortBy('rate');
-                        setSortDirection('desc'); // Default to highest first
-                      }
+                      setSortBy('rate');
+                      setSortDirection(sortBy === 'rate' && sortDirection === 'desc' ? 'asc' : 'desc');
                     }}
-                    className={`px-3 py-2 rounded text-sm flex justify-between items-center ${sortBy === 'rate' ? 'bg-indigo-50 text-indigo-700' : 'hover:bg-gray-50'}`}
+                    className={`px-3 py-2 rounded-lg flex items-center gap-1.5 transition-all ${
+                      sortBy === 'rate' 
+                        ? 'bg-indigo-50 text-indigo-700 font-medium shadow-sm' 
+                        : 'text-gray-600 hover:bg-gray-50'
+                    }`}
                   >
-                    Exchange Rate
+                    Rate
                     {sortBy === 'rate' && (
                       <span className="ml-1">
-                        <ArrowUpDown size={14} />
+                        {sortDirection === 'desc' ? (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m19 9-7 7-7-7"/></svg>
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m5 15 7-7 7 7"/></svg>
+                        )}
                       </span>
                     )}
                   </button>
                   
                   <button 
                     onClick={() => {
-                      if (sortBy === 'fees') {
-                        toggleSortDirection();
-                      } else {
-                        setSortBy('fees');
-                        setSortDirection('asc'); // Default to lowest first for fees
-                      }
+                      setSortBy('fees');
+                      setSortDirection(sortBy === 'fees' && sortDirection === 'asc' ? 'desc' : 'asc');
                     }}
-                    className={`px-3 py-2 rounded text-sm flex justify-between items-center ${sortBy === 'fees' ? 'bg-indigo-50 text-indigo-700' : 'hover:bg-gray-50'}`}
+                    className={`px-3 py-2 rounded-lg flex items-center gap-1.5 transition-all ${
+                      sortBy === 'fees' 
+                        ? 'bg-indigo-50 text-indigo-700 font-medium shadow-sm' 
+                        : 'text-gray-600 hover:bg-gray-50'
+                    }`}
                   >
                     Fees
                     {sortBy === 'fees' && (
                       <span className="ml-1">
-                        <ArrowUpDown size={14} />
+                        {sortDirection === 'asc' ? (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m19 9-7 7-7-7"/></svg>
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m5 15 7-7 7 7"/></svg>
+                        )}
                       </span>
                     )}
                   </button>
                   
                   <button 
                     onClick={() => {
-                      if (sortBy === 'rating') {
-                        toggleSortDirection();
-                      } else {
-                        setSortBy('rating');
-                        setSortDirection('desc'); // Default to highest first
-                      }
+                      setSortBy('rating');
+                      setSortDirection(sortBy === 'rating' && sortDirection === 'desc' ? 'asc' : 'desc');
                     }}
-                    className={`px-3 py-2 rounded text-sm flex justify-between items-center ${sortBy === 'rating' ? 'bg-indigo-50 text-indigo-700' : 'hover:bg-gray-50'}`}
+                    className={`px-3 py-2 rounded-lg flex items-center gap-1.5 transition-all ${
+                      sortBy === 'rating' 
+                        ? 'bg-indigo-50 text-indigo-700 font-medium shadow-sm' 
+                        : 'text-gray-600 hover:bg-gray-50'
+                    }`}
                   >
-                    User Rating
+                    Rating
                     {sortBy === 'rating' && (
                       <span className="ml-1">
-                        <ArrowUpDown size={14} />
+                        {sortDirection === 'desc' ? (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m19 9-7 7-7-7"/></svg>
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m5 15 7-7 7 7"/></svg>
+                        )}
                       </span>
                     )}
                   </button>
                 </div>
+                
+                <div className="text-sm text-gray-500 flex items-center gap-1">
+                  <span className="hidden lg:inline">Currently sorting by:</span>
+                  <span className="text-indigo-600 font-medium">
+                    {sortBy === 'rate' ? 'Exchange Rate' : sortBy === 'amount' ? 'Amount Received' : sortBy === 'fees' ? 'Fees' : 'User Rating'}
+                  </span>
+                  <span className="text-gray-400">
+                    ({sortDirection === 'desc' ? 'Highest first' : 'Lowest first'})
+                  </span>
+                </div>
               </div>
-            )}
+              
+              {/* Mobile Layout with Dropdown */}
+              <div className="md:hidden">
+                <div 
+                  className="flex justify-between items-center w-full"
+                  onClick={() => setShowSortOptions(!showSortOptions)}
+                >
+                  <div className="flex items-center gap-2">
+                    <SlidersHorizontal size={16} className="text-indigo-500" />
+                    <span className="font-medium text-gray-700 text-sm">Sort by</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-indigo-600 font-medium text-sm">
+                      {sortBy === 'rate' ? 'Rate' : sortBy === 'amount' ? 'Amount' : sortBy === 'fees' ? 'Fees' : 'Rating'}
+                    </span>
+                    <span className="text-gray-500 text-xs">
+                      ({sortDirection === 'desc' ? 'High→Low' : 'Low→High'})
+                    </span>
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      width="16" 
+                      height="16" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      className={`transition-transform duration-200 ${showSortOptions ? 'rotate-180' : ''}`}
+                    >
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </div>
+                </div>
+                
+                {/* Mobile Dropdown */}
+                {showSortOptions && (
+                  <div className="mt-3 transition-all animate-in fade-in slide-in-from-top-5 duration-200">
+                    <div className="rounded-lg bg-gray-50 divide-y divide-gray-100">
+                      <button 
+                        onClick={() => {
+                          setSortBy('amount');
+                          setSortDirection(sortDirection === 'desc' ? 'asc' : 'desc');
+                          setShowSortOptions(false);
+                        }}
+                        className={`w-full px-4 py-3 text-left text-sm flex justify-between items-center transition-colors ${sortBy === 'amount' ? 'text-indigo-700 font-medium' : 'text-gray-700'}`}
+                      >
+                        Amount Received
+                        {sortBy === 'amount' && (
+                          <span className="flex items-center text-indigo-600">
+                            {sortDirection === 'desc' ? 'Highest first' : 'Lowest first'}
+                          </span>
+                        )}
+                      </button>
+                      
+                      <button 
+                        onClick={() => {
+                          setSortBy('rate');
+                          setSortDirection(sortDirection === 'desc' ? 'asc' : 'desc');
+                          setShowSortOptions(false);
+                        }}
+                        className={`w-full px-4 py-3 text-left text-sm flex justify-between items-center transition-colors ${sortBy === 'rate' ? 'text-indigo-700 font-medium' : 'text-gray-700'}`}
+                      >
+                        Exchange Rate
+                        {sortBy === 'rate' && (
+                          <span className="flex items-center text-indigo-600">
+                            {sortDirection === 'desc' ? 'Highest first' : 'Lowest first'}
+                          </span>
+                        )}
+                      </button>
+                      
+                      <button 
+                        onClick={() => {
+                          setSortBy('fees');
+                          setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+                          setShowSortOptions(false);
+                        }}
+                        className={`w-full px-4 py-3 text-left text-sm flex justify-between items-center transition-colors ${sortBy === 'fees' ? 'text-indigo-700 font-medium' : 'text-gray-700'}`}
+                      >
+                        Fees
+                        {sortBy === 'fees' && (
+                          <span className="flex items-center text-indigo-600">
+                            {sortDirection === 'asc' ? 'Lowest first' : 'Highest first'}
+                          </span>
+                        )}
+                      </button>
+                      
+                      <button 
+                        onClick={() => {
+                          setSortBy('rating');
+                          setSortDirection(sortDirection === 'desc' ? 'asc' : 'desc');
+                          setShowSortOptions(false);
+                        }}
+                        className={`w-full px-4 py-3 text-left text-sm flex justify-between items-center transition-colors ${sortBy === 'rating' ? 'text-indigo-700 font-medium' : 'text-gray-700'}`}
+                      >
+                        User Rating
+                        {sortBy === 'rating' && (
+                          <span className="flex items-center text-indigo-600">
+                            {sortDirection === 'desc' ? 'Highest first' : 'Lowest first'}
+                          </span>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
         
@@ -1293,10 +1548,9 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
               isBestDeal={provider.providerId === bestDealProvider?.providerId}
               isRealTimeApi={provider.realTimeApi}
               code={provider.providerCode}
-              // Pass fetched rating and loading state
-              fetchedRating={providerRatings[provider.providerId]}
               trustpilotRating={trustpilotRatings[provider.providerId]}
               ratingsLoading={ratingsLoading}
+              onRatingDetermined={(numericRating) => handleRatingDetermined(provider.providerId, numericRating)}
             />
           ))}
           
