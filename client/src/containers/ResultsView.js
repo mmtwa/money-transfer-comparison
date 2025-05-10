@@ -292,6 +292,36 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
     };
   };
   
+  /**
+   * Parse ISO 8601 duration string to approximate hours
+   * @param {string} isoDuration - ISO 8601 duration format 
+   * @returns {number} - Approximate hours
+   */
+  const parseIsoDuration = (isoDuration) => {
+    if (!isoDuration) return 0;
+    
+    // Parse days, hours, minutes from ISO 8601 duration string
+    const daysMatch = isoDuration.match(/(\d+)D/);
+    const hoursMatch = isoDuration.match(/(\d+)H/);
+    const minutesMatch = isoDuration.match(/(\d+)M(?!S)/);
+    
+    let totalHours = 0;
+    
+    if (daysMatch && daysMatch[1]) {
+      totalHours += parseInt(daysMatch[1]) * 24;
+    }
+    
+    if (hoursMatch && hoursMatch[1]) {
+      totalHours += parseInt(hoursMatch[1]);
+    }
+    
+    if (minutesMatch && minutesMatch[1]) {
+      totalHours += parseInt(minutesMatch[1]) / 60;
+    }
+    
+    return Math.round(totalHours);
+  };
+  
   // Fetch data from API on component mount or when search parameters change
   useEffect(() => {
     const fetchData = async () => {
@@ -299,9 +329,9 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
       try {
         console.log('Fetching exchange rates for:', { fromCurrency, toCurrency, amount });
         
-        // Fetch providers and exchange rates from Wise v3 comparisons API
+        // Fetch providers and exchange rates from Wise v4 comparisons API
         try {
-          console.log('Fetching data from Wise v3 comparison API');
+          console.log('Fetching data from Wise v4 comparison API');
           
           // First try accessing through our backend proxy
           let comparisonData = null;
@@ -324,8 +354,9 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
             console.error('Error fetching from backend, trying direct API:', backendError);
             // If backend proxy fails, try direct API call as fallback
             try {
-              const directResponse = await apiService.getWiseV3Comparison(
-                fromCurrency,
+              console.log('Trying direct v4 API call as fallback');
+              const directResponse = await apiService.getWiseV4Comparison(
+                fromCurrency, 
                 toCurrency,
                 amount
               );
@@ -365,7 +396,38 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
                 let transferTimeHours = { min: 24, max: 72 };
                 let hasExplicitDeliveryTime = false;
                 
-                if (quote.estimatedDelivery) {
+                if (quote.deliveryEstimation && quote.deliveryEstimation.duration) {
+                  // Use the v4 API deliveryEstimation
+                  hasExplicitDeliveryTime = true;
+                  
+                  // Use the formatted time from the API if available
+                  if (quote.estimatedDelivery) {
+                    transferTime = quote.estimatedDelivery;
+                  }
+                  
+                  // Extract hours from the deliveryEstimation
+                  if (quote.deliveryEstimation.minHours !== undefined || quote.deliveryEstimation.maxHours !== undefined) {
+                    // Use the pre-calculated hours
+                    transferTimeHours = {
+                      min: quote.deliveryEstimation.minHours || quote.deliveryEstimation.maxHours,
+                      max: quote.deliveryEstimation.maxHours || quote.deliveryEstimation.minHours
+                    };
+                  } else if (quote.deliveryEstimation.duration.min || quote.deliveryEstimation.duration.max) {
+                    // Try to calculate hours ourselves
+                    const minDuration = quote.deliveryEstimation.duration.min;
+                    const maxDuration = quote.deliveryEstimation.duration.max;
+                    
+                    // If only one duration is provided, use it for both min and max
+                    const effectiveMinDuration = minDuration || maxDuration;
+                    const effectiveMaxDuration = maxDuration || minDuration;
+                    
+                    // Parse the ISO 8601 duration
+                    transferTimeHours = {
+                      min: parseIsoDuration(effectiveMinDuration) || 24,
+                      max: parseIsoDuration(effectiveMaxDuration) || 72
+                    };
+                  }
+                } else if (quote.estimatedDelivery) {
                   transferTime = quote.estimatedDelivery;
                   hasExplicitDeliveryTime = true;
                   

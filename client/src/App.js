@@ -1,12 +1,30 @@
 import React, { useEffect, useState, lazy, Suspense } from 'react';
-import { BrowserRouter, useNavigate, Route } from 'react-router-dom';
+import { BrowserRouter, useNavigate, Route, Routes } from 'react-router-dom';
 import MoneyCompare from './containers/MoneyCompare';
 import Analytics from './components/Analytics';
 import FontLoader from './components/FontLoader';
 import StructuredData from './components/StructuredData';
 import CookieConsent from './components/CookieConsent';
+import Login from './pages/Login';
 import './App.css';
 import Careers from './pages/Careers';
+import { AuthProvider } from './hooks/useAuth';
+
+// Lazy load admin components
+const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
+const ProviderList = lazy(() => import('./pages/admin/providers/ProviderList'));
+const AddProvider = lazy(() => import('./pages/admin/providers/AddProvider'));
+const EditProvider = lazy(() => import('./pages/admin/providers/EditProvider'));
+
+// Lazy load ad partners components
+const AdPartnerList = lazy(() => import('./pages/admin/adPartners/AdPartnerList'));
+const AddAdPartner = lazy(() => import('./pages/admin/adPartners/AddAdPartner'));
+const EditAdPartner = lazy(() => import('./pages/admin/adPartners/EditAdPartner'));
+
+// Lazy load content components
+const ContentList = lazy(() => import('./pages/admin/content/ContentList'));
+const ContentForm = lazy(() => import('./pages/admin/content/ContentForm'));
+const ContentDetail = lazy(() => import('./pages/admin/content/ContentDetail'));
 
 // Lazy load non-critical components
 const PreloadFlags = lazy(() => import('./components/ui/PreloadFlags'));
@@ -73,24 +91,97 @@ function App() {
     );
   };
 
+  // Check if we're on an admin route
+  const isAdminRoute = initialPath.startsWith('/admin');
+
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-gray-50">
-        <div className={`App ${isAppReady ? 'render-ready' : ''}`}>
-          <StructuredData page={getPageType()} />
-          <Analytics measurementId={measurementId} />
-          <FontLoader />
-          <MoneyCompare initialPath={initialPath} />
-          
-          {/* Cookie Consent Banner */}
-          <CookieConsentWithNavigation />
-          
-          {/* Lazy load non-critical components */}
-          <Suspense fallback={null}>
-            <PreloadFlags />
-          </Suspense>
+      <AuthProvider>
+        <div className="min-h-screen bg-gray-50">
+          <div className={`App ${isAppReady ? 'render-ready' : ''}`}>
+            {!isAdminRoute && (
+              <>
+                <StructuredData page={getPageType()} />
+                <Analytics measurementId={measurementId} />
+                <FontLoader />
+                <MoneyCompare initialPath={initialPath} />
+                
+                {/* Cookie Consent Banner */}
+                <CookieConsentWithNavigation />
+              </>
+            )}
+            
+            {/* Admin Routes */}
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/admin" element={
+                <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
+                  <AdminDashboard />
+                </Suspense>
+              } />
+              <Route path="/admin/providers" element={
+                <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
+                  <ProviderList />
+                </Suspense>
+              } />
+              <Route path="/admin/providers/new" element={
+                <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
+                  <AddProvider />
+                </Suspense>
+              } />
+              <Route path="/admin/providers/:id/edit" element={
+                <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
+                  <EditProvider />
+                </Suspense>
+              } />
+              
+              {/* Ad Partners Routes */}
+              <Route path="/admin/ad-partners" element={
+                <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
+                  <AdPartnerList />
+                </Suspense>
+              } />
+              <Route path="/admin/ad-partners/new" element={
+                <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
+                  <AddAdPartner />
+                </Suspense>
+              } />
+              <Route path="/admin/ad-partners/:id/edit" element={
+                <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
+                  <EditAdPartner />
+                </Suspense>
+              } />
+              
+              {/* Content Routes */}
+              <Route path="/admin/content" element={
+                <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
+                  <ContentList />
+                </Suspense>
+              } />
+              <Route path="/admin/content/new" element={
+                <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
+                  <ContentForm />
+                </Suspense>
+              } />
+              <Route path="/admin/content/:id/edit" element={
+                <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
+                  <ContentForm />
+                </Suspense>
+              } />
+              <Route path="/admin/content/:id/view" element={
+                <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
+                  <ContentDetail />
+                </Suspense>
+              } />
+            </Routes>
+            
+            {/* Lazy load non-critical components */}
+            <Suspense fallback={null}>
+              <PreloadFlags />
+            </Suspense>
+          </div>
         </div>
-      </div>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

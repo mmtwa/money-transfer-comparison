@@ -60,7 +60,7 @@ const SendMoneyToMexicoGuide = () => {
           </p>
           
           <p className="mb-6 text-left">
-            Having spent three months traveling throughout Mexico investigating how money moves across this critical economic pathway, I've witnessed firsthand how these transfers sustain families, build homes, and even fund small businesses in communities from Chiapas to Chihuahua. This corridor isn't just about numbers – it's about people.
+            Having spent three months traveling throughout Mexico exploring how money moves across this critical economic pathway, I've witnessed firsthand how these transfers sustain families, build homes, and even fund small businesses in communities from Chiapas to Chihuahua. This corridor isn't just about numbers – it's about people.
           </p>
 
           <div className="bg-green-50 p-6 rounded-lg my-8">
@@ -89,7 +89,7 @@ const SendMoneyToMexicoGuide = () => {
       {expandedSections['best-providers'] && (
         <>
           <p className="mb-6 text-left">
-            Over the course of eight weeks, I sent dozens of test transfers ranging from $50 to $1,000 using every major money transfer provider serving the US-Mexico corridor. I tracked exchange rates, fees, delivery times, and customer service experiences. After multiple rounds of testing, these six providers consistently delivered the best value and service:
+            Over the course of eight weeks during my travels across Mexico, I sent dozens of test transfers ranging from $50 to $1,000 using every major money transfer provider serving the US-Mexico corridor. I tracked exchange rates, fees, delivery times, and customer service experiences. After multiple rounds of testing, these six providers consistently delivered the best value and service:
           </p>
           
           <div className="grid md:grid-cols-2 gap-4 mb-6">

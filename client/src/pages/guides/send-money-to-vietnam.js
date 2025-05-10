@@ -4,8 +4,8 @@ import GuideDetail from './GuideDetail';
 import ClickableHeadline from '../../components/common/ClickableHeadline';
 import useExpandableSections from '../../hooks/useExpandableSections';
 // Import images
-import heroImageJpg from '../../assets/images/guides/philippines-transfer-hero-optimized.jpg';
-import heroImageWebp from '../../assets/images/guides/philippines-transfer-hero-new.webp';
+import heroImageJpg from '../../assets/images/guides/vietnam-transfer-hero-optimized.jpg';
+import heroImageWebp from '../../assets/images/guides/vietnam-transfer-hero-new.webp';
 // Import responsive image component
 import ResponsiveImage from '../../components/common/ResponsiveImage';
 

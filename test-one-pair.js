@@ -9,8 +9,14 @@ async function testPair() {
     
     console.log(`Testing ${fromCurrency} to ${toCurrency} conversion...`);
     
-    const response = await axios.get(`http://localhost:5000/api/rates/compare`, {
-      params: { fromCurrency, toCurrency, amount }
+    // Fetch all providers from the API
+    console.log(`Fetching providers for ${fromCurrency} to ${toCurrency}...`);
+    const response = await axios.get(`http://localhost:5000/api/ofx/compare`, {
+      params: {
+        fromCurrency,
+        toCurrency,
+        amount
+      }
     });
     
     console.log('API Response Status:', response.status);

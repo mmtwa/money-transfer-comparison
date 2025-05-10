@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import adPartners from '../config/adPartners';
+import { getAdPartners } from '../services/adService';
 
 /**
  * AdBackground Component - Handles loading and displaying homepage ad backgrounds
@@ -16,7 +16,8 @@ const AdBackground = ({ currentAdPartner, adMetadata }) => {
   const [viewportSize, setViewportSize] = useState('desktop');
   
   // Get the partner config or fall back to default
-  const partnerConfig = adPartners[currentAdPartner] || adPartners.default;
+  const partners = getAdPartners();
+  const partnerConfig = adMetadata || partners[currentAdPartner] || partners.default || {};
   
   // Determine viewport size on mount and window resize
   useEffect(() => {
@@ -45,23 +46,43 @@ const AdBackground = ({ currentAdPartner, adMetadata }) => {
   // Preload the appropriate image when viewport size or partner changes
   useEffect(() => {
     const preloadImage = () => {
+      // Safety check to ensure assets exist
+      if (!partnerConfig.assets || !partnerConfig.assets[viewportSize]) {
+        console.warn(`Missing assets for partner ${currentAdPartner} and viewport ${viewportSize}`);
+        setLoaded(true); // Mark as loaded to avoid infinite loading
+        return;
+      }
+      
       const asset = partnerConfig.assets[viewportSize];
-      if (!asset) return;
+      if (!asset || !asset.src) {
+        console.warn(`Missing source for partner ${currentAdPartner} and viewport ${viewportSize}`);
+        setLoaded(true); // Mark as loaded to avoid infinite loading
+        return;
+      }
       
       // Create image object to preload
       const img = new Image();
       img.src = asset.src;
       img.onload = () => setLoaded(true);
+      img.onerror = () => {
+        console.error(`Failed to load image: ${asset.src}`);
+        setLoaded(true); // Mark as loaded even on error to show something
+      };
     };
     
     setLoaded(false); // Reset loaded state when changing images
     preloadImage();
   }, [viewportSize, currentAdPartner, partnerConfig]);
   
+  // Safety check if no assets available
+  if (!partnerConfig.assets) {
+    return <div className="absolute inset-0 bg-gray-100"></div>;
+  }
+  
   // Get assets for each viewport size
-  const mobileAsset = partnerConfig.assets.mobile || {};
-  const tabletAsset = partnerConfig.assets.tablet || {};
-  const desktopAsset = partnerConfig.assets.desktop || {};
+  const mobileAsset = partnerConfig.assets?.mobile || {};
+  const tabletAsset = partnerConfig.assets?.tablet || {};
+  const desktopAsset = partnerConfig.assets?.desktop || {};
   
   // Handle click if ad is clickable
   const handleAdClick = () => {
@@ -85,7 +106,7 @@ const AdBackground = ({ currentAdPartner, adMetadata }) => {
       {/* Mobile background */}
       <div 
         className={`absolute inset-0 bg-cover bg-center bg-no-repeat block sm:hidden transition-opacity duration-300 ${loaded && viewportSize === 'mobile' ? 'opacity-100' : 'opacity-0'}`}
-        style={{ backgroundImage: `url('${mobileAsset.src}')` }}
+        style={{ backgroundImage: mobileAsset.src ? `url('${mobileAsset.src}')` : 'none' }}
         onClick={handleAdClick}
         role={partnerConfig.metadata?.linkUrl ? 'button' : undefined}
         aria-label={partnerConfig.metadata?.altText || 'Advertisement background'}
@@ -94,7 +115,7 @@ const AdBackground = ({ currentAdPartner, adMetadata }) => {
       {/* Tablet background */}
       <div 
         className={`absolute inset-0 bg-cover bg-center bg-no-repeat hidden sm:block md:hidden transition-opacity duration-300 ${loaded && viewportSize === 'tablet' ? 'opacity-100' : 'opacity-0'}`}
-        style={{ backgroundImage: `url('${tabletAsset.src}')` }}
+        style={{ backgroundImage: tabletAsset.src ? `url('${tabletAsset.src}')` : 'none' }}
         onClick={handleAdClick}
         role={partnerConfig.metadata?.linkUrl ? 'button' : undefined}
         aria-label={partnerConfig.metadata?.altText || 'Advertisement background'}
@@ -107,14 +128,18 @@ const AdBackground = ({ currentAdPartner, adMetadata }) => {
         role={partnerConfig.metadata?.linkUrl ? 'button' : undefined}
         aria-label={partnerConfig.metadata?.altText || 'Advertisement background'}
       >
-        <img 
-          src={desktopAsset.src}
-          alt={partnerConfig.metadata?.altText || 'Advertisement background'} 
-          className="w-full h-full object-top object-cover" 
-          width={desktopAsset.width}
-          height={desktopAsset.height}
-          loading="eager" // Load this as a priority
-        />
+        {desktopAsset.src ? (
+          <img 
+            src={desktopAsset.src}
+            alt={partnerConfig.metadata?.altText || 'Advertisement background'} 
+            className="w-full h-full object-top object-cover" 
+            width={desktopAsset.width || 1920}
+            height={desktopAsset.height || 1080}
+            loading="eager" // Load this as a priority
+          />
+        ) : (
+          <div className="w-full h-full bg-gray-100"></div>
+        )}
       </div>
     </div>
   );

@@ -138,14 +138,26 @@ const apiService = {
     });
   },
   
-  // Direct access to the Wise v3 comparison API
-  getWiseV3Comparison: async (sourceCurrency, targetCurrency, sendAmount) => {
+  // Get comparison data from the rates/compare endpoint that includes OFX
+  getRatesComparison: async (fromCurrency, toCurrency, amount) => {
+    return api.get('/ofx/compare', {
+      params: {
+        fromCurrency: fromCurrency,
+        toCurrency: toCurrency,
+        amount: amount
+      }
+    });
+  },
+  
+  // Direct access to the Wise v4 comparison API
+  getWiseV4Comparison: async (sourceCurrency, targetCurrency, sendAmount) => {
     // This could be a direct call to the Wise API if CORS allows, or through our backend proxy
-    return axios.get(`https://api.transferwise.com/v3/comparisons/`, {
+    return axios.get(`https://api.transferwise.com/v4/comparisons/`, {
       params: {
         sourceCurrency,
         targetCurrency,
-        sendAmount
+        sendAmount,
+        amountType: 'SEND'
       }
     });
   },
@@ -179,7 +191,7 @@ const apiService = {
     
     console.log(`Making request with validated dates: from=${validFromDate}, to=${validToDate}`);
     
-    return api.get('/rates/historical', {
+    return api.get('/wise/historical', {
       params: { 
         source: fromCurrency, 
         target: toCurrency, 

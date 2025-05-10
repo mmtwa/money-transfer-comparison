@@ -3,6 +3,7 @@ const Provider = require('../models/Provider');
 const RateCache = require('../models/RateCache');
 const NodeCache = require('node-cache');
 const wiseApiService = require('./wiseApiService');
+const ofxApiService = require('./ofxApiService');
 
 // In-memory cache for 15 minutes
 const memoryCache = new NodeCache({ stdTTL: 900, checkperiod: 60 });
@@ -46,6 +47,37 @@ class ProviderService {
         apiEnabled: true,
         apiHandler: 'wise'
       };
+      
+      // Add OFX provider if credentials are set in environment
+      if (process.env.OFX_CLIENT_ID && process.env.OFX_CLIENT_SECRET) {
+        console.log('Setting up OFX provider');
+        const baseUrl = process.env.ENABLE_SANDBOX_MODE === 'true' ? 
+          'https://sandbox.api.ofx.com' : 'https://api.ofx.com';
+          
+        this.providers['ofx'] = {
+          id: 'ofx-test-id',
+          name: 'OFX',
+          logo: '/images/providers/OFX_Logo.webp',
+          apiKey: process.env.OFX_CLIENT_ID,
+          apiSecret: process.env.OFX_CLIENT_SECRET,
+          baseUrl: baseUrl,
+          transferFeeStructure: {
+            type: 'flat',
+            amount: 15,
+            minimum: 0,
+            maximum: 15
+          },
+          exchangeRateMargin: 0.01,
+          transferTimeHours: {
+            min: 24,
+            max: 48
+          },
+          rating: 4.6,
+          methods: ['bank_transfer'],
+          apiEnabled: true,
+          apiHandler: 'ofx'
+        };
+      }
       
       // Try to load providers from database, but continue even if it fails
       try {
@@ -274,6 +306,34 @@ class ProviderService {
           deliveryTimeText = provider.deliveryTimes[`${fromCurrency}_${targetCurrency}`];
           console.log(`[CalculateResults] Using Wise API delivery time: ${deliveryTimeText}`);
         }
+      } else if (code === 'ofx') {
+        // OFX: Always set fee to 0
+        transferFee = 0;
+        // Use the convertedAmount from the OFX API if available
+        const amountKey = `${fromCurrency}_${targetCurrency}_${amount}`;
+        let amountReceived = provider.convertedAmounts && provider.convertedAmounts[amountKey] !== undefined
+          ? provider.convertedAmounts[amountKey]
+          : amount * rate;
+        // Format delivery time text if not already set
+        if (provider.deliveryTimes && provider.deliveryTimes[`${fromCurrency}_${targetCurrency}`]) {
+          deliveryTimeText = provider.deliveryTimes[`${fromCurrency}_${targetCurrency}`];
+        }
+        results.push({
+          provider: {
+            id: provider.id,
+            name: provider.name,
+            logo: provider.logo,
+            rating: provider.rating
+          },
+          rate: rate,
+          effectiveRateWithFees: amountReceived / amount, // For OFX, no fee, so this is just the rate
+          amountReceived: amountReceived,
+          transferFee: transferFee,
+          totalCost: amount, // No fee, so total cost is just the amount
+          deliveryTime: deliveryTimeText,
+          methods: provider.methods
+        });
+        continue;
       } else {
         // Calculate fee based on provider's fee structure
         if (provider.transferFeeStructure.type === 'flat') {
@@ -348,6 +408,8 @@ class ProviderService {
       switch (provider.apiHandler.toLowerCase()) {
         case 'wise':
           return await this.fetchWiseRate(provider, fromCurrency, targetCurrency, amount);
+        case 'ofx':
+          return await this.fetchOFXRate(provider, fromCurrency, targetCurrency, amount);
         default:
           console.log(`No specific handler for provider: ${provider.apiHandler}`);
           return null;
@@ -392,6 +454,61 @@ class ProviderService {
     }
   }
   
+  async fetchOFXRate(provider, fromCurrency, targetCurrency, amount) {
+    try {
+      console.log(`[fetchOFXRate] Attempting to get rate for ${fromCurrency} to ${targetCurrency}`);
+      
+      // Clear any existing rate cache for this currency pair
+      await this.clearCache(fromCurrency, targetCurrency);
+      
+      // Use the dedicated OFX API service to get the rate
+      const rateInfo = await ofxApiService.getExchangeRate(fromCurrency, targetCurrency, amount);
+      
+      if (!rateInfo || !rateInfo.rate) {
+        throw new Error('No rate returned from OFX API');
+      }
+      
+      console.log(`[fetchOFXRate] Received rate from OFX API: ${rateInfo.rate}`);
+      
+      // Store the fee for later use in calculations
+      if (!provider.transferFees) {
+        provider.transferFees = {};
+      }
+      
+      const feeKey = `${fromCurrency}_${targetCurrency}_${amount}`;
+      provider.transferFees[feeKey] = rateInfo.fee || 0;
+      
+      // Store converted amount if available
+      if (!provider.convertedAmounts) {
+        provider.convertedAmounts = {};
+      }
+      
+      provider.convertedAmounts[feeKey] = rateInfo.targetAmount;
+      
+      // Store delivery time if available
+      if (rateInfo.deliveryTime) {
+        if (!provider.deliveryTimes) {
+          provider.deliveryTimes = {};
+        }
+        
+        const currencyPairKey = `${fromCurrency}_${targetCurrency}`;
+        provider.deliveryTimes[currencyPairKey] = rateInfo.deliveryTime;
+        
+        console.log(`[fetchOFXRate] Set delivery time for ${fromCurrency} to ${targetCurrency}: ${rateInfo.deliveryTime}`);
+      }
+      
+      return rateInfo.rate;
+    } catch (error) {
+      console.error('[fetchOFXRate] Error:', error.message);
+      if (error.response) {
+        console.error('[fetchOFXRate] Response status:', error.response.status);
+        console.error('[fetchOFXRate] Response data:', JSON.stringify(error.response.data));
+      }
+      // Do not return a fallback or mock rate. OFX will not be included for this pair.
+      return null;
+    }
+  }
+  
   async clearCache(fromCurrency = null, targetCurrency = null) {
     try {
       if (fromCurrency && targetCurrency) {
@@ -416,6 +533,21 @@ class ProviderService {
       console.error('Error clearing cache:', error);
       return false;
     }
+  }
+  
+  /**
+   * Remove a specific API-related key from the memory cache
+   * @param {string} cacheKey - The cache key to remove
+   */
+  removeFromCache(cacheKey) {
+    const apiCacheKey = cacheKey.startsWith('api:') ? cacheKey : `api:${cacheKey}`;
+    
+    // Try to delete from memory cache
+    const deleted = memoryCache.del(apiCacheKey);
+    
+    console.log(`Removed ${apiCacheKey} from memory cache: ${deleted ? 'success' : 'not found'}`);
+    
+    return deleted;
   }
 }
 

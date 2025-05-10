@@ -99,6 +99,36 @@ const adPartners = {
     }
   }
   */
+
+  // New Partner campaign
+  se: {
+    name: 'SE',
+    active: false,
+    startDate: null, // No start date - always active
+    endDate: null,   // No end date - always active
+    priority: 10,    // Higher priority than default
+    assets: {
+      mobile: {
+        src: '/partners/se/mobile.webp',
+        width: 640,
+        height: 1200
+      },
+      tablet: {
+        src: '/partners/se/tablet.webp',
+        width: 1024,
+        height: 1200
+      },
+      desktop: {
+        src: '/partners/se/desktop.webp',
+        width: 1920,
+        height: 1080
+      }
+    },
+    metadata: {
+      altText: 'SE Advertisement',
+      trackingId: 'se-2024'
+    }
+  }
 };
 
 export default adPartners; 

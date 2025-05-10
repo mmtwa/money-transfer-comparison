@@ -306,7 +306,7 @@ const LiveHistoricalRates = () => {
       console.error('Error fetching current rate:', err);
       // Try direct API as fallback
       try {
-        const directResponse = await apiService.getWiseV3Comparison(fromCurrency, toCurrency, 1000);
+        const directResponse = await apiService.getWiseV4Comparison(fromCurrency, toCurrency, 1000);
         
         if (directResponse.data && directResponse.data.providers) {
           const providers = directResponse.data.providers;
@@ -410,7 +410,7 @@ const LiveHistoricalRates = () => {
       console.error('Error fetching second pair current rate:', err);
       // Try direct API as fallback
       try {
-        const directResponse = await apiService.getWiseV3Comparison(fromCurrency, toCurrency, 1000);
+        const directResponse = await apiService.getWiseV4Comparison(fromCurrency, toCurrency, 1000);
         
         if (directResponse.data && directResponse.data.providers) {
           const providers = directResponse.data.providers;
@@ -622,7 +622,7 @@ const LiveHistoricalRates = () => {
           
           // Try direct API as fallback
           try {
-            const directResponse = await apiService.getWiseV3Comparison(baseCurrency, currency, productPrice);
+            const directResponse = await apiService.getWiseV4Comparison(baseCurrency, currency, productPrice);
             
             if (directResponse.data && directResponse.data.providers) {
               const providers = directResponse.data.providers;

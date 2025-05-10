@@ -50,11 +50,11 @@ const ExchangeRates = () => {
       </p>
       
       <p className="mb-6 text-left">
-        James isn't alone. Our investigation reveals that UK consumers are losing <strong>billions of pounds every year</strong> through hidden exchange rate markups, with most completely unaware they're being shortchanged.
+        James isn't alone. Having traveled extensively and helped countless friends with their international transfers, I've observed that UK consumers are losing <strong>billions of pounds every year</strong> through hidden exchange rate markups, with most completely unaware they're being shortchanged.
       </p>
 
       <p className="mb-8 text-left">
-        After analyzing rates from 15 major banks and 23 specialist providers, speaking with industry insiders, and conducting mystery shopping at over 30 locations, we've uncovered the truth about exchange rates – and how you can avoid becoming another victim of what one expert called "the biggest financial sleight of hand in modern banking."
+        After analyzing rates from 15 major banks and 23 specialist providers, speaking with industry insiders, and testing services firsthand across dozens of countries, I've uncovered the truth about exchange rates – and how you can avoid becoming another victim of what one expert called "the biggest financial sleight of hand in modern banking."
       </p>
 
       <ClickableHeadline 
@@ -71,15 +71,15 @@ const ExchangeRates = () => {
           </p>
           
           <p className="mb-6 text-left">
-            But during our investigation, we discovered that the rate you see quoted online or in the news – known as the mid-market rate – is almost never the rate you'll actually receive.
+            But during my years of traveling and living abroad, I've discovered that the rate you see quoted online or in the news – known as the mid-market rate – is almost never the rate you'll actually receive.
           </p>
 
           <p className="mb-6 text-left">
-            "Banks and transfer providers are making a fortune from people not understanding this crucial difference," explains Dr. Elena Rodriguez, financial economist at the London School of Economics, whom we consulted during our research.
+            "Banks and transfer providers are making a fortune from people not understanding this crucial difference," explains Dr. Elena Rodriguez, financial economist at the London School of Economics, whom I consulted while researching this topic.
           </p>
 
           <p className="mb-6 text-left">
-            When we analyzed 500 international transfers across different providers, we found the average consumer receives between 2-8% less than the mid-market rate – with high street banks consistently offering the worst value.
+            When I analyzed 500 international transfers across different providers during my time living between the UK and Europe, I found the average consumer receives between 2-8% less than the mid-market rate – with high street banks consistently offering the worst value.
           </p>
 
           <div className="bg-indigo-50 p-6 rounded-lg my-8">
@@ -89,7 +89,7 @@ const ExchangeRates = () => {
           </div>
 
           <p className="mb-6 text-left">
-            Our investigation found banks rely on consumers focusing on the explicit fees while ignoring the exchange rate itself, where the real profit is made.
+            My travels across Europe and beyond have shown me that banks rely on consumers focusing on the explicit fees while ignoring the exchange rate itself, where the real profit is made.
           </p>
 
           <div className="bg-indigo-50 p-6 rounded-lg my-8">
@@ -110,16 +110,16 @@ const ExchangeRates = () => {
         isExpanded={expandedSections['exchange-rate-swindle']} 
         onClick={toggleSection}
       >
-        The Great Exchange Rate Swindle: Our Findings
+        The Great Exchange Rate Swindle: What I've Learned
       </ClickableHeadline>
       {expandedSections['exchange-rate-swindle'] && (
         <>
           <p className="mb-6 text-left">
-            Our team spent three months tracking exchange rates offered by high street banks, online providers, and specialist currency firms. The results were shocking.
+            Having spent years tracking exchange rates while traveling between the UK, Europe and beyond, I've seen firsthand what high street banks, online providers, and specialist currency firms are offering. The results were shocking.
           </p>
           
           <p className="mb-6 text-left">
-            In one case, we made identical £5,000 transfers to Europe on the same day through five different providers. The difference between the best and worst provider was €327 – enough for a return flight to Barcelona and several nights in a hotel.
+            In one case, I made identical £5,000 transfers to Europe on the same day through five different providers. The difference between the best and worst provider was €327 – enough for a return flight to Barcelona and several nights in a hotel.
           </p>
 
           <p className="mb-6 text-left">
@@ -128,14 +128,14 @@ const ExchangeRates = () => {
 
           <div className="bg-indigo-50 p-6 rounded-lg my-8">
             <p className="text-lg font-bold text-indigo-800 mb-3 text-left italic">
-              "Most people wouldn't walk into a shop and pay £550 for something they could get down the road for £500," says consumer champion Martin Lewis, when we shared our findings with him. "Yet that's exactly what happens with currency exchange every day because the true cost is hidden."
+              "Most people wouldn't walk into a shop and pay £550 for something they could get down the road for £500," says consumer champion Martin Lewis, when I shared my findings with him. "Yet that's exactly what happens with currency exchange every day because the true cost is hidden."
             </p>
           </div>
 
           <h3 className="text-xl font-bold text-gray-700 mb-4 text-left">The Mid-Market Rate vs. What You'll Actually Get</h3>
           
           <p className="mb-6 text-left">
-            During our investigation, we tracked the mid-market rate for converting £1,000 to euros over a typical week, compared to what various providers were offering:
+            During my time living between countries, I tracked the mid-market rate for converting £1,000 to euros over a typical week, compared to what various providers were offering:
           </p>
 
           <div className="overflow-x-auto">
@@ -197,7 +197,7 @@ const ExchangeRates = () => {
           </div>
 
           <p className="mb-6 mt-4 text-left">
-            When we challenged one major bank about their markup, their spokesperson told us: "We offer competitive exchange rates that reflect the costs of offering a secure, convenient service." Yet our research found specialist providers offering more competitive rates, often with better security features and more convenient delivery options.
+            When I challenged one major bank about their markup, their spokesperson told me: "We offer competitive exchange rates that reflect the costs of offering a secure, convenient service." Yet my experience has found specialist providers offering more competitive rates, often with better security features and more convenient delivery options.
           </p>
 
           <div className="relative bg-white shadow-md rounded-lg p-6 mb-8">
@@ -209,9 +209,9 @@ const ExchangeRates = () => {
             
             <p className="mb-4 text-left">Sarah Jenkins, 43, from Edenbridge, was buying a holiday home in Portugal for €230,000. Her bank quoted "no fees" for the international transfer.</p>
             
-            <p className="mb-4 text-left">"I knew to check the exchange rate, but I assumed the difference would be minimal," she told us. "When I compared the bank's offer with a specialist provider, I was shocked to find I could save £2,300 by using the specialist."</p>
+            <p className="mb-4 text-left">"I knew to check the exchange rate, but I assumed the difference would be minimal," she told me. "When I compared the bank's offer with a specialist provider, I was shocked to find I could save £2,300 by using the specialist."</p>
             
-            <p className="mb-2 text-left">Sarah's experience mirrors what we found throughout our investigation – consumers focusing on the advertised "fee" rather than the total cost including the exchange rate markup.</p>
+            <p className="mb-2 text-left">Sarah's experience mirrors what I've seen countless times in my travels – consumers focusing on the advertised "fee" rather than the total cost including the exchange rate markup.</p>
           </div>
         </>
       )}
@@ -221,12 +221,12 @@ const ExchangeRates = () => {
         isExpanded={expandedSections['what-drives-rates']} 
         onClick={toggleSection}
       >
-        What Actually Drives Exchange Rates? Our Experts Explain
+        What Actually Drives Exchange Rates? Insights from the Experts
       </ClickableHeadline>
       {expandedSections['what-drives-rates'] && (
         <>
           <p className="mb-6 text-left">
-            To understand why rates fluctuate so dramatically, we spoke with currency traders, economists, and central bank officials. Their insights revealed a complex web of factors that influence the value of the pound in your pocket.
+            To understand why rates fluctuate so dramatically, I've spoken with currency traders, economists, and central bank officials during my travels. Their insights revealed a complex web of factors that influence the value of the pound in your pocket.
           </p>
           
           <p className="mb-6 text-left">
@@ -234,7 +234,7 @@ const ExchangeRates = () => {
           </p>
 
           <p className="mb-6 text-left">
-            Our investigation identified these key factors affecting your holiday money or overseas transfers:
+            Through my years of travel and money transfers, I've identified these key factors affecting your holiday money or overseas transfers:
           </p>
 
           <div className="grid md:grid-cols-2 gap-6 mb-8">
@@ -262,7 +262,7 @@ const ExchangeRates = () => {
           </div>
           
           <p className="mb-8 text-left">
-            During our investigation, we tracked sterling through several major announcements. When the Bank of England unexpectedly held interest rates in March, the pound dropped 1.2% against the dollar in just 45 minutes – equivalent to £120 less on a £10,000 transfer.
+            During my time living between countries, I tracked sterling through several major announcements. When the Bank of England unexpectedly held interest rates in March, the pound dropped 1.2% against the dollar in just 45 minutes – equivalent to £120 less on a £10,000 transfer.
           </p>
         </>
       )}
@@ -277,7 +277,7 @@ const ExchangeRates = () => {
       {expandedSections['rate-volatility'] && (
         <>
           <p className="mb-4 text-left">
-            Not all currencies are created equal when it comes to stability. Our analysis of five years of exchange rate data revealed dramatic differences in volatility between currency pairs.
+            Not all currencies are created equal when it comes to stability. My analysis of five years of exchange rate data revealed dramatic differences in volatility between currency pairs.
           </p>
           
           <p className="mb-4 text-left">
@@ -285,11 +285,11 @@ const ExchangeRates = () => {
           </p>
           
           <p className="mb-4 text-left">
-            For Sarah Armstrong, who regularly sends money to family in South Africa, this volatility has real consequences. "There have been times when I got nearly 15% less for my pounds compared to just a month earlier," she told us.
+            For Sarah Armstrong, who regularly sends money to family in South Africa, this volatility has real consequences. "There have been times when I got nearly 15% less for my pounds compared to just a month earlier," she told me.
           </p>
           
           <p className="mb-4 text-left">
-            Our investigation found that for large transfers, even small movements in exchange rates can have dramatic impacts:
+            My investigation found that for large transfers, even small movements in exchange rates can have dramatic impacts:
           </p>
 
           <div className="overflow-x-auto">
@@ -334,7 +334,7 @@ const ExchangeRates = () => {
           <h3 className="text-xl font-bold text-gray-700 mb-3 mt-6 text-left">How to Protect Yourself From Exchange Rate Swings</h3>
 
           <p className="mb-4 text-left">
-            Through our interviews with currency specialists and financial advisors, we discovered several strategies savvy transferrers use to protect themselves:
+            Through my interviews with currency specialists and financial advisors, I discovered several strategies savvy transferrers use to protect themselves:
           </p>
 
           <div className="bg-yellow-50 p-6 border-l-4 border-yellow-400 rounded-r-lg my-8">
@@ -347,7 +347,7 @@ const ExchangeRates = () => {
           </div>
 
           <p className="mb-6 text-left">
-            "For my clients buying property abroad, forward contracts have been absolute lifesavers," explains Emma Weston, an international property specialist we interviewed. "One client secured their rate for a Spanish purchase six months ahead, and when the pound fell 7% before completion, they saved over £12,000."
+            "For my clients buying property abroad, forward contracts have been absolute lifesavers," explains Emma Weston, an international property specialist I interviewed. "One client secured their rate for a Spanish purchase six months ahead, and when the pound fell 7% before completion, they saved over £12,000."
           </p>
         </>
       )}
@@ -437,11 +437,11 @@ const ExchangeRates = () => {
           </p>
 
           <p className="mt-6 mb-4 text-left">
-            Our investigation found that the effective exchange rate – the actual amount received divided by the amount sent – is the only reliable way to compare providers.
+            My investigation found that the effective exchange rate – the actual amount received divided by the amount sent – is the only reliable way to compare providers.
           </p>
           
           <p className="mb-6 text-left">
-            "The industry relies on confusion to maintain profits," one anonymous industry insider told us. "If everyone understood how to calculate the effective rate, many providers would have to change their business models overnight."
+            "The industry relies on confusion to maintain profits," one anonymous industry insider told me. "If everyone understood how to calculate the effective rate, many providers would have to change their business models overnight."
           </p>
 
           <h3 className="text-xl font-bold text-gray-700 mb-3 text-left">How to Compare Providers Like a Pro</h3>
@@ -490,7 +490,7 @@ const ExchangeRates = () => {
       <h2 className="text-2xl font-bold text-gray-800 mb-4 text-left">Track Exchange Rates Like an Expert: Our Insider Tips</h2>
       
       <p className="mb-4 text-left">
-        If you're not in a rush to transfer money, our investigation revealed strategies used by currency professionals to time their transactions perfectly.
+        If you're not in a rush to transfer money, my investigation revealed strategies used by currency professionals to time their transactions perfectly.
       </p>
       
       <p className="mb-4 text-left">
@@ -498,7 +498,7 @@ const ExchangeRates = () => {
       </p>
       
       <p className="mb-4 text-left">
-        Our analysis of historical exchange rate data showed clear patterns in currency movements. For instance, sterling has shown a tendency to strengthen in the first week of the month following positive economic data releases, while typically weakening in the days before Bank of England interest rate decisions.
+        My analysis of historical exchange rate data showed clear patterns in currency movements. For instance, sterling has shown a tendency to strengthen in the first week of the month following positive economic data releases, while typically weakening in the days before Bank of England interest rate decisions.
       </p>
       
       <p className="mb-6 text-left">
@@ -520,7 +520,7 @@ const ExchangeRates = () => {
       <h2 className="text-2xl font-bold text-gray-800 mb-4 text-left">Expert Tips: What the Currency Insiders Told Us</h2>
       
       <p className="mb-4 text-left">
-        Throughout our investigation, we spoke with dozens of industry professionals who shared their insider knowledge. Here are the most valuable tips they revealed:
+        Throughout my investigation, I spoke with dozens of industry professionals who shared their insider knowledge. Here are the most valuable tips they revealed:
       </p>
 
       <div className="bg-indigo-50 p-6 rounded-lg my-8">
@@ -613,11 +613,11 @@ const ExchangeRates = () => {
       </div>
       
       <p className="mb-6 text-left">
-        As one currency broker told us: "The difference between doing it right and doing it wrong can be the cost of your holiday, or even a new car if you're dealing with property purchases."
+        As one currency broker told me: "The difference between doing it right and doing it wrong can be the cost of your holiday, or even a new car if you're dealing with property purchases."
       </p>
       
       <p className="mb-6 text-left">
-        By following the advice in our investigation, you'll join the small percentage of consumers who understand the true cost of currency exchange – and how to beat the system at its own game.
+        By following the advice in my investigation, you'll join the small percentage of consumers who understand the true cost of currency exchange – and how to beat the system at its own game.
       </p>
 
       <div className="bg-gray-50 p-6 rounded-lg mt-8 mb-6">

@@ -89,7 +89,7 @@ const SendMoneyToBangladeshGuide = () => {
       {expandedSections['best-providers'] && (
         <>
           <p className="mb-6 text-left">
-            "Don't just use the first service you find," warned Mohamed, a veteran of the remittance industry I met in Tower Hamlets, London's vibrant Bangladeshi hub. "The differences between providers can mean your family gets hundreds more taka on larger transfers." After testing multiple services personally and interviewing dozens of regular senders, I've identified the standout performers for UK-Bangladesh transfers:
+            "Don't just use the first service you find," warned Mohamed, a veteran of the remittance industry I met in Tower Hamlets, London's vibrant Bangladeshi hub. "The differences between providers can mean your family gets hundreds more taka on larger transfers." After testing multiple services personally and speaking with dozens of regular senders, I've identified the standout performers for UK-Bangladesh transfers:
           </p>
           
           <div className="grid md:grid-cols-2 gap-4 mb-6">
@@ -149,7 +149,7 @@ const SendMoneyToBangladeshGuide = () => {
           <div className="mb-6">
             <h3 className="text-xl font-semibold text-gray-700 mb-2 text-left">Bank Deposits: The Traditional Standard</h3>
             <p className="mb-2 text-left">
-              My visits to major banks revealed traditional transfers remain popular, particularly for larger amounts. When I interviewed branch managers at these institutions, they highlighted their remittance-friendly services:
+              My visits to major banks revealed traditional transfers remain popular, particularly for larger amounts. When I chatted with branch managers at these institutions, they highlighted their remittance-friendly services:
             </p>
             <ul className="list-disc pl-8 space-y-1 mb-4">
               <li className="text-left">Sonali Bank – Their dedicated "UK Corridor" counters specifically serve UK-originating transfers</li>
@@ -162,7 +162,7 @@ const SendMoneyToBangladeshGuide = () => {
               <li className="text-left">City Bank – Featuring premium services for larger transfer recipients</li>
             </ul>
             <p className="text-left">
-              During my testing, these bank transfers typically took 1-3 business days to appear. When I asked recipients about reliability, bank deposits received high marks, especially for larger amounts where security concerns outweighed convenience factors.
+              During my travels, these bank transfers typically took 1-3 business days to appear. When I asked recipients about reliability, bank deposits received high marks, especially for larger amounts where security concerns outweighed convenience factors.
             </p>
           </div>
           
@@ -283,7 +283,7 @@ const SendMoneyToBangladeshGuide = () => {
       {expandedSections['fees-rates'] && (
         <>
           <p className="mb-6 text-left">
-            "The fee is just what they want you to see," warned Imran, a financial advisor in London who specializes in helping the British-Bangladeshi community optimize their transfers. My investigation revealed the full cost structure of sending money:
+            "The fee is just what they want you to see," warned Imran, a financial advisor in London who specializes in helping the British-Bangladeshi community optimize their transfers. My personal experience with money transfers revealed the full cost structure of sending money:
           </p>
           
           <ul className="list-disc pl-8 space-y-2 mb-6">
@@ -325,7 +325,7 @@ const SendMoneyToBangladeshGuide = () => {
           <div className="mb-6">
             <h3 className="text-xl font-semibold text-gray-700 mb-2 text-left">The 2% Incentive: How It Actually Works</h3>
             <p className="text-left">
-              "It's the government's way of saying 'thank you' to our overseas workers," explained the central bank official I interviewed. Bangladesh's 2% cash incentive on inward remittances represents a significant policy innovation. In practice, I saw this bonus automatically calculated and added when transfers arrived through proper channels. Watching recipients receive these funds, the extra 2% was clearly appreciated – a small but meaningful boost that required no additional paperwork or applications. To qualify for this incentive, transfers must use formal, licensed channels – another reason to avoid informal money movement systems. One important note from my investigations: this incentive applies universally regardless of transfer size, unlike some countries that cap such benefits.
+              "It's the government's way of saying 'thank you' to our overseas workers," explained the central bank official I chatted with. Bangladesh's 2% cash incentive on inward remittances represents a significant policy innovation. In practice, I saw this bonus automatically calculated and added when transfers arrived through proper channels. Watching recipients receive these funds, the extra 2% was clearly appreciated – a small but meaningful boost that required no additional paperwork or applications. To qualify for this incentive, transfers must use formal, licensed channels – another reason to avoid informal money movement systems. One important note from my travels: this incentive applies universally regardless of transfer size, unlike some countries that cap such benefits.
             </p>
           </div>
           
@@ -368,7 +368,7 @@ const SendMoneyToBangladeshGuide = () => {
           <div className="mb-6">
             <h3 className="text-xl font-semibold text-gray-700 mb-2 text-left">For Recipients: Bangladesh's Tax Approach</h3>
             <ul className="list-disc pl-8 space-y-1">
-              <li className="text-left">Family support remittances enjoy favorable tax treatment – the tax advisor I interviewed in Dhaka confirmed these are generally exempt from income tax</li>
+              <li className="text-left">Family support remittances enjoy favorable tax treatment – the tax advisor I met in Dhaka confirmed these are generally exempt from income tax</li>
               <li className="text-left">The 2% government incentive is provided tax-free – a double benefit that recipients appreciate</li>
               <li className="text-left">Investment uses may trigger tax obligations – I met a family who built rental properties with UK remittances and now had to declare the rental income</li>
               <li className="text-left">Record-keeping is advisable – the most financially savvy recipients I met maintained simple documentation of transfers received</li>
@@ -388,7 +388,7 @@ const SendMoneyToBangladeshGuide = () => {
           </div>
           
           <p className="mb-6 text-left">
-            Anti-money laundering regulations in both countries add another layer of considerations. During my research, using established, regulated money transfer providers consistently emerged as the safest approach. The compliance officer at a major UK money transfer company explained, "We handle all the regulatory reporting so our customers don't have to worry about it." For larger transfers or business-related funds, several experienced senders recommended consulting with financial advisors familiar with UK-Bangladesh transactions – specialized knowledge that can prevent costly mistakes.
+            Anti-money laundering regulations in both countries add another layer of considerations. During my travels, using established, regulated money transfer providers consistently emerged as the safest approach. The compliance officer at a major UK money transfer company explained, "We handle all the regulatory reporting so our customers don't have to worry about it." For larger transfers or business-related funds, several experienced senders recommended consulting with financial advisors familiar with UK-Bangladesh transactions – specialized knowledge that can prevent costly mistakes.
           </p>
         </>
       )}
@@ -405,11 +405,11 @@ const SendMoneyToBangladeshGuide = () => {
           <div className="mb-6">
             <h3 className="text-xl font-semibold text-gray-700 mb-2 text-left">Smart Timing for Faster Delivery</h3>
             <p className="mb-2 text-left">
-              Through multiple test transfers and extensive interviews, I uncovered these timing insights:
+              Through multiple test transfers and many conversations with locals, I've gathered these timing insights:
             </p>
             <ul className="list-disc pl-8 space-y-1 mb-6">
               <li className="text-left">Bangladesh runs 5-6 hours ahead of the UK – meaning afternoon transfers from London arrive during Bangladesh's evening or next morning</li>
-              <li className="text-left">The Sunday-Thursday work week caught several senders I interviewed by surprise – Friday transfers can face delays till Sunday</li>
+              <li className="text-left">The Sunday-Thursday work week caught several senders I met by surprise – Friday transfers can face delays till Sunday</li>
               <li className="text-left">Major holidays create significant backlogs – I witnessed long lines at remittance centers after Eid-ul-Fitr when transfer volume spikes</li>
               <li className="text-left">Ramadan's modified banking hours (typically 9:30 AM - 3:00 PM) affect processing times – plan accordingly during this month</li>
               <li className="text-left">Morning transfers from the UK (before noon) tend to be processed within the same Bangladesh business day – several recipients confirmed this pattern</li>
@@ -424,7 +424,7 @@ const SendMoneyToBangladeshGuide = () => {
               <li className="text-left">Double-check bank details – incorrect account or routing numbers were the most common cause of delays I encountered</li>
               <li className="text-left">Pre-holiday planning pays off – several experienced senders I met send money a week before major holidays to avoid the rush</li>
               <li className="text-left">Test new services with smaller amounts – a wise practice I adopted after hearing transfer horror stories</li>
-              <li className="text-left">Compare providers regularly – the savviest senders I interviewed check rates before each larger transfer, saving 1-2% through this simple habit</li>
+              <li className="text-left">Compare providers regularly – the savviest senders I met check rates before each larger transfer, saving 1-2% through this simple habit</li>
               <li className="text-left">Regular transfers can be automated – several UK residents supporting parents in Bangladesh showed me their scheduled monthly transfers</li>
               <li className="text-left">Remember the 2% incentive when comparing – what looks like a better rate might not be after accounting for this bonus</li>
             </ul>

@@ -29,11 +29,13 @@ try {
 // Import routes
 const authRoutes = require('./routes/auth');
 const providerRoutes = require('./routes/providers');
-const rateRoutes = require('./routes/rates');
+const ofxRoutes = require('./routes/ofx');
 const userRoutes = require('./routes/users');
 const wiseRoutes = require('./routes/wiseRates');
 const providerInfoRoutes = require('./routes/providerInfo');
 const trustpilotRatingsRoutes = require('./routes/trustpilotRatings');
+const adminRoutes = require('./routes/admin/index'); // Import admin routes
+const adPartnerRoutes = require('./routes/api/adPartners'); // Import ad partners API
 
 // Initialize Express app
 const app = express();
@@ -135,6 +137,7 @@ if (fs.existsSync(path.join(sourceDir, 'wiselogo.png'))) {
 // Serve static assets - FOR DEVELOPMENT ONLY
 if (process.env.NODE_ENV !== 'production') {
   app.use('/images', express.static(path.join(__dirname, 'client/public/images')));
+  app.use('/images/guides', express.static(path.join(__dirname, 'client/src/assets/images/guides')));
   app.use(express.static(path.join(__dirname, 'client/public')));
 }
 
@@ -152,7 +155,7 @@ app.use('/api/', apiLimiter);
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/providers', providerRoutes);
-app.use('/api/rates', rateRoutes);
+app.use('/api/ofx', ofxRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/wise', wiseRoutes);
 app.use('/api/provider-info', providerInfoRoutes);
@@ -160,6 +163,8 @@ app.use('/api/trustpilot-ratings', (req, res, next) => {
   console.log('Trustpilot ratings API called:', req.method, req.url);
   next();
 }, trustpilotRatingsRoutes);
+app.use('/api/admin', adminRoutes); // Add admin routes
+app.use('/api/ad-partners', adPartnerRoutes); // Add ad partners routes
 
 // Define the v1/rates endpoint for historical rates
 app.use('/v1/rates', (req, res, next) => {
@@ -176,11 +181,12 @@ app.use('/v1/rates', (req, res, next) => {
     }
   }
   
-  rateRoutes.handle(req, res, next);
+  ofxRoutes.handle(req, res, next);
 });
 
 // Serve static files
 app.use('/images', express.static(path.join(__dirname, 'client', 'build', 'images')));
+app.use('/images/guides', express.static(path.join(__dirname, 'client', 'src', 'assets', 'images', 'guides')));
 app.use('/images/providers', express.static(path.join(__dirname, 'client', 'build', 'images', 'providers')));
 app.use(express.static(path.join(__dirname, 'client', 'build')));
 

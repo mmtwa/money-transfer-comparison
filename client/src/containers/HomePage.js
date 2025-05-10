@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import SearchForm from './SearchForm';
 import AdBackground from '../components/AdBackground';
 import Header from '../components/layout/Header';
-import { selectAdPartner, trackImpression } from '../services/adService';
-import adPartners from '../config/adPartners';
+import { selectAdPartner, trackImpression, getAdPartners } from '../services/adService';
 
 /**
  * Home page container with dynamic ad backgrounds and search form
@@ -11,17 +10,37 @@ import adPartners from '../config/adPartners';
 const HomePage = ({ onSearch, initialData, onAboutClick, onGuidesClick, onFaqClick, onHistoricalRatesClick }) => {
   // Select the appropriate ad partner based on scheduling and priority
   const [currentAdPartner, setCurrentAdPartner] = useState('default');
-  const [adMetadata, setAdMetadata] = useState(adPartners.default);
+  const [adMetadata, setAdMetadata] = useState({});
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
   // Initialize the ad partner on component mount
   useEffect(() => {
-    const partnerId = selectAdPartner();
-    setCurrentAdPartner(partnerId);
-    setAdMetadata(adPartners[partnerId] || adPartners.default);
-    
-    // Track impression for analytics
-    trackImpression(partnerId);
+    const initializeAdPartner = async () => {
+      setIsLoading(true);
+      try {
+        // Get ad partner asynchronously
+        const partnerId = await selectAdPartner();
+        setCurrentAdPartner(partnerId);
+        
+        // Get all ad partners data
+        const allPartners = getAdPartners();
+        setAdMetadata(allPartners[partnerId] || allPartners.default);
+        
+        // Track impression for analytics
+        trackImpression(partnerId);
+      } catch (error) {
+        console.error('Error initializing ad partner:', error);
+        // Fallback to default if there's an error
+        setCurrentAdPartner('default');
+        const allPartners = getAdPartners();
+        setAdMetadata(allPartners.default);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeAdPartner();
   }, []);
   
   // Handle menu state change from Header component
@@ -71,8 +90,13 @@ const HomePage = ({ onSearch, initialData, onAboutClick, onGuidesClick, onFaqCli
       boxSizing: 'border-box',
       position: 'relative' 
     }}>
-      {/* Dynamic Ad Background */}
-      <AdBackground currentAdPartner={currentAdPartner} adMetadata={adMetadata} />
+      {/* Loading state for ad background */}
+      {isLoading ? (
+        <div className="absolute inset-0 bg-gray-100"></div>
+      ) : (
+        /* Dynamic Ad Background */
+        <AdBackground currentAdPartner={currentAdPartner} adMetadata={adMetadata} />
+      )}
   
       {/* Header with transparent background */}
       <div className={`absolute top-0 left-0 right-0 ${menuOpen ? 'z-50' : 'z-10'}`}>
@@ -131,42 +155,44 @@ const HomePage = ({ onSearch, initialData, onAboutClick, onGuidesClick, onFaqCli
         </div>
         
         {/* British Airways promotional text - responsive positioning */}
-        <a
-          href="https://www.britishairways.com/content/information/travel-classes/club-world"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block relative text-center max-w-xs mx-auto mb-8 mt-8 md:absolute md:text-right md:max-w-3xl md:mx-0 md:mt-0 md:bottom-10 md:right-10"
-          style={{
-            padding: '20px',
-            color: 'rgba(255, 255, 250, 0.95)',
-            textShadow: '0 2px 4px rgba(0, 0, 0, 0.25)',
-            zIndex: 5,
-            textDecoration: 'none',
-            cursor: 'pointer',
-            transition: 'opacity 0.2s ease-in-out'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
-          onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-        >
-          <div style={{
-            fontSize: 'clamp(42px, 4vw, 64px)',
-            marginBottom: '12px',
-            fontFamily: '"Libre Caslon Display", serif',
-            fontStyle: 'italic',
-            fontWeight: 400,
-            lineHeight: 1.2
-          }}>
-            Experience British Airways
-          </div>
-          <div style={{
-            fontSize: 'clamp(24px, 2.5vw, 32px)',
-            fontFamily: '"Poppins", sans-serif',
-            fontWeight: 400,
-            letterSpacing: '0.02em'
-          }}>
-            See their new Club World experience
-          </div>
-        </a>
+        {currentAdPartner === 'ba' && (
+          <a
+            href="https://www.britishairways.com/content/information/travel-classes/club-world"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block relative text-center max-w-xs mx-auto mb-8 mt-8 md:absolute md:text-right md:max-w-3xl md:mx-0 md:mt-0 md:bottom-10 md:right-10"
+            style={{
+              padding: '20px',
+              color: 'rgba(255, 255, 250, 0.95)',
+              textShadow: '0 2px 4px rgba(0, 0, 0, 0.25)',
+              zIndex: 5,
+              textDecoration: 'none',
+              cursor: 'pointer',
+              transition: 'opacity 0.2s ease-in-out'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+          >
+            <div style={{
+              fontSize: 'clamp(42px, 4vw, 64px)',
+              marginBottom: '12px',
+              fontFamily: '"Libre Caslon Display", serif',
+              fontStyle: 'italic',
+              fontWeight: 400,
+              lineHeight: 1.2
+            }}>
+              Experience British Airways
+            </div>
+            <div style={{
+              fontSize: 'clamp(24px, 2.5vw, 32px)',
+              fontFamily: '"Poppins", sans-serif',
+              fontWeight: 400,
+              letterSpacing: '0.02em'
+            }}>
+              See their new Club World experience
+            </div>
+          </a>
+        )}
       </div>
     </div>
   );

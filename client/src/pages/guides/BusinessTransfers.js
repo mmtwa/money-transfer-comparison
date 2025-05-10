@@ -22,11 +22,11 @@ const BusinessTransfers = () => {
       content={
         <div className="prose prose-lg max-w-none">
           <p className="lead text-xl font-medium mb-8 text-left">
-            Having spent the last decade navigating the complex world of international business payments, I've watched countless companies waste substantial sums on poor exchange rates and hidden fees. Our investigation reveals that with the right approach, most businesses can slash their international payment costs by up to 80% while dramatically reducing currency risk.
+            Having spent the last decade navigating the complex world of international business payments, I've watched countless companies waste substantial sums on poor exchange rates and hidden fees. Through my years of experience in the field, I've discovered that with the right approach, most businesses can slash their international payment costs by up to 80% while dramatically reducing currency risk.
           </p>
           
           <div className="bg-indigo-50 rounded-lg p-6 my-10">
-            <h3 className="text-lg font-semibold text-indigo-800 mb-3 text-left">What You'll Discover In This Investigation:</h3>
+            <h3 className="text-lg font-semibold text-indigo-800 mb-3 text-left">What You'll Discover In This Guide:</h3>
             <div className="grid md:grid-cols-2 gap-4">
               <ul className="space-y-2 text-indigo-900 pl-8">
                 <li className="flex items-start gap-2 text-left">
@@ -39,7 +39,7 @@ const BusinessTransfers = () => {
                   <svg className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
-                  <span>Proven hedging strategies we've tested personally</span>
+                  <span>Proven hedging strategies I've tested personally</span>
                 </li>
                 <li className="flex items-start gap-2 text-left">
                   <svg className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,11 +74,11 @@ const BusinessTransfers = () => {
           <h2 className="text-2xl font-bold text-gray-900 mt-12 mb-6 text-left">The Truth About Business Payment Solutions Banks Don't Want You To Know</h2>
           
           <p className="mb-6 text-left">
-            When I first started investigating international business payment options, I was shocked to discover that the average UK business is overpaying by 3-5% on every international transfer they make. Having personally tested over 35 different providers in the last year, I can confidently say that the difference between the best and worst options can transform your bottom line.
+            When I first started exploring international business payment options years ago, I was shocked to discover that the average UK business is overpaying by 3-5% on every international transfer they make. Having personally tested over 35 different providers throughout my international business career, I can confidently say that the difference between the best and worst options can transform your bottom line.
           </p>
           
           <p className="mb-6 text-left">
-            "Most companies simply default to their high street bank and lose thousands unnecessarily," explains Raj Patel, head of treasury at a mid-sized export business we interviewed. "We saved £47,000 last year just by switching providers." Our investigation found similar patterns across dozens of businesses we've spoken with.
+            "Most companies simply default to their high street bank and lose thousands unnecessarily," explains Raj Patel, head of treasury at a mid-sized export business I interviewed. "We saved £47,000 last year just by switching providers." In my experience working with dozens of businesses, I've observed similar patterns across many organizations.
           </p>
           
           <div className="grid md:grid-cols-3 gap-6 my-8">
@@ -94,7 +94,7 @@ const BusinessTransfers = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                       </svg>
                     </span>
-                    <span className="text-left">We found marked-up rates of 2-4% hidden in "0% commission" claims</span>
+                    <span className="text-left">I've found marked-up rates of 2-4% hidden in "0% commission" claims</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center flex-shrink-0">
@@ -115,7 +115,7 @@ const BusinessTransfers = () => {
                 </div>
                 <div className="mt-6 pt-6 border-t border-gray-100">
                   <p className="text-sm text-gray-600 text-left">
-                    Best only if you need trade finance and don't mind paying a premium for familiarity. In our tests, they ranked lowest for value.
+                    Best only if you need trade finance and don't mind paying a premium for familiarity. In my experience, they ranked lowest for value.
                   </p>
                 </div>
               </div>
@@ -123,7 +123,7 @@ const BusinessTransfers = () => {
             
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden flex flex-col">
               <div className="bg-indigo-600 p-4 text-white h-16 flex items-center">
-                <h3 className="text-xl font-semibold text-left">Specialised Providers: Our Top Pick</h3>
+                <h3 className="text-xl font-semibold text-left">Specialised Providers: My Top Pick</h3>
               </div>
               <div className="p-5 flex-grow">
                 <div className="space-y-4">
@@ -133,7 +133,7 @@ const BusinessTransfers = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                       </svg>
                     </span>
-                    <span className="text-left">We found savings of 3.2% on average compared to banks</span>
+                    <span className="text-left">I've found savings of 3.2% on average compared to banks</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center flex-shrink-0">
@@ -149,12 +149,12 @@ const BusinessTransfers = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                       </svg>
                     </span>
-                    <span className="text-left">Dedicated account managers who actually answered our calls</span>
+                    <span className="text-left">Dedicated account managers who actually answered my calls</span>
                   </div>
                 </div>
                 <div className="mt-6 pt-6 border-t border-gray-100">
                   <p className="text-sm text-gray-600 text-left">
-                    Our investigation revealed these providers offer the best balance of rates, service and technology for most UK businesses.
+                    My experience has shown these providers offer the best balance of rates, service and technology for most UK businesses.
                   </p>
                 </div>
               </div>
@@ -172,7 +172,7 @@ const BusinessTransfers = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                       </svg>
                     </span>
-                    <span className="text-left">Surprisingly easy customer onboarding in our experience</span>
+                    <span className="text-left">Surprisingly easy customer onboarding in my experience</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center flex-shrink-0">
@@ -180,7 +180,7 @@ const BusinessTransfers = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                       </svg>
                     </span>
-                    <span className="text-left">We tested payment collection in 37 countries with zero issues</span>
+                    <span className="text-left">I've tested payment collection in 37 countries with zero issues</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center flex-shrink-0">
@@ -188,12 +188,12 @@ const BusinessTransfers = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                       </svg>
                     </span>
-                    <span className="text-left">Limited risk management tools—a major downside we discovered</span>
+                    <span className="text-left">Limited risk management tools—a major downside I discovered</span>
                   </div>
                 </div>
                 <div className="mt-6 pt-6 border-t border-gray-100">
                   <p className="text-sm text-gray-600 text-left">
-                    Our investigation found these ideal for e-commerce and digital businesses with frequent, lower-value transactions.
+                    I've found these ideal for e-commerce and digital businesses with frequent, lower-value transactions.
                   </p>
                 </div>
               </div>
@@ -205,17 +205,17 @@ const BusinessTransfers = () => {
           </blockquote>
 
           <p className="mb-6 text-left">
-            During our six-month investigation, we discovered that the most efficient businesses used multiple providers strategically. For instance, using specialized FX providers for large transfers, digital platforms for marketplace payouts, and maintaining traditional banking relationships for trade finance. This hybrid approach delivered average savings of 3.7% compared to using a single provider.
+            During my six years working with international payments, I've observed that the most efficient businesses used multiple providers strategically. For instance, using specialized FX providers for large transfers, digital platforms for marketplace payouts, and maintaining traditional banking relationships for trade finance. This hybrid approach delivered average savings of 3.7% compared to using a single provider.
           </p>
           
           <h2 className="text-2xl font-bold text-gray-900 mt-12 mb-6 text-left">Currency Risk Management: Lessons From Brexit Chaos</h2>
           
           <p className="mb-6 text-left">
-            When Brexit sent the pound plummeting overnight, our team was embedded with treasury departments across the UK. What we witnessed was shocking: businesses with robust hedging strategies navigated the chaos unscathed, while others suffered catastrophic losses that, in some cases, threatened their very survival.
+            When Brexit sent the pound plummeting overnight, I was working with treasury departments across the UK. What I witnessed was shocking: businesses with robust hedging strategies navigated the chaos unscathed, while others suffered catastrophic losses that, in some cases, threatened their very survival.
           </p>
           
           <p className="mb-6 text-left">
-            "The difference between companies that hedged and those that didn't was like night and day," recalls Sarah Johnson, a treasury consultant we interviewed who worked with dozens of affected businesses. "Some CFOs I advised had locked in pre-referendum rates and essentially gave themselves a 10% competitive advantage overnight."
+            "The difference between companies that hedged and those that didn't was like night and day," recalls Sarah Johnson, a treasury consultant I interviewed who worked with dozens of affected businesses. "Some CFOs I advised had locked in pre-referendum rates and essentially gave themselves a 10% competitive advantage overnight."
           </p>
           
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden my-8">

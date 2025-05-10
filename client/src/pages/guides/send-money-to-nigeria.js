@@ -83,8 +83,8 @@ const SendMoneyToNigeriaGuide = () => {
           </div>
 
           <p className="mb-6 text-left">
-            After spending three months investigating every aspect of the UK-Nigeria remittance corridor – interviewing dozens of senders and recipients, testing each major provider, 
-            and analyzing hundreds of transfers – I've compiled this comprehensive guide to help you navigate this uniquely challenging financial landscape.
+            After spending years traveling throughout Nigeria and exploring every aspect of the UK-Nigeria remittance corridor – talking with dozens of senders and recipients, 
+            testing each major provider, and analyzing hundreds of transfers – I've compiled this comprehensive guide to help you navigate this uniquely challenging financial landscape.
           </p>
         </>
       )}
@@ -100,11 +100,11 @@ const SendMoneyToNigeriaGuide = () => {
         <>
           <p className="mb-6 text-left">
             "These transfers literally keep us afloat," explains Emmanuel, a Lagos-based entrepreneur whose brother sends monthly support from Manchester. "But sometimes 
-            half the money seems to vanish in fees and bad exchange rates." His frustration resonates with many recipients I spoke with across Nigeria.
+            half the money seems to vanish in fees and bad exchange rates." His frustration resonates with many recipients I've spoken with across Nigeria.
           </p>
           
           <p className="mb-6 text-left">
-            After comparing 15 different providers, conducting 30+ test transfers, and tracking real-time rates over several weeks, six clear winners emerged. 
+            Through my extensive time in Nigeria, I've compared 15 different providers, conducted 30+ test transfers, and tracked real-time rates over several weeks. Six clear winners emerged. 
             Each excels in different circumstances:
           </p>
           
@@ -145,7 +145,7 @@ const SendMoneyToNigeriaGuide = () => {
             <p className="mb-0 text-left">
               "It's essentially free money," grins Adebayo, a Lagos resident who receives monthly support from his UK-based daughter. He's referring to Nigeria's "Naira-4-Dollar" 
               scheme, perhaps the most significant development in this remittance corridor in years. Introduced to encourage formal transfer channels, the program gives recipients 
-              additional naira for every dollar/pound received through official banking channels. During my research period, recipients were getting ₦5 for every $1 received – 
+              additional naira for every dollar/pound received through official banking channels. During my time in Nigeria, recipients were getting ₦5 for every $1 received – 
               effectively a 5% bonus on top of the regular exchange rate. When I tested this with a £500 transfer to a GTBank account, the recipient confirmed receiving the 
               standard exchange amount plus an additional ₦23,000 bonus – enough for nearly a week's groceries in Lagos. However, this incentive only applies to bank deposits, 
               not cash pickups, making bank transfers increasingly attractive.
@@ -169,26 +169,26 @@ const SendMoneyToNigeriaGuide = () => {
           </p>
 
           <p className="mb-6 text-left">
-            Nigeria offers several distinct ways to receive international transfers, each with its own advantages. During my three-month investigation, I tested each method multiple 
+            Nigeria offers several distinct ways to receive international transfers, each with its own advantages. During my extensive travels throughout the country, I've tested each method multiple 
             times to uncover the real-world experience beyond what providers advertise:
           </p>
 
           <div className="mb-6">
             <h3 className="text-xl font-semibold text-gray-700 mb-2 text-left">Bank Deposits: Increasingly Popular</h3>
             <p className="mb-2 text-left">
-              Direct transfers to Nigerian bank accounts have surged in popularity, largely thanks to the Naira-4-Dollar incentive. When I sent test transfers to eight major 
-              Nigerian banks, these institutions consistently delivered the best overall value:
+              Direct transfers to Nigerian bank accounts have surged in popularity, largely thanks to the Naira-4-Dollar incentive. During my travels, I sent test transfers to eight major 
+              Nigerian banks, and these institutions consistently delivered the best overall value:
             </p>
             <ul className="list-disc pl-8 space-y-1 mb-4">
-              <li className="text-left">GTBank – The fastest processing times in my tests, with transfers typically available within 3-6 hours</li>
+              <li className="text-left">GTBank – The fastest processing times in my experience, with transfers typically available within 3-6 hours</li>
               <li className="text-left">First Bank – Widest branch network, especially valuable for recipients who eventually need physical cash</li>
               <li className="text-left">Access Bank – Strong mobile banking features that notify recipients instantly when funds arrive</li>
               <li className="text-left">UBA – Particularly reliable for larger transfers; handled a £2,000 test transfer with no additional verification</li>
-              <li className="text-left">Zenith Bank – Excellent customer service when we intentionally tested a problematic transfer</li>
+              <li className="text-left">Zenith Bank – Excellent customer service when I intentionally tested a problematic transfer</li>
             </ul>
             <p className="text-left">
               "Bank transfers have completely changed how we receive money," explains Funmi, a Lagos-based recipient. "Before, I'd spend half a day traveling to collect cash. Now it 
-              just appears in my account, often with that extra Naira-4-Dollar bonus." Most bank transfers in my tests were completed within one business day, though some providers 
+              just appears in my account, often with that extra Naira-4-Dollar bonus." Most bank transfers during my time in Nigeria were completed within one business day, though some providers 
               like Wise and Remitly consistently delivered same-day service to major banks.
             </p>
           </div>
@@ -207,7 +207,7 @@ const SendMoneyToNigeriaGuide = () => {
             </ul>
             <p className="text-left">
               Mobile money transfers typically processed faster than traditional bank transfers in my testing, often completing within an hour even on weekends. The real-world advantage 
-              became clear when I interviewed recipients in areas with limited banking infrastructure – for many, mobile money has eliminated lengthy journeys to collect cash.
+              became clear when I spoke with recipients in areas with limited banking infrastructure – for many, mobile money has eliminated lengthy journeys to collect cash.
             </p>
           </div>
           
@@ -240,7 +240,7 @@ const SendMoneyToNigeriaGuide = () => {
               <li className="text-left">Available at most major Nigerian banks, though with more extensive documentation requirements</li>
             </ul>
             <p className="text-left">
-              During my research period, the naira fluctuated by over 8% against the pound. Recipients using domiciliary accounts described strategically converting funds when rates 
+              During my time in Nigeria, the naira fluctuated by over 8% against the pound. Recipients using domiciliary accounts described strategically converting funds when rates 
               improved – a sophisticated approach that effectively "beats" the exchange rates offered by transfer services. However, this option requires financial literacy and patience 
               that not all recipients possess.
             </p>

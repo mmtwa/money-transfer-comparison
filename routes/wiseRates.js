@@ -329,4 +329,62 @@ router.get('/compare', [
   }
 });
 
+/**
+ * @route   GET /api/wise/historical
+ * @desc    Get historical exchange rates from Wise API
+ * @access  Public
+ */
+router.get('/historical', [
+  check('source', 'Source currency is required').notEmpty().isLength({ min: 3, max: 3 }),
+  check('target', 'Target currency is required').notEmpty().isLength({ min: 3, max: 3 }),
+  check('from', 'From date must be a valid ISO date string').optional().isString(),
+  check('to', 'To date must be a valid ISO date string').optional().isString(),
+  check('group', 'Group must be one of: hour, day, week, month').optional().isIn(['hour', 'day', 'week', 'month'])
+], cacheApiResponse(300), async (req, res) => {
+  console.log('==== WISE HISTORICAL RATES ENDPOINT CALLED ====');
+  
+  // Validate request
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'Validation error',
+      errors: errors.array() 
+    });
+  }
+
+  const { source, target, from, to, group = 'day' } = req.query;
+  
+  try {
+    // Get historical rates from Wise API service
+    const historicalRates = await wiseApiService.getHistoricalRates(
+      source.toUpperCase(),
+      target.toUpperCase(),
+      from,
+      to,
+      group
+    );
+    
+    if (!historicalRates || historicalRates.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No historical rate data found'
+      });
+    }
+    
+    res.json({
+      success: true,
+      count: historicalRates.length,
+      data: historicalRates
+    });
+  } catch (error) {
+    console.error('Error fetching historical rates from Wise API:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Could not fetch historical exchange rates from Wise API',
+      error: process.env.NODE_ENV === 'production' ? null : error.message
+    });
+  }
+});
+
 module.exports = router;

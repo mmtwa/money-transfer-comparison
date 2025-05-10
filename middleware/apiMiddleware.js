@@ -36,6 +36,16 @@ const cacheApiResponse = (duration = 300) => {
     
     // Create a cache key from the URL and query parameters
     const cacheKey = `api:${req.originalUrl}`;
+    
+    // Reduce caching time for OFX rates
+    let cacheDuration = duration;
+    if (req.originalUrl.includes('rates/compare') && req.query && 
+        req.query.fromCurrency && req.query.toCurrency) {
+      // Reduce cache time for rate comparison to 60 seconds
+      cacheDuration = 60;
+      console.log(`[apiMiddleware] Using reduced cache duration (${cacheDuration}s) for rates/compare endpoint`);
+    }
+    
     const cachedResponse = apiCache.get(cacheKey);
     
     if (cachedResponse) {
@@ -53,7 +63,7 @@ const cacheApiResponse = (duration = 300) => {
         try {
           // Ensure we're caching a plain object, not a MongoDB document
           const cacheableBody = JSON.parse(JSON.stringify(body));
-          apiCache.set(cacheKey, cacheableBody, duration);
+          apiCache.set(cacheKey, cacheableBody, cacheDuration);
         } catch (err) {
           console.error('Error caching API response:', err);
           // Continue without caching

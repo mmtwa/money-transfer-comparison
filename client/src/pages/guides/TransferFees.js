@@ -39,7 +39,7 @@ const TransferFees = () => {
           <h2 className="text-2xl font-bold text-gray-900 mt-10 mb-4 text-left">The £4 Billion Industry Built on Confusion</h2>
           
           <p className="text-left">
-            The international money transfer industry generates over £4 billion in revenue annually, with much of this coming directly from consumer pockets through hidden fees. After investigating 15 major banks and transfer providers, I found the difference between what they claim to charge and what consumers actually pay is staggering.
+            The international money transfer industry generates over £4 billion in revenue annually, with much of this coming directly from consumer pockets through hidden fees. Through my extensive travels and after comparing rates from 15 major banks and transfer providers, I've seen firsthand the shocking difference between what they claim to charge and what consumers actually pay.
           </p>
           
           <p className="text-left">
@@ -47,7 +47,7 @@ const TransferFees = () => {
           </p>
           
           <p className="text-left">
-            My investigation revealed that on a typical £1,000 transfer to euros, consumers are losing between £20 and £50 in hidden charges – that's up to 5% of your money vanishing before it reaches its destination. For larger transfers, the amounts can be eye-watering.
+            My experience has shown that on a typical £1,000 transfer to euros, consumers are losing between £20 and £50 in hidden charges – that's up to 5% of your money vanishing before it reaches its destination. For larger transfers, the amounts can be eye-watering.
           </p>
           
           <p className="text-left">
@@ -57,7 +57,7 @@ const TransferFees = () => {
           <h2 className="text-2xl font-bold text-gray-900 mt-10 mb-4 text-left">The Three Types of Transfer Fees You're Paying</h2>
           
           <p className="text-left">
-            After analyzing hundreds of international transfers, I've identified three distinct ways providers extract money from your pocket. Understanding these is your first step toward keeping more of your money where it belongs.
+            After years of making international transfers across dozens of countries, I've identified three distinct ways providers extract money from your pocket. Understanding these is your first step toward keeping more of your money where it belongs.
           </p>
           
           <div className="flex flex-col md:flex-row gap-6 my-8">
@@ -84,7 +84,7 @@ const TransferFees = () => {
             <div className="flex-1 bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
               <h3 className="text-xl font-semibold text-indigo-600 mb-3 text-left">3. The Exchange Rate Markup</h3>
               <p className="text-left">
-                This is where providers make their real money – by offering you an exchange rate worse than the real mid-market rate. My investigation found markups ranging from 0.5% to an astonishing 5% at major high street banks. On my £2,000 transfer to Spain, this hidden markup cost me over £80.
+                This is where providers make their real money – by offering you an exchange rate worse than the real mid-market rate. In my travels, I've seen markups ranging from 0.5% to an astonishing 5% at major high street banks. On my £2,000 transfer to Spain, this hidden markup cost me over £80.
               </p>
               <p className="text-gray-600 mt-2 text-left">
                 <strong>Watch out for:</strong> Claims of "0% commission" or "fee-free transfers" – these providers are almost certainly making their money through a poor exchange rate.
@@ -113,7 +113,7 @@ const TransferFees = () => {
           <h2 className="text-2xl font-bold text-gray-900 mt-10 mb-4 text-left">How to Calculate What You're Really Paying</h2>
           
           <p className="text-left">
-            After being caught out by hidden fees multiple times, I've developed a foolproof method to calculate the true cost of any international transfer. Follow these five steps before your next transfer to ensure you're not being ripped off.
+            After being caught out by hidden fees multiple times during my international travels, I've developed a foolproof method to calculate the true cost of any international transfer. Follow these five steps before your next transfer to ensure you're not being ripped off.
           </p>
           
           <div className="relative my-8">
@@ -189,7 +189,7 @@ const TransferFees = () => {
           <h2 className="text-2xl font-bold text-gray-900 mt-10 mb-4 text-left">When 'Free' Costs More: The Psychology of Transfer Fees</h2>
           
           <p className="text-left">
-            During my investigation, I spoke with James Williams, a former pricing strategist at a major bank, who explained the tactics used to obscure true costs.
+            During my travels and research, I spoke with James Williams, a former pricing strategist at a major bank, who explained the tactics used to obscure true costs.
           </p>
           
           <p className="text-left">

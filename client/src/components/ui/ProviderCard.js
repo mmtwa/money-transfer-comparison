@@ -163,9 +163,6 @@ const ProviderCard = ({
     if (typeof window !== 'undefined' && !window.cardController) {
       // Create a global controller for all cards
       window.cardController = {
-        activeCardId: null,
-        isProcessing: false,
-        pendingCardId: null,
         cards: {},
         
         // Register a card with the controller
@@ -176,100 +173,61 @@ const ProviderCard = ({
         // Unregister a card
         unregisterCard: function(id) {
           delete this.cards[id];
-          if (this.activeCardId === id) {
-            this.activeCardId = null;
-          }
         },
         
-        // Set a card as active
-        setActiveCard: function(id) {
-          // If we're already processing an activation, queue this request
-          if (this.isProcessing) {
-            this.pendingCardId = id;
-            return;
-          }
-          
-          // Don't do anything if this card is already active
-          if (id === this.activeCardId) {
-            return;
-          }
-          
-          this.isProcessing = true;
-          
-          // First deactivate any active card
-          if (this.activeCardId && this.cards[this.activeCardId]) {
-            const oldCard = this.cards[this.activeCardId];
-            oldCard.classList.remove('card-active');
-          }
-          
-          // Update active card ID
-          this.activeCardId = id;
-          
-          // If we have a new active card, activate it
-          if (id && this.cards[id]) {
-            setTimeout(() => {
-              if (this.cards[id]) {
-                this.cards[id].classList.add('card-active');
-              }
-              
-              // After animation completes, check for pending activations
-              setTimeout(() => {
-                this.isProcessing = false;
-                
-                // If we have a pending activation that's different, process it
-                if (this.pendingCardId && this.pendingCardId !== id) {
-                  const pendingId = this.pendingCardId;
-                  this.pendingCardId = null;
-                  this.setActiveCard(pendingId);
-                }
-              }, 300);
-            }, 50);
-          } else {
-            // No new active card, just finish processing
-            setTimeout(() => {
-              this.isProcessing = false;
-              
-              if (this.pendingCardId) {
-                const pendingId = this.pendingCardId;
-                this.pendingCardId = null;
-                this.setActiveCard(pendingId);
-              }
-            }, 300);
-          }
-        },
-        
-        // Find and activate the most centered card
-        updateActiveCard: function() {
-          // Get viewport center point
+        // Calculate and apply scaling effects based on distance from center
+        updateCardEffects: function() {
+          // Get viewport dimensions
           const viewportHeight = window.innerHeight;
-          const viewportCenter = viewportHeight / 2;
+          const viewportCenter = viewportHeight * 0.55;
           
-          let bestCardId = null;
-          let bestDistance = Infinity;
+          // Maximum distance at which the card still gets some effect
+          // (approximately 70% of viewport height)
+          const maxEffectDistance = viewportHeight * 0.7;
           
-          // Find the card closest to the center
+          // Process each card
           Object.keys(this.cards).forEach(id => {
             const cardElement = this.cards[id];
             if (cardElement) {
               const rect = cardElement.getBoundingClientRect();
               const cardCenter = rect.top + rect.height / 2;
-              const distance = Math.abs(cardCenter - viewportCenter);
               
-              // If this card is in the viewport and closer to center than our best so far
-              if (distance < bestDistance && 
-                  rect.bottom > 0 && 
-                  rect.top < viewportHeight) {
-                bestDistance = distance;
-                bestCardId = id;
+              // Distance from the center of the viewport (absolute value)
+              const distanceFromCenter = Math.abs(cardCenter - viewportCenter);
+              
+              // If the card is within our effect range
+              if (distanceFromCenter <= maxEffectDistance) {
+                // Calculate a factor between 0 and 1, where:
+                // 0 = at maxEffectDistance or further (minimum effect)
+                // 1 = at the exact center (maximum effect)
+                const effectFactor = Math.max(0, 1 - (distanceFromCenter / maxEffectDistance));
+                
+                // Apply smooth scaling - cubic easing for a more natural feel
+                // Scale ranges from 1.0 (no effect) to 1.05 (full effect)
+                const scale = 1 + (0.05 * Math.pow(effectFactor, 3));
+                
+                // Apply smooth shadow - quartic easing for shadow intensity
+                // Shadow spread ranges from 0px to 15px
+                const shadowSpread = 15 * Math.pow(effectFactor, 4);
+                // Shadow blur ranges from 8px to 30px
+                const shadowBlur = 8 + (22 * Math.pow(effectFactor, 3));
+                
+                // Set z-index based on proximity to center (higher = closer to center)
+                // Changed from 10-100 range to 1-5 range to prevent overlapping other UI elements
+                const zIndex = Math.floor(1 + (4 * effectFactor));
+                
+                // Apply combined effects
+                cardElement.style.transform = `scale(${scale})`;
+                cardElement.style.boxShadow = `0 ${shadowSpread}px ${shadowBlur}px rgba(0, 0, 0, ${0.05 + (0.03 * effectFactor)})`;
+                cardElement.style.zIndex = zIndex;
+              } else {
+                // Reset to default state for cards outside the effect range
+                cardElement.style.transform = 'scale(1)';
+                cardElement.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.05)';
+                cardElement.style.zIndex = '1';
               }
             }
           });
-          
-          // If we found a card close to center, and it's not currently the active card,
-          // activate it
-          if (bestCardId && bestCardId !== this.activeCardId) {
-            this.setActiveCard(bestCardId);
-          }
         }
       };
     }
@@ -285,7 +243,7 @@ const ProviderCard = ({
     // Set up scroll handler
     const handleScroll = () => {
       if (window.cardController) {
-        window.cardController.updateActiveCard();
+        window.cardController.updateCardEffects();
       }
     };
     
@@ -303,10 +261,12 @@ const ProviderCard = ({
       };
     };
     
-    const throttledScroll = throttle(handleScroll, 150);
+    const throttledScroll = throttle(handleScroll, 50); // Reduced from 150ms to 50ms for smoother effect
     
     // Add event listener
     window.addEventListener('scroll', throttledScroll);
+    // Also listen for resize events to recalculate on window resize
+    window.addEventListener('resize', throttledScroll);
     
     // Initial check after a delay to ensure layout is complete
     setTimeout(handleScroll, 300);
@@ -314,6 +274,7 @@ const ProviderCard = ({
     // Cleanup
     return () => {
       window.removeEventListener('scroll', throttledScroll);
+      window.removeEventListener('resize', throttledScroll);
       window.cardController.unregisterCard(id);
     };
   }, [id]);
@@ -400,6 +361,18 @@ const ProviderCard = ({
     if (provider?.transferTime || transferTime) {
       const timeValue = provider?.transferTime || transferTime;
       
+      // Handle OFX specific transfer time format
+      if (provider?.providerCode?.toLowerCase() === 'ofx') {
+        if (provider.transferTimeHours) {
+          const { min, max } = provider.transferTimeHours;
+          if (min === max) {
+            return `Within ${min} hours`;
+          }
+          return `${min}-${max} hours`;
+        }
+        return '1-48 hours'; // Default OFX transfer time range
+      }
+      
       // Check if this is an ISO date string (delivered from the Wise API)
       if (timeValue && typeof timeValue === 'string' && timeValue.includes('T') && timeValue.includes('Z')) {
         try {
@@ -430,13 +403,13 @@ const ProviderCard = ({
           // If it's within a week
           const daysDiff = Math.round((deliveryDate - now) / (1000 * 60 * 60 * 24));
           if (daysDiff <= 7) {
-            return `${daysDiff} days`;
+            return `Within ${daysDiff} days`;
           }
           
-          // Format as date
+          // Otherwise show the date
           return deliveryDate.toLocaleDateString();
-        } catch (e) {
-          // If parsing fails, just return the string
+        } catch (error) {
+          console.error('Error parsing delivery date:', error);
           return timeValue;
         }
       }
@@ -444,17 +417,24 @@ const ProviderCard = ({
       return timeValue;
     }
     
-    // Fall back to hours format
-    const timeHours = provider?.transferTimeHours || provider?.timeHours || { min: null, max: null };
-    
-    if (timeHours.min !== null && timeHours.max !== null) {
-      if (timeHours.min === timeHours.max) {
-        return `${timeHours.min} hours`;
-      }
-      return `${timeHours.min}-${timeHours.max} hours`;
+    // Default fallback
+    return 'Varies';
+  };
+
+  // Update the amount received calculation
+  const calculateAmountReceived = () => {
+    if (provider?.amountReceived) {
+      return provider.amountReceived;
     }
     
-    return 'Unknown';
+    if (provider?.rate && amount) {
+      const rate = provider.rate;
+      const transferFee = provider?.transferFee || 0;
+      const amountAfterFee = amount - transferFee;
+      return amountAfterFee * rate;
+    }
+    
+    return 0;
   };
 
   // Wrap icon components to prevent flashing
@@ -514,21 +494,12 @@ const ProviderCard = ({
         }
 
         .provider-card:hover {
-          transform: scale(1.01);
           box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
           z-index: 5;
         }
         
-        .card-active {
-          transform: scale(1.03) rotate(0.5deg);
-          box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08), 0 5px 15px rgba(0, 0, 0, 0.05);
-          z-index: 10;
-        }
-
         .glass-effect {
           background: rgba(255, 255, 255, 0.95);
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
         }
 
         .feature-tag {
@@ -592,11 +563,6 @@ const ProviderCard = ({
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
           }
           
-          .card-active {
-            transform: scale(1.02) rotate(0.3deg); /* Less dramatic effect on mobile */
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06), 0 4px 8px rgba(0, 0, 0, 0.04);
-          }
-
           .tooltip {
             position: absolute;
             bottom: 100%;
@@ -643,13 +609,13 @@ const ProviderCard = ({
         }}
       >
         {/* Card Header - Provider info and amount */}
-        <div className="flex flex-col sm:flex-row items-center justify-between p-6 border-b border-gray-100">
-          <div className="flex flex-col items-center sm:items-start mb-4 sm:mb-0">
+        <div className="flex flex-col sm:flex-row items-center justify-between p-3 sm:p-4 border-b border-gray-100">
+          <div className="flex flex-col items-center sm:flex-row sm:items-center mb-2 sm:mb-0">
             <div className="relative group">
               <img 
                 src={provider?.logo || logo || '/images/providers/default.png'} 
                 alt={`${provider?.name || name || 'Provider'} logo`} 
-                className="h-32 w-32 sm:h-40 sm:w-40 object-contain transition-transform duration-300 group-hover:scale-105"
+                className="h-24 w-24 sm:h-28 sm:w-28 object-contain transition-transform duration-300 group-hover:scale-105"
                 onError={(e) => {
                   const code = (provider?.providerCode || '').toLowerCase();
                   let fallbackUrl = '/images/providers/default.png';
@@ -657,6 +623,7 @@ const ProviderCard = ({
                   else if (code === 'torfx') fallbackUrl = '/images/providers/torfx.png';
                   else if (code === 'wise') fallbackUrl = '/images/providers/wise.png';
                   else if (code === 'western-union' || code === 'westernunion') fallbackUrl = '/images/providers/westernunion.png';
+                  else if (code === 'ofx' || (provider?.name || name || '').toLowerCase().includes('ofx')) fallbackUrl = '/images/providers/OFX_Logo.webp';
                   e.target.onerror = null;
                   e.target.src = fallbackUrl;
                   e.target.onerror = () => { e.target.src = fallbackUrl.startsWith('/') ? fallbackUrl.substring(1) : '/' + fallbackUrl; };
@@ -664,16 +631,16 @@ const ProviderCard = ({
               />
             </div>
             
-            {providerCode && (
-              <div className="mt-3">
+            <div className="mt-2 sm:mt-0 sm:ml-3">
+              {providerCode && (
                 <TrustpilotRating 
                   providerName={providerCode} 
                   preloadedRating={trustpilotRating}
                   onRatingDetermined={onRatingDetermined}
                 />
-              </div>
-            )}
-            {!providerCode && renderRating(provider?.rating || rating)}
+              )}
+              {!providerCode && renderRating(provider?.rating || rating)}
+            </div>
           </div>
           
           <div className="text-center sm:text-right">
@@ -683,20 +650,22 @@ const ProviderCard = ({
               provider?.providerCode?.toLowerCase() === 'profee' ||
               provider?.providerCode?.toLowerCase() === 'regencyfx' ||
               provider?.providerCode?.toLowerCase() === 'pandaremit' ||
+              provider?.providerCode?.toLowerCase() === 'ofx' ||
               (provider?.name || name || '').toLowerCase().includes('torfx') ||
               (provider?.name || name || '').toLowerCase().includes('xe') ||
               (provider?.name || name || '').toLowerCase().includes('profee') ||
               (provider?.name || name || '').toLowerCase().includes('regency') ||
-              (provider?.name || name || '').toLowerCase().includes('panda')
+              (provider?.name || name || '').toLowerCase().includes('panda') ||
+              (provider?.name || name || '').toLowerCase().includes('ofx')
             ) && (
               <div className="relative inline-block">
                 <div 
-                  className="inline-flex items-center text-xs font-medium text-amber-600 bg-amber-50 py-1.5 px-3 rounded-full mb-3 cursor-help"
+                  className="inline-flex items-center text-xs font-medium text-amber-600 bg-amber-50 py-1 px-2.5 rounded-full mb-1.5 cursor-help"
                   onMouseEnter={() => setShowTooltip(true)}
                   onMouseLeave={() => setShowTooltip(false)}
                   onTouchStart={() => setShowTooltip(!showTooltip)}
                 >
-                  <Info size={14} className="mr-1.5" />
+                  <Info size={12} className="mr-1" />
                   Indicative Rate
                 </div>
                 <div className={`tooltip ${showTooltip ? 'show' : ''}`} style={{ pointerEvents: 'none' }}>
@@ -704,72 +673,72 @@ const ProviderCard = ({
                 </div>
               </div>
             )}
-            <div className="text-sm uppercase font-medium text-indigo-600 tracking-wide">They receive</div>
-            <div className="text-3xl font-bold mt-1">
+            <div className="text-xs uppercase font-medium text-indigo-600 tracking-wide">They receive</div>
+            <div className="text-2xl font-bold mt-0.5">
               <span className="text-shimmer">
-                {getCurrencySymbol(toCurrency)} {formatAmount(provider?.amountReceived || receiveAmount || 0)}
+                {getCurrencySymbol(toCurrency)} {formatAmount(calculateAmountReceived())}
               </span>
             </div>
-            <div className="text-sm text-gray-600 mt-2 bg-indigo-50 py-1 px-3 rounded-full inline-flex items-center">
-              <span className="mr-1.5">Fees:</span>
+            <div className="text-xs text-gray-600 mt-1 bg-indigo-50 py-0.5 px-2 rounded-full inline-flex items-center">
+              <span className="mr-1">Fees:</span>
               {getCurrencySymbol(fromCurrency)} {formatAmount(provider?.transferFee || transferFee || 0)}
             </div>
           </div>
         </div>
         
         {/* Card Body - Exchange details */}
-        <div className="p-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="p-3 sm:p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Exchange Rate */}
             <div className="flex items-start group">
-              <div className="w-1 h-full min-h-[40px] bg-indigo-400 mr-4 self-stretch rounded-full transition-all duration-300 group-hover:bg-indigo-500"></div>
+              <div className="w-1 h-full min-h-[30px] bg-indigo-400 mr-2 self-stretch rounded-full transition-all duration-300 group-hover:bg-indigo-500"></div>
               <div className="text-left">
-                <div className="text-sm text-gray-600 font-medium mb-1.5">Exchange Rate</div>
-                <div className="font-bold text-lg">{`1 ${fromCurrency} = ${(provider?.rate || rate || 0).toFixed(4)} ${toCurrency}`}</div>
+                <div className="text-xs text-gray-600 font-medium mb-0.5">Exchange Rate</div>
+                <div className="font-bold text-sm">{`1 ${fromCurrency} = ${(provider?.rate || rate || 0).toFixed(4)} ${toCurrency}`}</div>
               </div>
             </div>
             
             {/* Delivery Time */}
             <div className="flex items-start group">
-              <div className="w-1 h-full min-h-[40px] bg-indigo-400 mr-4 self-stretch rounded-full transition-all duration-300 group-hover:bg-indigo-500"></div>
+              <div className="w-1 h-full min-h-[30px] bg-indigo-400 mr-2 self-stretch rounded-full transition-all duration-300 group-hover:bg-indigo-500"></div>
               <div className="text-left">
-                <div className="text-sm text-gray-600 font-medium mb-1.5 flex items-center">
-                  <Clock size={16} className="mr-1.5" />
+                <div className="text-xs text-gray-600 font-medium mb-0.5 flex items-center">
+                  <Clock size={12} className="mr-1" />
                   Delivery Time
                 </div>
-                <div className="font-medium">{formatTransferTime()}</div>
+                <div className="font-medium text-sm">{formatTransferTime()}</div>
               </div>
             </div>
             
             {/* Fees */}
             <div className="flex items-start group">
-              <div className="w-1 h-full min-h-[40px] bg-indigo-400 mr-4 self-stretch rounded-full transition-all duration-300 group-hover:bg-indigo-500"></div>
+              <div className="w-1 h-full min-h-[30px] bg-indigo-400 mr-2 self-stretch rounded-full transition-all duration-300 group-hover:bg-indigo-500"></div>
               <div className="text-left">
-                <div className="text-sm text-gray-600 font-medium mb-1.5">Fee</div>
-                <div className="font-medium">{getCurrencySymbol(fromCurrency)} {formatAmount(provider?.transferFee || transferFee || 0)}</div>
+                <div className="text-xs text-gray-600 font-medium mb-0.5">Fee</div>
+                <div className="font-medium text-sm">{getCurrencySymbol(fromCurrency)} {formatAmount(provider?.transferFee || transferFee || 0)}</div>
               </div>
             </div>
             
             {/* Rate Margin */}
             <div className="flex items-start group">
-              <div className="w-1 h-full min-h-[40px] bg-indigo-400 mr-4 self-stretch rounded-full transition-all duration-300 group-hover:bg-indigo-500"></div>
+              <div className="w-1 h-full min-h-[30px] bg-indigo-400 mr-2 self-stretch rounded-full transition-all duration-300 group-hover:bg-indigo-500"></div>
               <div className="text-left">
-                <div className="text-sm text-gray-600 font-medium mb-1.5">Rate Margin</div>
-                <div>
+                <div className="text-xs text-gray-600 font-medium mb-0.5">Rate Margin</div>
+                <div className="text-sm">
                   {provider?.effectiveRate && provider?.baseRate ? (
                     provider.effectiveRate > provider.baseRate ? (
                       <div className="flex items-center text-green-600 font-medium">
-                        <ArrowUp size={16} className="mr-1.5" />
+                        <ArrowUp size={12} className="mr-1" />
                         <span>{`${((provider.effectiveRate / provider.baseRate - 1) * 100).toFixed(2)}% above mid-market`}</span>
                       </div>
                     ) : provider.effectiveRate < provider.baseRate ? (
                       <div className="flex items-center text-red-600 font-medium">
-                        <ArrowDown size={16} className="mr-1.5" />
+                        <ArrowDown size={12} className="mr-1" />
                         <span>{`${((1 - provider.effectiveRate / provider.baseRate) * 100).toFixed(2)}% below mid-market`}</span>
                       </div>
                     ) : (
                       <div className="flex items-center text-gray-600 font-medium">
-                        <Minus size={16} className="mr-1.5" />
+                        <Minus size={12} className="mr-1" />
                         <span>Same as mid-market</span>
                       </div>
                     )
@@ -782,14 +751,14 @@ const ProviderCard = ({
           </div>
           
           {/* Features */}
-          <div className="mt-6">
-            <div className="flex flex-wrap gap-2">
+          <div className="mt-3">
+            <div className="flex flex-wrap gap-1.5">
               {(provider?.features || features).map((feature, idx) => (
                 <span 
                   key={idx} 
-                  className="feature-tag inline-flex items-center text-sm text-indigo-700 bg-indigo-50 py-1.5 px-3 rounded-full"
+                  className="feature-tag inline-flex items-center text-xs text-indigo-700 bg-indigo-50 py-1 px-2 rounded-full"
                 >
-                  <Check className="w-4 h-4 text-green-500 mr-1.5" />
+                  <Check className="w-3 h-3 text-green-500 mr-1" />
                   {feature}
                 </span>
               ))}
@@ -798,15 +767,15 @@ const ProviderCard = ({
         </div>
         
         {/* Card Footer - CTA */}
-        <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end">
+        <div className="px-4 py-2 border-t border-gray-100 flex items-center justify-end">
           <a 
             href={getProviderWebsite(provider?.providerCode || provider?.code || provider?.name || name || '')} 
             target="_blank" 
             rel="noopener noreferrer"
-            className="bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 px-6 rounded-lg flex items-center justify-center font-medium transition-all duration-300 hover:shadow-lg hover:shadow-indigo-200"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white py-1.5 px-4 rounded-lg flex items-center justify-center font-medium text-sm transition-all duration-300 hover:shadow-lg hover:shadow-indigo-200"
           >
             Get Deal
-            <ExternalLink size={16} className="ml-2" />
+            <ExternalLink size={14} className="ml-1.5" />
           </a>
         </div>
       </div>

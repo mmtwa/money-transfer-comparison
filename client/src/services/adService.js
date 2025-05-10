@@ -8,18 +8,60 @@
  * - Provides a clean API for ad-related operations
  */
 
+import axios from 'axios';
 import adPartnerConfig from '../config/adPartners';
+
+// Cache for partners data
+let partnersCache = null;
+let lastFetchTime = 0;
+const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
+
+/**
+ * Fetches ad partners from the API
+ * @returns {Promise<Object>} The ad partners data
+ */
+export const fetchAdPartners = async () => {
+  const now = Date.now();
+  
+  // Return cached data if it's fresh
+  if (partnersCache && now - lastFetchTime < CACHE_DURATION) {
+    return partnersCache;
+  }
+  
+  try {
+    // Fetch from API
+    const response = await axios.get('/api/ad-partners/active');
+    
+    if (response.data.success) {
+      // Cache the results
+      partnersCache = response.data.data;
+      lastFetchTime = now;
+      return partnersCache;
+    } else {
+      console.error('Error fetching ad partners:', response.data.message);
+      // Fall back to static config
+      return adPartnerConfig;
+    }
+  } catch (error) {
+    console.error('Failed to fetch ad partners:', error);
+    // Fall back to static config in case of error
+    return adPartnerConfig;
+  }
+};
 
 /**
  * Selects an appropriate ad partner based on scheduling and priority
  * @returns {string} The key of the selected ad partner
  */
-export const selectAdPartner = () => {
+export const selectAdPartner = async () => {
   const now = new Date();
+  
+  // Get partners data from API or cache
+  const partners = await fetchAdPartners();
   const activePartners = [];
   
   // Filter for active partners based on date
-  Object.entries(adPartnerConfig).forEach(([key, partner]) => {
+  Object.entries(partners).forEach(([key, partner]) => {
     // Skip default in this first pass
     if (key === 'default') return;
     
@@ -46,6 +88,14 @@ export const selectAdPartner = () => {
 };
 
 /**
+ * Gets all ad partners (non-async for compatibility)
+ * @returns {Object} The cached ad partners or static config
+ */
+export const getAdPartners = () => {
+  return partnersCache || adPartnerConfig;
+};
+
+/**
  * Tracks an impression for analytics purposes
  * @param {string} partnerId The partner ID to track
  */
@@ -66,8 +116,9 @@ export const trackImpression = (partnerId) => {
  * Preloads ad assets for a specific partner to improve performance
  * @param {string} partnerId The partner ID to preload
  */
-export const preloadAdAssets = (partnerId) => {
-  const partner = adPartnerConfig[partnerId];
+export const preloadAdAssets = async (partnerId) => {
+  const partners = await fetchAdPartners();
+  const partner = partners[partnerId];
   if (!partner) return;
   
   // Preload all assets for the partner
@@ -85,4 +136,6 @@ export default {
   selectAdPartner,
   trackImpression,
   preloadAdAssets,
+  fetchAdPartners,
+  getAdPartners
 }; 

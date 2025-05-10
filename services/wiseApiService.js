@@ -569,6 +569,119 @@ async function getHistoricalRates(sourceCurrency, targetCurrency, fromDate = nul
 }
 
 /**
+ * Convert ISO 8601 duration format to approximate hours
+ * @param {string} isoDuration - ISO 8601 duration format (e.g. 'PT20H8M16.305111S')
+ * @returns {number} - Approximate hours
+ */
+function isoToDurationHours(isoDuration) {
+  if (!isoDuration) return 0;
+  
+  // Parse days, hours, minutes, seconds from ISO 8601 duration format
+  const daysMatch = isoDuration.match(/(\d+)D/);
+  const hoursMatch = isoDuration.match(/(\d+)H/);
+  const minutesMatch = isoDuration.match(/(\d+)M(?!S)/); // Avoid matching with seconds
+  const secondsMatch = isoDuration.match(/(\d+(\.\d+)?)S/);
+  
+  let totalHours = 0;
+  
+  if (daysMatch && daysMatch[1]) {
+    totalHours += parseInt(daysMatch[1]) * 24;
+  }
+  
+  if (hoursMatch && hoursMatch[1]) {
+    totalHours += parseInt(hoursMatch[1]);
+  }
+  
+  if (minutesMatch && minutesMatch[1]) {
+    totalHours += parseInt(minutesMatch[1]) / 60;
+  }
+  
+  if (secondsMatch && secondsMatch[1]) {
+    totalHours += parseFloat(secondsMatch[1]) / 3600;
+  }
+  
+  return Math.round(totalHours * 10) / 10; // Round to 1 decimal place
+}
+
+/**
+ * Format ISO duration to human-readable text
+ * @param {object} duration - Duration object with min and max properties
+ * @returns {string} - Human-readable duration
+ */
+function formatDeliveryTime(duration) {
+  if (!duration || (!duration.min && !duration.max)) {
+    return '2-3 business days'; // Default fallback
+  }
+  
+  // If min and max are the same, use exact time
+  if (duration.min && duration.max && duration.min === duration.max) {
+    const hours = isoToDurationHours(duration.min);
+    
+    if (hours < 1) {
+      return 'Within minutes';
+    } else if (hours === 1) {
+      return 'Within 1 hour';
+    } else if (hours < 24) {
+      return `Within ${Math.ceil(hours)} hours`;
+    } else {
+      const days = Math.ceil(hours / 24);
+      return days === 1 ? '1 business day' : `${days} business days`;
+    }
+  }
+  
+  // If only min is provided, format as "From X"
+  if (duration.min && !duration.max) {
+    const hours = isoToDurationHours(duration.min);
+    
+    if (hours < 1) {
+      return 'From minutes';
+    } else if (hours === 1) {
+      return 'From 1 hour';
+    } else if (hours < 24) {
+      return `From ${Math.ceil(hours)} hours`;
+    } else {
+      const days = Math.ceil(hours / 24);
+      return days === 1 ? 'From 1 business day' : `From ${days} business days`;
+    }
+  }
+  
+  // If only max is provided, format as "Within X"
+  if (!duration.min && duration.max) {
+    const hours = isoToDurationHours(duration.max);
+    
+    if (hours < 1) {
+      return 'Within minutes';
+    } else if (hours === 1) {
+      return 'Within 1 hour';
+    } else if (hours < 24) {
+      return `Within ${Math.ceil(hours)} hours`;
+    } else {
+      const days = Math.ceil(hours / 24);
+      return days === 1 ? 'Within 1 business day' : `Within ${days} business days`;
+    }
+  }
+  
+  // If both min and max are provided, format as range
+  const minHours = isoToDurationHours(duration.min);
+  const maxHours = isoToDurationHours(duration.max);
+  
+  if (minHours < 24 && maxHours < 24) {
+    // Both within a day, express as hours
+    return `${Math.ceil(minHours)}-${Math.ceil(maxHours)} hours`;
+  } else {
+    // Express as days
+    const minDays = Math.ceil(minHours / 24);
+    const maxDays = Math.ceil(maxHours / 24);
+    
+    if (minDays === maxDays) {
+      return minDays === 1 ? '1 business day' : `${minDays} business days`;
+    } else {
+      return `${minDays}-${maxDays} business days`;
+    }
+  }
+}
+
+/**
  * Get price comparison data from Wise API showing all providers
  * @param {string} sourceCurrency - Source currency code
  * @param {string} targetCurrency - Target currency code
@@ -594,28 +707,64 @@ const getPriceComparison = async (
     return cachedData;
   }
 
-  console.log('[WiseAPI] Fetching comparison data from Wise API');
+  console.log('[WiseAPI] Fetching comparison data from Wise API v4');
 
   const params = {
     sourceCurrency,
     targetCurrency,
     sendAmount: amount,
+    amountType: 'SEND',
     sourceCountry: sourceCountry || undefined,
     targetCountry: targetCountry || undefined,
     providerType: providerType || undefined,
   };
 
   try {
-    const response = await http.get('/v3/comparisons', { params });
+    const response = await http.get('/v4/comparisons', { params });
     let comparisonData = response.data;
+    
+    // Process the data to include formatted delivery times
+    if (comparisonData.providers && comparisonData.providers.length > 0) {
+      comparisonData.providers = comparisonData.providers.map(provider => {
+        if (provider.quotes && provider.quotes.length > 0) {
+          // Update each quote with properly formatted delivery times
+          provider.quotes = provider.quotes.map(quote => {
+            if (quote.deliveryEstimation) {
+              // Calculate hours from ISO duration for min and max
+              const minDuration = quote.deliveryEstimation.duration?.min;
+              const maxDuration = quote.deliveryEstimation.duration?.max;
+              
+              // Add the formatted delivery time as estimatedDelivery for backwards compatibility
+              quote.estimatedDelivery = formatDeliveryTime(quote.deliveryEstimation.duration);
+              
+              // Add hours for min and max for the UI to display
+              if (minDuration) {
+                quote.deliveryEstimation.minHours = isoToDurationHours(minDuration);
+              }
+              
+              if (maxDuration) {
+                quote.deliveryEstimation.maxHours = isoToDurationHours(maxDuration);
+              }
+            } else {
+              // Fallback to estimated delivery time if not available
+              quote.estimatedDelivery = getEstimatedDeliveryTime(sourceCurrency, targetCurrency);
+            }
+            
+            return quote;
+          });
+        }
+        
+        return provider;
+      });
+    }
 
-    // Cache the modified results
+    // Cache the results
     cache.set(cacheKey, comparisonData);
     console.log('[WiseAPI] Comparison data fetched and cached');
     return comparisonData;
 
   } catch (error) {
-    console.error(`Error getting price comparison from Wise API: ${error.message}`);
+    console.error(`Error getting price comparison from Wise API v4: ${error.message}`);
     throw error;
   }
 };
@@ -630,5 +779,7 @@ module.exports = {
   getHistoricalRates,
   calculateWiseFee,
   getEstimatedDeliveryTime,
-  getPriceComparison
+  getPriceComparison,
+  formatDeliveryTime,
+  isoToDurationHours
 };

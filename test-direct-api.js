@@ -5,7 +5,7 @@ async function testPair(fromCurrency, toCurrency, amount) {
   try {
     console.log(`\n===== Testing ${fromCurrency} to ${toCurrency} =====`);
     
-    const response = await axios.get(`http://localhost:5000/api/rates/compare`, {
+    const response = await axios.get(`http://localhost:5000/api/ofx/compare`, {
       params: { fromCurrency, toCurrency, amount }
     });
     
@@ -43,3 +43,31 @@ async function testApi() {
 }
 
 testApi(); 
+
+(async () => {
+  try {
+    // Call the API to fetch exchange rates
+    console.log('Testing direct API call to get providers...');
+    const response = await axios.get(`http://localhost:5000/api/ofx/compare`, {
+      params: {
+        fromCurrency: 'USD',
+        toCurrency: 'EUR',
+        amount: 1000
+      }
+    });
+    
+    console.log('API Response Status:', response.status);
+    
+    if (response.data.data && response.data.data.length === 0) {
+      console.log('API returned success but with empty data array - no providers available');
+    } else if (response.data.data && response.data.data.length > 0) {
+      console.log(`API returned ${response.data.data.length} providers:`);
+      response.data.data.forEach(provider => {
+        console.log(`- ${provider.providerName}: ${provider.effectiveRate} (${provider.amountReceived} ${response.data.data[0].toCurrency})`);
+      });
+    }
+    
+  } catch (error) {
+    console.error('Error making API request:', error.message);
+  }
+})(); 
