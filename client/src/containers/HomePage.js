@@ -49,12 +49,44 @@ const HomePage = ({ onSearch, initialData, onAboutClick, onGuidesClick, onFaqCli
   };
   
   useEffect(() => {
-    // Embed required fonts
-    const libreCaslonLink = document.createElement('link');
-    libreCaslonLink.rel = 'stylesheet';
-    libreCaslonLink.href = 'https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&display=swap';
-    document.head.appendChild(libreCaslonLink);
+    // Create stylesheet for custom fonts
+    const customFontStyle = document.createElement('style');
+    customFontStyle.textContent = `
+      @font-face {
+        font-family: 'Mylius Italic';
+        src: url('/assets/fonts/Mylius Italic.otf') format('opentype');
+        font-weight: normal;
+        font-style: italic;
+        font-display: swap;
+      }
+      
+      @font-face {
+        font-family: 'Mylius Bold';
+        src: url('/assets/fonts/Mylius Bold.otf') format('opentype');
+        font-weight: bold;
+        font-style: normal;
+        font-display: swap;
+      }
+      
+      @font-face {
+        font-family: 'Mylius Sans';
+        src: url('/assets/fonts/Mylius Sans.otf') format('opentype');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+      }
+      
+      @font-face {
+        font-family: 'Mylius';
+        src: url('/assets/fonts/Mylius.otf') format('opentype');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+      }
+    `;
+    document.head.appendChild(customFontStyle);
     
+    // Embed remaining required fonts
     const poppinsLink = document.createElement('link');
     poppinsLink.rel = 'stylesheet';
     poppinsLink.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap';
@@ -62,7 +94,7 @@ const HomePage = ({ onSearch, initialData, onAboutClick, onGuidesClick, onFaqCli
     
     // Clean up function to remove links on unmount
     return () => {
-      document.head.removeChild(libreCaslonLink);
+      document.head.removeChild(customFontStyle);
       document.head.removeChild(poppinsLink);
     };
   }, []);
@@ -175,17 +207,33 @@ const HomePage = ({ onSearch, initialData, onAboutClick, onGuidesClick, onFaqCli
           >
             <div style={{
               fontSize: 'clamp(42px, 4vw, 64px)',
-              marginBottom: '12px',
-              fontFamily: '"Libre Caslon Display", serif',
-              fontStyle: 'italic',
-              fontWeight: 400,
-              lineHeight: 1.2
+              marginBottom: '-28px',
+              lineHeight: 1.2,
+              textAlign: 'inherit' // Ensure alignment is consistent with parent
             }}>
-              Experience <br></br> British Airways
+              <span style={{ fontFamily: '"Mylius Italic", serif', fontStyle: 'italic', fontWeight: 400 }}>
+                Experience 
+              </span>
+              <br/>
+              {/* Replace text with image */}
+              <img 
+                src="/partners/ba/British-Airways-Logo-1997-500x281.png" 
+                alt="BRITISH AIRWAYS Logo" 
+                style={{ 
+                  display: 'inline-block', // Align with text flow if needed
+                  verticalAlign: 'middle', // Adjust vertical alignment
+                  maxWidth: '300px', // Adjust size as needed, can be responsive
+                  width: 'auto', // Maintain aspect ratio
+                  height: 'auto', // Maintain aspect ratio
+                  maxHeight: '160px', // User changed
+                  filter: 'drop-shadow(0 2px 12px 2px #fff)', // Increased whiteness/prominence of logo shadow
+                  marginTop: '-42px' // User changed
+                }} 
+              />
             </div>
             <div style={{
               fontSize: 'clamp(24px, 2.5vw, 32px)',
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"Mylius Sans", sans-serif',
               fontWeight: 400,
               letterSpacing: '0.02em'
             }}>
