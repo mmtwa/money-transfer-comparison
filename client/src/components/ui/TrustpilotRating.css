@@ -68,6 +68,46 @@
   .trustpilot-rating-stars {
     justify-content: center;
   }
+  
+  /* Override center alignment for compact mode */
+  .trustpilot-rating.text-xs {
+    text-align: left;
+  }
+  
+  .trustpilot-rating.text-xs .trustpilot-rating-header {
+    justify-content: flex-start;
+  }
+  
+  .trustpilot-rating.text-xs .trustpilot-rating-stars {
+    justify-content: flex-start;
+  }
+}
+
+/* Compact mode styles for mobile */
+.trustpilot-rating.text-xs {
+  margin-top: 0;
+  padding: 0;
+}
+
+.trustpilot-rating.text-xs .trustpilot-rating-header {
+  margin-bottom: 2px;
+}
+
+.trustpilot-rating.text-xs .trustpilot-rating-header svg {
+  margin-right: 2px;
+}
+
+.trustpilot-rating.text-xs .trustpilot-rating-stars {
+  gap: 2px;
+}
+
+.trustpilot-rating.text-xs .trustpilot-rating-stars svg {
+  font-size: 16px;
+}
+
+.trustpilot-rating.text-xs .trustpilot-rating-value {
+  font-size: 16px;
+  margin-left: 5px;
 }
 
 /* Add animation for loading state */

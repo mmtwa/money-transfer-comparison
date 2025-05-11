@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { ExternalLink, Check, ThumbsUp, ArrowUp, ArrowDown, Minus, Clock, Info } from 'lucide-react';
 import { formatAmount, getCurrencySymbol } from '../../utils/currency';
 import TrustpilotRating from './TrustpilotRating';
@@ -129,7 +129,10 @@ const ProviderCard = ({
   const [showDetailsPopup, setShowDetailsPopup] = React.useState(false);
   const [isHovered, setIsHovered] = React.useState(false);
   const [showTooltip, setShowTooltip] = React.useState(false);
+  const [tooltipVisible, setTooltipVisible] = useState(false);
   const cardRef = useRef(null);
+  const mobileTooltipRef = useRef(null);
+  const desktopTooltipRef = useRef(null);
   // Simple central registry for active card
   if (typeof window !== 'undefined' && !window.activeCardId) {
     window.activeCardId = null;
@@ -279,6 +282,55 @@ const ProviderCard = ({
     };
   }, [id]);
 
+  // Auto-hide tooltip after 5 seconds
+  useEffect(() => {
+    let timeoutId;
+    if (tooltipVisible) {
+      timeoutId = setTimeout(() => {
+        setTooltipVisible(false);
+      }, 5000);
+    }
+    
+    // Cleanup timeout
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [tooltipVisible]);
+
+  // Add a new useEffect to handle positioning of the tooltip relative to the card
+  useEffect(() => {
+    if (tooltipVisible && mobileTooltipRef.current && cardRef.current) {
+      // For mobile only
+      if (window.innerWidth < 640) {
+        // This function will position the tooltip
+        const positionTooltip = () => {
+          // Position the tooltip in the center of the card
+          const cardRect = cardRef.current.getBoundingClientRect();
+          const cardCenterX = cardRect.left + (cardRect.width / 2);
+          const cardCenterY = cardRect.top + (cardRect.height / 2);
+          
+          mobileTooltipRef.current.style.position = 'fixed';
+          mobileTooltipRef.current.style.top = `${cardCenterY}px`;
+          mobileTooltipRef.current.style.left = `${cardCenterX}px`;
+          mobileTooltipRef.current.style.transform = 'translate(-50%, -50%)';
+          mobileTooltipRef.current.style.maxWidth = `${Math.min(300, cardRect.width * 0.9)}px`;
+        };
+        
+        // Position immediately and on scroll
+        positionTooltip();
+        
+        // Add scroll listener to reposition on scroll
+        window.addEventListener('scroll', positionTooltip);
+        window.addEventListener('resize', positionTooltip);
+        
+        // Clean up
+        return () => {
+          window.removeEventListener('scroll', positionTooltip);
+          window.removeEventListener('resize', positionTooltip);
+        };
+      }
+    }
+  }, [tooltipVisible]);
 
   // The provider code to use for the Trustpilot rating
   const getProviderCode = () => {
@@ -530,6 +582,7 @@ const ProviderCard = ({
           right: calc(100% + 12px);
           top: 50%;
           transform: translateY(-50%) translateX(4px);
+          pointer-events: none;
         }
 
         .tooltip.show {
@@ -549,6 +602,30 @@ const ProviderCard = ({
           border-color: transparent transparent transparent white;
         }
 
+        .tooltip-backdrop {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: rgba(0, 0, 0, 0.4);
+          z-index: 9998;
+          cursor: pointer;
+          touch-action: auto;
+        }
+
+        .tooltip-mobile {
+          position: fixed !important;
+          z-index: 10000 !important;
+          box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2) !important;
+          padding: 16px !important;
+          background-color: white;
+          border-radius: 8px;
+          border: 1px solid #E5E7EB;
+          width: auto;
+          min-width: 250px;
+        }
+
         @media (max-width: 640px) {
           .mobile-stack {
             flex-direction: column;
@@ -557,38 +634,159 @@ const ProviderCard = ({
           .mobile-center {
             text-align: center;
           }
+          
+          .mobile-compact-card .provider-img {
+            height: 26vw;
+            width: 26vw;
+            max-height: 100px;
+            max-width: 100px;
+            min-height: 70px;
+            min-width: 70px;
+          }
+          
+          .mobile-compact-card .mobile-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+          }
+          
+          .mobile-compact-card .mobile-header {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+          }
+          
+          .mobile-compact-card .mobile-provider-info {
+            display: flex;
+            align-items: center;
+          }
+          
+          .mobile-compact-card .mobile-detail-item {
+            padding: 8px 10px;
+            background: white;
+            border-radius: 6px;
+            text-align: left;
+          }
+          
+          .mobile-compact-card .mobile-detail-label {
+            font-size: 13px;
+            color: #6B7280;
+            margin-bottom: 2px;
+            text-align: left;
+            font-weight: 500;
+          }
+          
+          .mobile-compact-card .mobile-detail-value {
+            font-size: 0.8rem;
+            font-weight: 800;
+            text-align: left;
+          }
+          
+          .mobile-compact-card .mobile-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 8px;
+          }
+          
+          .mobile-compact-card .mobile-feature-tag {
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: #EEF2FF;
+            color: #4F46E5;
+            white-space: nowrap;
+          }
+          
+          .mobile-compact-card .mobile-badge {
+            font-size: 9px;
+            padding: 4px 10px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            background-color: #FEF3C7;
+            color: #D97706;
+            border: 1px solid #FBBF24;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+          }
+          
+          .mobile-compact-card .mobile-footer {
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #F3F4F6;
+          }
+          
+          .mobile-compact-card .mobile-amount-container {
+            text-align: right;
+          }
+          
+          .mobile-compact-card .mobile-indicative-label {
+            display: block;
+            margin-bottom: 12px;
+          }
+          
+          .mobile-compact-card .mobile-amount {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-top: 0;
+            line-height: 1.2;
+          }
+          
+          .mobile-compact-card .mobile-rate-margin {
+            font-size: 12px;
+            margin-top: 4px;
+          }
 
           .provider-card:hover {
             transform: scale(1.005);
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
           }
           
-          .tooltip {
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            right: auto;
-            top: auto;
-            transform: translateX(-50%) translateY(4px);
-            width: calc(100vw - 32px);
-            max-width: 320px;
-            text-align: left;
-            margin-bottom: 8px;
+          .tooltip-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.4);
+            z-index: 2147483646;
+            cursor: pointer;
+            touch-action: auto;
           }
 
-          .tooltip.show {
-            transform: translateX(-50%) translateY(0);
+          .tooltip-mobile {
+            position: fixed !important;
+            z-index: 2147483647 !important;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2) !important;
+            padding: 16px !important;
+            background-color: white;
+            border-radius: 8px;
+            border: 1px solid #E5E7EB;
+            width: auto;
+            min-width: 250px;
+            max-width: 90vw;
+            left: 50% !important;
+            top: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
           }
 
-          .tooltip::before {
-            display: block;
-            top: auto;
-            bottom: -6px;
-            left: 50%;
-            right: auto;
-            transform: translateX(-50%);
-            border-width: 6px 6px 0 6px;
-            border-color: white transparent transparent transparent;
+          .mobile-compact-card .get-deal-btn {
+            padding: 5px 12px;
+            font-size: 0.88rem;
+            border-radius: 8px;
+            min-width: 80px;
           }
         }
       `}</style>
@@ -598,7 +796,7 @@ const ProviderCard = ({
         ref={cardRef}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className={`rounded-xl overflow-hidden provider-card glass-effect
+        className={`rounded-xl overflow-hidden provider-card glass-effect mobile-compact-card
           ${index === 0 
             ? 'border-2 border-indigo-600' 
             : 'border border-gray-200'} 
@@ -608,14 +806,204 @@ const ProviderCard = ({
           position: 'relative',
         }}
       >
-        {/* Card Header - Provider info and amount */}
-        <div className="flex flex-col sm:flex-row items-center justify-between p-3 sm:p-4 border-b border-gray-100">
-          <div className="flex flex-col items-center sm:flex-row sm:items-center mb-2 sm:mb-0">
-            <div className="relative group">
+        {/* Desktop Layout - Same as before */}
+        <div className="hidden sm:block">
+          {/* Card Header - Provider info and amount */}
+          <div className="flex flex-row items-center justify-between p-4 border-b border-gray-100">
+            <div className="flex flex-row items-center">
+              <div className="relative group">
+                <img 
+                  src={provider?.logo || logo || '/images/providers/default.png'} 
+                  alt={`${provider?.name || name || 'Provider'} logo`} 
+                  className="h-28 w-28 object-contain transition-transform duration-300 group-hover:scale-105"
+                  onError={(e) => {
+                    const code = (provider?.providerCode || '').toLowerCase();
+                    let fallbackUrl = '/images/providers/default.png';
+                    if (code === 'xe') fallbackUrl = '/images/providers/xe.png';
+                    else if (code === 'torfx') fallbackUrl = '/images/providers/torfx.png';
+                    else if (code === 'wise') fallbackUrl = '/images/providers/wise.png';
+                    else if (code === 'western-union' || code === 'westernunion') fallbackUrl = '/images/providers/westernunion.png';
+                    else if (code === 'ofx' || (provider?.name || name || '').toLowerCase().includes('ofx')) fallbackUrl = '/images/providers/OFX_Logo.webp';
+                    e.target.onerror = null;
+                    e.target.src = fallbackUrl;
+                    e.target.onerror = () => { e.target.src = fallbackUrl.startsWith('/') ? fallbackUrl.substring(1) : '/' + fallbackUrl; };
+                  }}
+                />
+              </div>
+              
+              <div className="ml-3">
+                {providerCode && (
+                  <TrustpilotRating 
+                    providerName={providerCode} 
+                    preloadedRating={trustpilotRating}
+                    onRatingDetermined={onRatingDetermined}
+                  />
+                )}
+                {!providerCode && renderRating(provider?.rating || rating)}
+              </div>
+            </div>
+            
+            <div className="text-right">
+              {/* Desktop version indicative rate */}
+              {(
+                provider?.providerCode?.toLowerCase() === 'torfx' ||
+                provider?.providerCode?.toLowerCase() === 'xe' ||
+                provider?.providerCode?.toLowerCase() === 'profee' ||
+                provider?.providerCode?.toLowerCase() === 'regencyfx' ||
+                provider?.providerCode?.toLowerCase() === 'pandaremit' ||
+                provider?.providerCode?.toLowerCase() === 'ofx' ||
+                (provider?.name || name || '').toLowerCase().includes('torfx') ||
+                (provider?.name || name || '').toLowerCase().includes('xe') ||
+                (provider?.name || name || '').toLowerCase().includes('profee') ||
+                (provider?.name || name || '').toLowerCase().includes('regency') ||
+                (provider?.name || name || '').toLowerCase().includes('panda') ||
+                (provider?.name || name || '').toLowerCase().includes('ofx')
+              ) && (
+                <div className="relative inline-block">
+                  <div 
+                    className="inline-flex items-center text-xs font-medium text-amber-600 bg-amber-50 py-1 px-2.5 rounded-full mb-1.5 cursor-pointer"
+                    onClick={() => setTooltipVisible(true)}
+                  >
+                    <Info size={12} className="mr-1" />
+                    Indicative Rate
+                  </div>
+                  {tooltipVisible && (
+                    <>
+                      <div 
+                        className="tooltip-backdrop" 
+                        onClick={() => setTooltipVisible(false)}
+                        onTouchStart={() => setTooltipVisible(false)}
+                      ></div>
+                      <div 
+                        ref={desktopTooltipRef}
+                        className="tooltip-mobile"
+                        style={{ width: '320px' }}
+                      >
+                        <div className="text-sm font-medium mb-2 text-gray-800">Indicative Rate</div>
+                        <div className="text-xs text-gray-600 leading-relaxed">
+                          While we do our best to get accurate rates from this provider, the rate shown is an indication based on current market variables and may change when you proceed with the transfer.
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+              <div className="text-xs uppercase font-medium text-indigo-600 tracking-wide">They receive</div>
+              <div className="text-2xl font-bold mt-0.5">
+                <span className="text-shimmer">
+                  {getCurrencySymbol(toCurrency)} {formatAmount(calculateAmountReceived())}
+                </span>
+              </div>
+              <div className="text-xs text-gray-600 mt-1 bg-indigo-50 py-0.5 px-2 rounded-full inline-flex items-center">
+                <span className="mr-1">Fees:</span>
+                {getCurrencySymbol(fromCurrency)} {formatAmount(provider?.transferFee || transferFee || 0)}
+              </div>
+            </div>
+          </div>
+          
+          {/* Card Body - Exchange details */}
+          <div className="p-4">
+            <div className="grid grid-cols-2 gap-3">
+              {/* Exchange Rate */}
+              <div className="flex items-start group">
+                <div className="w-1 h-full min-h-[30px] bg-indigo-400 mr-2 self-stretch rounded-full transition-all duration-300 group-hover:bg-indigo-500"></div>
+                <div className="text-left">
+                  <div className="text-xs text-gray-600 font-medium mb-0.5">Exchange Rate</div>
+                  <div className="font-bold text-sm">{`1 ${fromCurrency} = ${(provider?.rate || rate || 0).toFixed(4)} ${toCurrency}`}</div>
+                </div>
+              </div>
+              
+              {/* Delivery Time */}
+              <div className="flex items-start group">
+                <div className="w-1 h-full min-h-[30px] bg-indigo-400 mr-2 self-stretch rounded-full transition-all duration-300 group-hover:bg-indigo-500"></div>
+                <div className="text-left">
+                  <div className="text-xs text-gray-600 font-medium mb-0.5 flex items-center">
+                    <Clock size={12} className="mr-1" />
+                    Delivery Time
+                  </div>
+                  <div className="font-medium text-sm">{formatTransferTime()}</div>
+                </div>
+              </div>
+              
+              {/* Fees */}
+              <div className="flex items-start group">
+                <div className="w-1 h-full min-h-[30px] bg-indigo-400 mr-2 self-stretch rounded-full transition-all duration-300 group-hover:bg-indigo-500"></div>
+                <div className="text-left">
+                  <div className="text-xs text-gray-600 font-medium mb-0.5">Fee</div>
+                  <div className="font-medium text-sm">{getCurrencySymbol(fromCurrency)} {formatAmount(provider?.transferFee || transferFee || 0)}</div>
+                </div>
+              </div>
+              
+              {/* Rate Margin */}
+              <div className="flex items-start group">
+                <div className="w-1 h-full min-h-[30px] bg-indigo-400 mr-2 self-stretch rounded-full transition-all duration-300 group-hover:bg-indigo-500"></div>
+                <div className="text-left">
+                  <div className="text-xs text-gray-600 font-medium mb-0.5">Rate Margin</div>
+                  <div className="text-sm">
+                    {provider?.effectiveRate && provider?.baseRate ? (
+                      provider.effectiveRate > provider.baseRate ? (
+                        <div className="flex items-center text-green-600 font-medium">
+                          <ArrowUp size={12} className="mr-1" />
+                          <span>{`${((provider.effectiveRate / provider.baseRate - 1) * 100).toFixed(2)}% above mid-market`}</span>
+                        </div>
+                      ) : provider.effectiveRate < provider.baseRate ? (
+                        <div className="flex items-center text-red-600 font-medium">
+                          <ArrowDown size={12} className="mr-1" />
+                          <span>{`${((1 - provider.effectiveRate / provider.baseRate) * 100).toFixed(2)}% below mid-market`}</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center text-gray-600 font-medium">
+                          <Minus size={12} className="mr-1" />
+                          <span>Same as mid-market</span>
+                        </div>
+                      )
+                    ) : (
+                      `${((provider?.exchangeRateMargin || exchangeRateMargin || 0) * 100).toFixed(2)}%`
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Features */}
+            <div className="mt-3">
+              <div className="flex flex-wrap gap-1.5">
+                {(provider?.features || features).map((feature, idx) => (
+                  <span 
+                    key={idx} 
+                    className="feature-tag inline-flex items-center text-xs text-indigo-700 bg-indigo-50 py-1 px-2 rounded-full"
+                  >
+                    <Check className="w-3 h-3 text-green-500 mr-1" />
+                    {feature}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          {/* Card Footer - CTA */}
+          <div className="px-4 py-2 border-t border-gray-100 flex items-center justify-end">
+            <a 
+              href={getProviderWebsite(provider?.providerCode || provider?.code || provider?.name || name || '')} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white py-1.5 px-4 rounded-lg flex items-center justify-center font-medium text-sm transition-all duration-300 hover:shadow-lg hover:shadow-indigo-200"
+            >
+              Get Deal
+              <ExternalLink size={14} className="ml-1.5" />
+            </a>
+          </div>
+        </div>
+
+        {/* Mobile Layout - Optimized */}
+        <div className="block sm:hidden">
+          {/* Mobile Header - Provider info & amount */}
+          <div className="mobile-header">
+            <div className="mobile-provider-info">
               <img 
                 src={provider?.logo || logo || '/images/providers/default.png'} 
                 alt={`${provider?.name || name || 'Provider'} logo`} 
-                className="h-24 w-24 sm:h-28 sm:w-28 object-contain transition-transform duration-300 group-hover:scale-105"
+                className="provider-img object-contain"
                 onError={(e) => {
                   const code = (provider?.providerCode || '').toLowerCase();
                   let fallbackUrl = '/images/providers/default.png';
@@ -631,152 +1019,154 @@ const ProviderCard = ({
               />
             </div>
             
-            <div className="mt-2 sm:mt-0 sm:ml-3">
-              {providerCode && (
-                <TrustpilotRating 
-                  providerName={providerCode} 
-                  preloadedRating={trustpilotRating}
-                  onRatingDetermined={onRatingDetermined}
-                />
+            <div className="mobile-amount-container">
+              {(
+                provider?.providerCode?.toLowerCase() === 'torfx' ||
+                provider?.providerCode?.toLowerCase() === 'xe' ||
+                provider?.providerCode?.toLowerCase() === 'profee' ||
+                provider?.providerCode?.toLowerCase() === 'regencyfx' ||
+                provider?.providerCode?.toLowerCase() === 'pandaremit' ||
+                provider?.providerCode?.toLowerCase() === 'ofx' ||
+                (provider?.name || name || '').toLowerCase().includes('torfx') ||
+                (provider?.name || name || '').toLowerCase().includes('xe') ||
+                (provider?.name || name || '').toLowerCase().includes('profee') ||
+                (provider?.name || name || '').toLowerCase().includes('regency') ||
+                (provider?.name || name || '').toLowerCase().includes('panda') ||
+                (provider?.name || name || '').toLowerCase().includes('ofx')
+              ) && (
+                <div className="relative inline-block mb-1 mobile-indicative-label">
+                  <div 
+                    className="inline-flex items-center mobile-badge"
+                    onClick={() => setTooltipVisible(true)}
+                  >
+                    <Info size={8} className="mr-0.5" />
+                    Indicative
+                  </div>
+                  {tooltipVisible && (
+                    <>
+                      <div 
+                        className="tooltip-backdrop" 
+                        onClick={() => setTooltipVisible(false)}
+                        onTouchStart={() => setTooltipVisible(false)}
+                      ></div>
+                      <div 
+                        ref={mobileTooltipRef}
+                        className="tooltip-mobile"
+                      >
+                        <div className="text-sm font-medium mb-2 text-gray-800">Indicative Rate</div>
+                        <div className="text-xs text-gray-600 leading-relaxed">
+                          While we do our best to get accurate rates from this provider, the rate shown is an indication based on current market variables and may change when you proceed with the transfer.
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
               )}
-              {!providerCode && renderRating(provider?.rating || rating)}
+              <div className="text-xs uppercase font-medium text-indigo-600 text-right">They receive</div>
+              <div className="mobile-amount text-shimmer">
+                {getCurrencySymbol(toCurrency)} {formatAmount(calculateAmountReceived())}
+              </div>
             </div>
           </div>
           
-          <div className="text-center sm:text-right">
-            {(
-              provider?.providerCode?.toLowerCase() === 'torfx' ||
-              provider?.providerCode?.toLowerCase() === 'xe' ||
-              provider?.providerCode?.toLowerCase() === 'profee' ||
-              provider?.providerCode?.toLowerCase() === 'regencyfx' ||
-              provider?.providerCode?.toLowerCase() === 'pandaremit' ||
-              provider?.providerCode?.toLowerCase() === 'ofx' ||
-              (provider?.name || name || '').toLowerCase().includes('torfx') ||
-              (provider?.name || name || '').toLowerCase().includes('xe') ||
-              (provider?.name || name || '').toLowerCase().includes('profee') ||
-              (provider?.name || name || '').toLowerCase().includes('regency') ||
-              (provider?.name || name || '').toLowerCase().includes('panda') ||
-              (provider?.name || name || '').toLowerCase().includes('ofx')
-            ) && (
-              <div className="relative inline-block">
-                <div 
-                  className="inline-flex items-center text-xs font-medium text-amber-600 bg-amber-50 py-1 px-2.5 rounded-full mb-1.5 cursor-help"
-                  onMouseEnter={() => setShowTooltip(true)}
-                  onMouseLeave={() => setShowTooltip(false)}
-                  onTouchStart={() => setShowTooltip(!showTooltip)}
-                >
-                  <Info size={12} className="mr-1" />
-                  Indicative Rate
-                </div>
-                <div className={`tooltip ${showTooltip ? 'show' : ''}`} style={{ pointerEvents: 'none' }}>
-                  While we do our best to get accurate rates from this provider, the rate shown is an indication based on current market variables and may change when you proceed with the transfer.
-                </div>
+          {/* Mobile Info Grid */}
+          <div className="px-3 pb-2">
+            <div className="mobile-info-grid">
+              {/* Exchange Rate */}
+              <div className="mobile-detail-item">
+                <div className="mobile-detail-label">Exchange Rate</div>
+                <div className="mobile-detail-value">{`1 ${fromCurrency} = ${(provider?.rate || rate || 0).toFixed(4)} ${toCurrency}`}</div>
               </div>
-            )}
-            <div className="text-xs uppercase font-medium text-indigo-600 tracking-wide">They receive</div>
-            <div className="text-2xl font-bold mt-0.5">
-              <span className="text-shimmer">
-                {getCurrencySymbol(toCurrency)} {formatAmount(calculateAmountReceived())}
-              </span>
-            </div>
-            <div className="text-xs text-gray-600 mt-1 bg-indigo-50 py-0.5 px-2 rounded-full inline-flex items-center">
-              <span className="mr-1">Fees:</span>
-              {getCurrencySymbol(fromCurrency)} {formatAmount(provider?.transferFee || transferFee || 0)}
-            </div>
-          </div>
-        </div>
-        
-        {/* Card Body - Exchange details */}
-        <div className="p-3 sm:p-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* Exchange Rate */}
-            <div className="flex items-start group">
-              <div className="w-1 h-full min-h-[30px] bg-indigo-400 mr-2 self-stretch rounded-full transition-all duration-300 group-hover:bg-indigo-500"></div>
-              <div className="text-left">
-                <div className="text-xs text-gray-600 font-medium mb-0.5">Exchange Rate</div>
-                <div className="font-bold text-sm">{`1 ${fromCurrency} = ${(provider?.rate || rate || 0).toFixed(4)} ${toCurrency}`}</div>
-              </div>
-            </div>
-            
-            {/* Delivery Time */}
-            <div className="flex items-start group">
-              <div className="w-1 h-full min-h-[30px] bg-indigo-400 mr-2 self-stretch rounded-full transition-all duration-300 group-hover:bg-indigo-500"></div>
-              <div className="text-left">
-                <div className="text-xs text-gray-600 font-medium mb-0.5 flex items-center">
-                  <Clock size={12} className="mr-1" />
+              
+              {/* Delivery Time */}
+              <div className="mobile-detail-item">
+                <div className="mobile-detail-label flex items-center">
+                  <Clock size={8} className="mr-0.5" />
                   Delivery Time
                 </div>
-                <div className="font-medium text-sm">{formatTransferTime()}</div>
+                <div className="mobile-detail-value">{formatTransferTime()}</div>
               </div>
-            </div>
-            
-            {/* Fees */}
-            <div className="flex items-start group">
-              <div className="w-1 h-full min-h-[30px] bg-indigo-400 mr-2 self-stretch rounded-full transition-all duration-300 group-hover:bg-indigo-500"></div>
-              <div className="text-left">
-                <div className="text-xs text-gray-600 font-medium mb-0.5">Fee</div>
-                <div className="font-medium text-sm">{getCurrencySymbol(fromCurrency)} {formatAmount(provider?.transferFee || transferFee || 0)}</div>
+              
+              {/* Fees */}
+              <div className="mobile-detail-item">
+                <div className="mobile-detail-label">Fee</div>
+                <div className="mobile-detail-value">{getCurrencySymbol(fromCurrency)} {formatAmount(provider?.transferFee || transferFee || 0)}</div>
               </div>
-            </div>
-            
-            {/* Rate Margin */}
-            <div className="flex items-start group">
-              <div className="w-1 h-full min-h-[30px] bg-indigo-400 mr-2 self-stretch rounded-full transition-all duration-300 group-hover:bg-indigo-500"></div>
-              <div className="text-left">
-                <div className="text-xs text-gray-600 font-medium mb-0.5">Rate Margin</div>
-                <div className="text-sm">
-                  {provider?.effectiveRate && provider?.baseRate ? (
-                    provider.effectiveRate > provider.baseRate ? (
-                      <div className="flex items-center text-green-600 font-medium">
-                        <ArrowUp size={12} className="mr-1" />
-                        <span>{`${((provider.effectiveRate / provider.baseRate - 1) * 100).toFixed(2)}% above mid-market`}</span>
-                      </div>
-                    ) : provider.effectiveRate < provider.baseRate ? (
-                      <div className="flex items-center text-red-600 font-medium">
-                        <ArrowDown size={12} className="mr-1" />
-                        <span>{`${((1 - provider.effectiveRate / provider.baseRate) * 100).toFixed(2)}% below mid-market`}</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center text-gray-600 font-medium">
-                        <Minus size={12} className="mr-1" />
-                        <span>Same as mid-market</span>
-                      </div>
-                    )
+              
+              {/* Rating */}
+              <div className="mobile-detail-item">
+                <div className="mobile-detail-label">Rating</div>
+                <div className="mobile-detail-value flex items-center scale-75 origin-left">
+                  {providerCode ? (
+                    <TrustpilotRating 
+                      providerName={providerCode} 
+                      preloadedRating={trustpilotRating}
+                      onRatingDetermined={onRatingDetermined}
+                      compact={true}
+                    />
                   ) : (
-                    `${((provider?.exchangeRateMargin || exchangeRateMargin || 0) * 100).toFixed(2)}%`
+                    renderRating(provider?.rating || rating)
                   )}
                 </div>
               </div>
             </div>
+            
+            {/* Features - If any */}
+            {(provider?.features || features).length > 0 && (
+              <div className="mobile-features">
+                {(provider?.features || features).slice(0, 3).map((feature, idx) => (
+                  <span 
+                    key={idx} 
+                    className="mobile-feature-tag"
+                  >
+                    <Check className="w-2 h-2 text-green-500 mr-0.5 inline-block" />
+                    {feature}
+                  </span>
+                ))}
+                {(provider?.features || features).length > 3 && (
+                  <span className="mobile-feature-tag">
+                    +{(provider?.features || features).length - 3} more
+                  </span>
+                )}
+              </div>
+            )}
           </div>
           
-          {/* Features */}
-          <div className="mt-3">
-            <div className="flex flex-wrap gap-1.5">
-              {(provider?.features || features).map((feature, idx) => (
-                <span 
-                  key={idx} 
-                  className="feature-tag inline-flex items-center text-xs text-indigo-700 bg-indigo-50 py-1 px-2 rounded-full"
-                >
-                  <Check className="w-3 h-3 text-green-500 mr-1" />
-                  {feature}
-                </span>
-              ))}
+          {/* Mobile Footer - Rate Margin & CTA */}
+          <div className="mobile-footer">
+            <div className="mobile-rate-margin">
+              {provider?.effectiveRate && provider?.baseRate ? (
+                provider.effectiveRate > provider.baseRate ? (
+                  <div className="flex items-center text-green-600 text-xs font-medium">
+                    <ArrowUp size={8} className="mr-1" />
+                    <span>{`${((provider.effectiveRate / provider.baseRate - 1) * 100).toFixed(2)}% above mid-market`}</span>
+                  </div>
+                ) : provider.effectiveRate < provider.baseRate ? (
+                  <div className="flex items-center text-red-600 text-xs font-medium">
+                    <ArrowDown size={8} className="mr-1" />
+                    <span>{`${((1 - provider.effectiveRate / provider.baseRate) * 100).toFixed(2)}% below mid-market`}</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center text-gray-600 text-xs font-medium">
+                    <Minus size={8} className="mr-1" />
+                    <span>Same as mid-market</span>
+                  </div>
+                )
+              ) : (
+                <span className="text-xs">{`${((provider?.exchangeRateMargin || exchangeRateMargin || 0) * 100).toFixed(2)}% margin`}</span>
+              )}
             </div>
+            
+            <a 
+              href={getProviderWebsite(provider?.providerCode || provider?.code || provider?.name || name || '')} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white get-deal-btn flex items-center justify-center font-semibold"
+            >
+              Get Deal
+              <ExternalLink size={14} className="ml-1" />
+            </a>
           </div>
-        </div>
-        
-        {/* Card Footer - CTA */}
-        <div className="px-4 py-2 border-t border-gray-100 flex items-center justify-end">
-          <a 
-            href={getProviderWebsite(provider?.providerCode || provider?.code || provider?.name || name || '')} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="bg-indigo-600 hover:bg-indigo-700 text-white py-1.5 px-4 rounded-lg flex items-center justify-center font-medium text-sm transition-all duration-300 hover:shadow-lg hover:shadow-indigo-200"
-          >
-            Get Deal
-            <ExternalLink size={14} className="ml-1.5" />
-          </a>
         </div>
       </div>
 

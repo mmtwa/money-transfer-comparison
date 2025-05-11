@@ -14,7 +14,6 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
   const [sortDirection, setSortDirection] = useState('desc');
   const [showSortOptions, setShowSortOptions] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [showLoadingAnimation, setShowLoadingAnimation] = useState(true);
   const [providerResults, setProviderResults] = useState([]);
   const [bestDealProvider, setBestDealProvider] = useState(null);
   const [error, setError] = useState(null);
@@ -939,74 +938,31 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
     }
   };
   
-  // Add useEffect for loading animation timing
-  useEffect(() => {
-    if (!loading) {
-      // Keep the animation visible for 2 seconds after data is loaded
-      const timer = setTimeout(() => {
-        setShowLoadingAnimation(false);
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [loading]);
-  
   // Show loading state or error
-  if (loading || showLoadingAnimation) {
+  if (loading) {
     return (
       <div className="container mx-auto flex-1 px-4 sm:px-6 md:px-8 py-5 max-w-6xl">
         <div className="mb-4">
           <button 
             onClick={onBackToSearch}
-            className="text-indigo-600 hover:text-indigo-800 flex items-center transition-colors font-medium"
+            className="text-indigo-600 hover:text-indigo-800 flex items-center transition-colors font-medium group"
           >
-            <ChevronLeft size={18} className="mr-1" /> Back to search
+            <div className="relative overflow-hidden mr-1">
+              <ChevronLeft size={18} className="relative z-10" />
+              <div className="absolute inset-0 bg-indigo-100 rounded-full scale-0 transition-transform group-hover:scale-100 opacity-0 group-hover:opacity-100"></div>
+            </div>
+            <span className="relative">
+              Back to search
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-indigo-300 group-hover:w-full transition-all duration-200"></span>
+            </span>
           </button>
         </div>
         
         <div className="flex flex-col items-center justify-center min-h-[70vh] px-4 sm:px-6 md:px-8">
-          {/* Main loading animation container */}
-          <div className="relative w-full max-w-md mx-auto">
-            {/* Animated background gradient */}
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-50 via-purple-50 to-indigo-50 rounded-3xl opacity-50 animate-gradient-x"></div>
-            
-            {/* Content container */}
-            <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-indigo-100/50">
-              {/* Animated circles */}
-              <div className="relative w-32 h-32 mx-auto mb-8">
-                {/* Outer rotating circle */}
-                <div className="absolute inset-0 border-4 border-indigo-200 rounded-full animate-[spin_3s_linear_infinite]"></div>
-                {/* Middle pulsing circle */}
-                <div className="absolute inset-4 border-4 border-indigo-400 rounded-full animate-[pulse_2s_ease-in-out_infinite]"></div>
-                {/* Inner rotating circle */}
-                <div className="absolute inset-8 border-4 border-indigo-500 rounded-full animate-[spin_2s_linear_infinite_reverse]"></div>
-                {/* Center dot with glow */}
-                <div className="absolute inset-[35%] bg-indigo-600 rounded-full animate-pulse shadow-lg shadow-indigo-200"></div>
-              </div>
-              
-              {/* Text content */}
-              <div className="text-center space-y-6">
-                <div className="space-y-2">
-                  <h3 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                    Finding the best rates
-                  </h3>
-                  <p className="text-gray-600 text-sm sm:text-base max-w-sm mx-auto">
-                    We're comparing rates from multiple providers to find you the best deal for your transfer.
-                  </p>
-                </div>
-                
-                {/* Animated progress indicators */}
-                <div className="flex justify-center items-center space-x-2">
-                  <div className="w-2 h-2 bg-indigo-500 rounded-full animate-[bounce_1s_infinite_0ms]"></div>
-                  <div className="w-2 h-2 bg-indigo-500 rounded-full animate-[bounce_1s_infinite_150ms]"></div>
-                  <div className="w-2 h-2 bg-indigo-500 rounded-full animate-[bounce_1s_infinite_300ms]"></div>
-                </div>
-                
-                {/* Progress bar */}
-                <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full animate-[progress_2s_ease-in-out_infinite]"></div>
-                </div>
-              </div>
-            </div>
+          {/* Simple loading state instead of animation since we use TransitionLoader */}
+          <div className="text-center p-8">
+            <div className="inline-block animate-spin h-8 w-8 border-4 border-indigo-500 border-t-transparent rounded-full mb-4"></div>
+            <p className="text-gray-600">Loading comparison results...</p>
           </div>
         </div>
       </div>
@@ -1157,15 +1113,34 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
           background-size: 200% 200%;
           animation: gradient-x 3s ease infinite;
         }
+
+        /* Extra small text size for mobile views */
+        .text-2xs {
+          font-size: 0.65rem;
+          line-height: 1rem;
+        }
+
+        /* Ensure results content is visible by default, but can be hidden when needed */
+        #results-content {
+          opacity: 1;
+          transition: opacity 300ms ease-in-out;
+        }
       `}</style>
       
-      <div className="container mx-auto flex-1 px-4 py-5 max-w-6xl" style={{ zIndex: 100, position: 'relative' }}>
+      <div id="results-content" className="container mx-auto flex-1 px-4 py-5 max-w-6xl" style={{ zIndex: 100, position: 'relative', opacity: 1 }}>
         <div className="mb-4">
           <button 
             onClick={onBackToSearch}
-            className="text-indigo-600 hover:text-indigo-800 flex items-center transition-colors font-medium"
+            className="text-indigo-600 hover:text-indigo-800 flex items-center transition-colors font-medium group"
           >
-            <ChevronLeft size={18} className="mr-1" /> Back to search
+            <div className="relative overflow-hidden mr-1">
+              <ChevronLeft size={18} className="relative z-10" />
+              <div className="absolute inset-0 bg-indigo-100 rounded-full scale-0 transition-transform group-hover:scale-100 opacity-0 group-hover:opacity-100"></div>
+            </div>
+            <span className="relative">
+              Back to search
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-indigo-300 group-hover:w-full transition-all duration-200"></span>
+            </span>
           </button>
         </div>
         
@@ -1285,60 +1260,81 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
         {bestDealProvider && (
           <div 
             onClick={() => scrollToProvider(bestDealProvider.providerId)}
-            className="mb-5 rounded-lg shadow-sm border border-indigo-200 p-4 cursor-pointer hover:shadow-md transition-all metal-shimmer gradient-bg relative z-10"
+            className="mb-5 rounded-lg shadow-sm border border-indigo-200 p-3 md:p-4 cursor-pointer hover:shadow-md transition-all metal-shimmer gradient-bg relative z-10"
           >
             <div className="flex flex-col md:flex-row items-center justify-between relative z-10">
-              <div className="flex items-center mb-3 md:mb-0">
-                <Award size={24} className="text-indigo-600 mr-2" />
-                <h3 className="font-bold text-indigo-800 text-lg">Best Deal</h3>
+              {/* Mobile-optimized header with award icon + title + button */}
+              <div className="flex items-center justify-between w-full md:w-auto md:justify-start mb-2 md:mb-0">
+                <div className="flex items-center">
+                  <Award size={20} className="text-indigo-600 mr-1.5" />
+                  <h3 className="font-bold text-indigo-800 text-base md:text-lg">Best Deal</h3>
+                </div>
+                
+                {/* View Provider button moved up on mobile */}
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    scrollToProvider(bestDealProvider.providerId);
+                  }}
+                  className="text-xs bg-white px-2 py-1 md:px-3 md:py-1.5 rounded-md shadow-sm border border-indigo-100 text-indigo-700 font-medium flex items-center md:hidden"
+                >
+                  View
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1">
+                    <path d="m12 5 7 7-7 7"></path>
+                  </svg>
+                </button>
               </div>
               
-              <div className="flex flex-col md:flex-row items-center justify-center md:flex-1">
-                <img 
-                  src={bestDealProvider.providerLogo} 
-                  alt={`${bestDealProvider.providerName} logo`} 
-                  className="w-16 h-16 object-contain mb-3 md:mb-0 md:mr-4"
-                  onError={(e) => {
-                    // Try to fix the path if it starts with "/"
-                    if ((bestDealProvider.providerLogo || '').startsWith('/')) {
-                      const imgSrc = bestDealProvider.providerLogo;
-                      e.target.src = imgSrc.substring(1);
-                    } else {
-                      // Fall back to a direct provider logo based on provider name
-                      const providerName = (bestDealProvider.providerName || '').toLowerCase();
-                      if (providerName.includes('wise')) {
-                        e.target.src = '/images/providers/wise.png';
-                        // If that fails, try without the leading slash
-                        e.target.onerror = () => { e.target.src = 'images/providers/wise.png'; };
-                      } else if (providerName.includes('xe')) {
-                        e.target.src = '/images/providers/xe.png';
-                        // If that fails, try without the leading slash
-                        e.target.onerror = () => { e.target.src = 'images/providers/xe.png'; };
-                      } else if (providerName.includes('western') || providerName.includes('union')) {
-                        e.target.src = '/images/providers/westernunion.png';
-                        // If that fails, try without the leading slash
-                        e.target.onerror = () => { e.target.src = 'images/providers/westernunion.png'; };
-                      } else if (providerName.includes('torfx')) { // Add specific case for TorFX
-                        e.target.src = '/images/providers/torfx.png';
-                        // If that fails, try without the leading slash
-                        e.target.onerror = () => { e.target.src = 'images/providers/torfx.png'; };
-                      } else if (providerName.includes('panda') || providerName.includes('remit')) { // Add specific case for Panda Remit
-                        e.target.src = '/images/providers/pandaremit.png';
-                        // If that fails, try without the leading slash
-                        e.target.onerror = () => { e.target.src = 'images/providers/pandaremit.png'; };
+              {/* Compact mobile content section */}
+              <div className="flex items-center justify-between w-full md:flex-row md:items-center md:justify-center md:flex-1 md:space-x-4">
+                <div className="flex items-center">
+                  <img 
+                    src={bestDealProvider.providerLogo} 
+                    alt={`${bestDealProvider.providerName} logo`} 
+                    className="w-12 h-12 md:w-16 md:h-16 object-contain md:mb-0 md:mr-4"
+                    onError={(e) => {
+                      // Try to fix the path if it starts with "/"
+                      if ((bestDealProvider.providerLogo || '').startsWith('/')) {
+                        const imgSrc = bestDealProvider.providerLogo;
+                        e.target.src = imgSrc.substring(1);
                       } else {
-                        // Default fallback
-                        e.target.src = '/images/providers/default.png';
-                        // If that fails, try without the leading slash
-                        e.target.onerror = () => { e.target.src = 'images/providers/default.png'; };
+                        // Fall back to a direct provider logo based on provider name
+                        const providerName = (bestDealProvider.providerName || '').toLowerCase();
+                        if (providerName.includes('wise')) {
+                          e.target.src = '/images/providers/wise.png';
+                          // If that fails, try without the leading slash
+                          e.target.onerror = () => { e.target.src = 'images/providers/wise.png'; };
+                        } else if (providerName.includes('xe')) {
+                          e.target.src = '/images/providers/xe.png';
+                          // If that fails, try without the leading slash
+                          e.target.onerror = () => { e.target.src = 'images/providers/xe.png'; };
+                        } else if (providerName.includes('western') || providerName.includes('union')) {
+                          e.target.src = '/images/providers/westernunion.png';
+                          // If that fails, try without the leading slash
+                          e.target.onerror = () => { e.target.src = 'images/providers/westernunion.png'; };
+                        } else if (providerName.includes('torfx')) { // Add specific case for TorFX
+                          e.target.src = '/images/providers/torfx.png';
+                          // If that fails, try without the leading slash
+                          e.target.onerror = () => { e.target.src = 'images/providers/torfx.png'; };
+                        } else if (providerName.includes('panda') || providerName.includes('remit')) { // Add specific case for Panda Remit
+                          e.target.src = '/images/providers/pandaremit.png';
+                          // If that fails, try without the leading slash
+                          e.target.onerror = () => { e.target.src = 'images/providers/pandaremit.png'; };
+                        } else {
+                          // Default fallback
+                          e.target.src = '/images/providers/default.png';
+                          // If that fails, try without the leading slash
+                          e.target.onerror = () => { e.target.src = 'images/providers/default.png'; };
+                        }
                       }
-                    }
-                  }}
-                />
+                    }}
+                  />
+                  {/* Provider name removed */}
+                </div>
                 
-                <div className="text-center">
-                  <div className="text-xs uppercase font-medium text-indigo-600 mb-1">They receive</div>
-                  <div className="text-2xl font-bold">
+                <div className="flex-shrink-0 text-right md:text-center ml-2 md:ml-0 md:mx-auto">
+                  <div className="text-2xs md:text-xs uppercase font-medium text-indigo-600 mb-0 md:mb-1">They receive</div>
+                  <div className="text-lg md:text-2xl font-bold">
                     <span className="text-shimmer">
                       {getCurrencySymbol(toCurrency)} {formatAmount(bestDealProvider.amountReceived)}
                     </span>
@@ -1346,9 +1342,10 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
                 </div>
               </div>
               
+              {/* Desktop-only button (hidden on mobile) */}
               <button 
                 onClick={() => scrollToProvider(bestDealProvider.providerId)}
-                className="text-xs bg-white px-3 py-1.5 rounded-md shadow-sm border border-indigo-100 text-indigo-700 font-medium flex items-center mt-3 md:mt-0"
+                className="hidden md:flex text-xs bg-white px-3 py-1.5 rounded-md shadow-sm border border-indigo-100 text-indigo-700 font-medium items-center mt-3 md:mt-0"
               >
                 View Provider
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1">

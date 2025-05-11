@@ -58,6 +58,7 @@ import Service from '../pages/guides/criteria/Service';
 import DigitalNative from '../pages/guides/method/DigitalNative';
 import DigitalAdapter from '../pages/guides/method/DigitalAdapter';
 import Traditional from '../pages/guides/method/Traditional';
+import TransitionLoader from '../components/ui/TransitionLoader';
 
 /**
  * Main container component for the money transfer comparison app
@@ -69,6 +70,9 @@ const MoneyCompare = ({ initialPath }) => {
     toCurrency: 'EUR',
     amount: 1000
   });
+  // New state to control the transition animation
+  const [showTransition, setShowTransition] = useState(false);
+  const [isNavigatingToResults, setIsNavigatingToResults] = useState(false);
   
   // Get the current location from React Router
   const location = useLocation();
@@ -318,22 +322,83 @@ const MoneyCompare = ({ initialPath }) => {
   }, [currentPage]);
   
   const handleSearch = (data) => {
-    setSearchData(data);
-    setCurrentPage('results');
+    // First make sure any results content is hidden during transition
+    const resultsContent = document.getElementById('results-content');
+    if (resultsContent) {
+      resultsContent.style.opacity = '0';
+    }
     
-    // Update URL using React Router
-    navigate('/results', { 
-      state: { fromHomepage: true, searchData: data } 
-    });
+    setSearchData(data);
+    setShowTransition(true);
+    setIsNavigatingToResults(true);
+    
+    // Navigation to results page will be handled after the transition animation completes
+  };
+  
+  // This function is called when the transition animation completes
+  const handleTransitionComplete = () => {
+    if (isNavigatingToResults) {
+      // Set the current page and update URL first
+      setCurrentPage('results');
+      
+      // Update URL using React Router
+      navigate('/results', { 
+        state: { fromHomepage: true, searchData }
+      });
+      
+      // Hide the transition animation
+      setShowTransition(false);
+      
+      // After a short delay, make sure any elements with ID 'results-content' are visible
+      setTimeout(() => {
+        const resultsContent = document.getElementById('results-content');
+        if (resultsContent) {
+          resultsContent.style.opacity = '1';
+        }
+        setIsNavigatingToResults(false);
+      }, 100);
+    } else {
+      // Just hide the transition in case it's ever shown
+      setShowTransition(false);
+    }
   };
   
   const handleBackToHome = () => {
-    setCurrentPage('home');
-    
-    // Update URL using React Router
-    navigate('/', { 
-      state: { fromResults: true, searchData } 
-    });
+    // Create a smooth transition directly without using the TransitionLoader
+    // Add a white overlay that fades in and out quickly
+    const overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.inset = '0';
+    overlay.style.backgroundColor = 'white';
+    overlay.style.opacity = '0';
+    overlay.style.zIndex = '40';
+    overlay.style.transition = 'opacity 300ms ease-in-out';
+    document.body.appendChild(overlay);
+
+    // Fade in
+    setTimeout(() => {
+      overlay.style.opacity = '1';
+    }, 10);
+
+    // After fade in, navigate and update state
+    setTimeout(() => {
+      setCurrentPage('home');
+      
+      // Update URL using React Router
+      navigate('/', { 
+        state: { fromResults: true, searchData } 
+      });
+      
+      // Start fade out
+      setTimeout(() => {
+        overlay.style.opacity = '0';
+        
+        // Remove overlay after fade out completes
+        setTimeout(() => {
+          document.body.removeChild(overlay);
+        }, 300);
+      }, 50);
+    }, 300);
   };
 
   const navigateToAboutUs = () => {
@@ -1747,7 +1812,7 @@ const MoneyCompare = ({ initialPath }) => {
   };
   
   return (
-    <div className="MoneyCompare">
+    <>
       <CanonicalUrl />
       <Routes>
         <Route path="/" element={renderPageContent()} />
@@ -1809,7 +1874,17 @@ const MoneyCompare = ({ initialPath }) => {
         */}
         <Route path="*" element={renderPageContent()} />
       </Routes>
-    </div>
+      
+      {/* Transition Loader */}
+      <TransitionLoader 
+        isVisible={showTransition}
+        fromCurrency={searchData.fromCurrency}
+        toCurrency={searchData.toCurrency}
+        amount={searchData.amount}
+        onAnimationComplete={handleTransitionComplete}
+        isReturningToSearch={!isNavigatingToResults}
+      />
+    </>
   );
 };
 

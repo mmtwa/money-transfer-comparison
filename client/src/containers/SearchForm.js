@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Search } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import CurrencySelector from '../components/ui/CurrencySelector';
 import Button from '../components/ui/Button';
 import { currenciesList } from '../utils/currency';
@@ -57,15 +57,17 @@ const SearchForm = ({ onSearch, initialData }) => {
     setActiveDropdown(null); // Close any open dropdown
     setIsLoading(true);
     
-    // Simulate API call with a short delay
+    // Add 1 second delay before executing the search
     setTimeout(() => {
+      // Call the search function
       onSearch({
         fromCurrency,
         toCurrency,
         amount: amount || 1000 // Default to 1000 if amount is empty
       });
-      setIsLoading(false);
-    }, 1000);
+    }, 500); // 1 second delay
+    
+    // No need for setTimeout here as the loading state will be handled by the TransitionLoader
   };
 
   // Handle dropdown toggle - ensures only one dropdown is open at a time
@@ -328,23 +330,26 @@ const SearchForm = ({ onSearch, initialData }) => {
   return (
     <div className="w-full max-w-md mx-auto lg:mx-0 relative">
       <motion.div 
-        className="bg-white rounded-3xl shadow-lg border border-gray-100"
+        className="bg-white rounded-[32px] shadow-xl border border-gray-100 backdrop-blur-sm"
         initial={{ opacity: 1, y: 0 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
       >
-        {/* Trust badge positioned above the main form content */}
+        {/* Trust badge */}
         <div className="flex justify-center">
-          <div 
-            className="inline-flex items-center -mt-3 px-3 sm:px-4 py-1 sm:py-2 bg-white rounded-full border border-gray-200 shadow-md"
+          <motion.div
+            initial={{ y: -10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.1, duration: 0.3 }}
+            className="inline-flex items-center -mt-3 px-4 sm:px-5 py-1.5 sm:py-2 bg-white rounded-full border border-gray-200 shadow-md"
             style={{ fontFamily: 'Poppins, sans-serif' }}
           >
-            <div className="flex items-center justify-center h-4 sm:h-5 w-4 sm:w-5 rounded-full bg-green-500 mr-1 sm:mr-2 flex-shrink-0">
-              <svg className="h-2 sm:h-3 w-2 sm:w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <div className="flex items-center justify-center h-4 sm:h-5 w-4 sm:w-5 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 mr-2 sm:mr-2.5 flex-shrink-0">
+              <svg className="h-2.5 sm:h-3 w-2.5 sm:w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
               </svg>
             </div>
-            <div className="text-[10px] sm:text-xs font-semibold tracking-tight leading-tight text-gray-700">
+            <div className="text-[10px] sm:text-xs font-medium tracking-tight leading-tight text-gray-700">
               <span className="hidden sm:inline">
                 TRUST ASSURED: We earn from ad partners, not your money. <br /> 
                 No sponsored listings, no commission. Totally transparent.
@@ -354,82 +359,50 @@ const SearchForm = ({ onSearch, initialData }) => {
                 No sponsored listings. No commission.
               </span>
             </div>
-          </div>
+          </motion.div>
         </div>
 
-        <div className="px-6 pb-6 pt-3 md:px-8 md:pb-8 md:pt-4">
-          <h2 className="mb-4 text-left">
-            <div className="flex flex-col items-center sm:items-start space-y-4">
-              <div
-                className="text-2xl sm:text-2xl md:text-3xl lg:text-3xl font-semibold tracking-tight leading-tight overflow-hidden whitespace-nowrap relative"
-                style={{ 
-                  fontFamily: 'Poppins, sans-serif', 
-                  minHeight: '36px'
-                }}
+        <div className="px-6 pb-7 pt-4 md:px-8 md:pb-8 md:pt-5">
+          {/* Heading */}
+          <motion.div 
+            initial={{ y: 10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.3 }}
+            className="mb-5 text-left"
+          >
+            <div className="flex flex-col items-center sm:items-start space-y-3">
+              <h2 className="text-2xl sm:text-2xl md:text-3xl lg:text-3xl font-bold tracking-tight leading-tight overflow-hidden relative"
+                style={{ fontFamily: 'Poppins, sans-serif' }}
               >
-                <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-800 text-transparent bg-clip-text">
+                <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-transparent bg-clip-text">
                   Transfer more, pay less.
                 </span>
-                <div 
-                  className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-30"
-                  style={{ 
-                    transform: "translateX(-100%)",
-                    animation: "shimmer 2s infinite linear",
-                    filter: "blur(5px)" 
-                  }}
-                />
-              </div>
+                <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-30 shimmer-effect"></div>
+              </h2>
               
-              <div
-                className="text-xs sm:text-sm md:text-base lg:text-lg font-medium tracking-tight leading-tight text-gray-700 overflow-hidden"
-                style={{ 
-                  fontFamily: 'Poppins, sans-serif', 
-                  minHeight: '48px'
-                }}
-              >
+              <div className="text-xs sm:text-sm md:text-base lg:text-lg font-medium tracking-tight leading-tight text-gray-700">
                 <div className="block sm:hidden text-center">
-                  <div 
-                    className="text-[14px] leading-tight overflow-hidden whitespace-nowrap relative mb-1"
-                    style={{ 
-                      fontFamily: 'Poppins, sans-serif',
-                      minHeight: '20px'
-                    }}
+                  <div className="text-[14px] leading-tight mb-1 font-semibold overflow-hidden relative"
+                    style={{ fontFamily: 'Poppins, sans-serif' }}
                   >
-                    <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-800 text-transparent bg-clip-text">
+                    <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-transparent bg-clip-text">
                       Truly Independent. Transparently Better.
                     </span>
-                    <div 
-                      className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-30"
-                      style={{ 
-                        transform: "translateX(-100%)",
-                        animation: "shimmer 2s infinite linear",
-                        filter: "blur(5px)" 
-                      }}
-                    />
+                    <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-30 shimmer-effect"></div>
                   </div>
                   <div className="text-[13px] leading-[1.2] font-medium text-gray-600">
-                    Compare instantly & see the <span className="font-semibold text-gray-800">real cost</span> before you send.
+                    Compare money transfers instantly & see<br /> the <span className="font-semibold text-gray-800">real cost</span> before you send.
                   </div>
                 </div>
-                <div className="hidden sm:block space-y-3">
-                  <div 
-                    className="text-base leading-tight overflow-hidden whitespace-nowrap relative"
-                    style={{ 
-                      fontFamily: 'Poppins, sans-serif',
-                      minHeight: '36px'
-                    }}
+                
+                <div className="hidden sm:block space-y-2">
+                  <div className="text-base leading-tight font-semibold overflow-hidden relative"
+                    style={{ fontFamily: 'Poppins, sans-serif' }}
                   >
-                    <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-800 text-transparent bg-clip-text">
+                    <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-transparent bg-clip-text">
                       Truly Independent. Transparently Better.
                     </span>
-                    <div 
-                      className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-30"
-                      style={{ 
-                        transform: "translateX(-100%)",
-                        animation: "shimmer 2s infinite linear",
-                        filter: "blur(5px)" 
-                      }}
-                    />
+                    <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-30 shimmer-effect"></div>
                   </div>
                   <div className="text-sm leading-tight">
                     <div>Compare instantly & see the <span className="font-semibold">real cost</span> before</div>
@@ -438,74 +411,111 @@ const SearchForm = ({ onSearch, initialData }) => {
                 </div>
               </div>
             </div>
-          </h2>
+          </motion.div>
           
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-black-600 mb-2 text-left">You send</label>
-            <div className="flex">
-              <div className="relative w-2/5">
-                <CurrencySelector 
-                  selectedCurrency={fromCurrency}
-                  onCurrencyChange={handleCurrencyChange}
-                  isOpen={activeDropdown === 'from'}
-                  onToggle={handleDropdownToggle}
-                  id="from"
-                />
-              </div>
-              <div className="relative w-3/5 ml-4 md:ml-8" style={{ minHeight: "60px" }}>
-                <div className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium text-lg md:text-xl lg:text-[22px]">
-                  {getCurrencySymbol(fromCurrency)}
+          {/* Form fields */}
+          <motion.div 
+            className="space-y-5"
+            initial={{ y: 15, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.3 }}
+          >
+            {/* Send field */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-left">You send</label>
+              <div className="flex items-start">
+                <div className="relative w-2/5">
+                  <CurrencySelector 
+                    selectedCurrency={fromCurrency}
+                    onCurrencyChange={handleCurrencyChange}
+                    isOpen={activeDropdown === 'from'}
+                    onToggle={handleDropdownToggle}
+                    id="from"
+                  />
                 </div>
-                <input
-                  ref={amountInputRef}
-                  type="text"
-                  value={inputValue}
-                  onChange={handleAmountChange}
-                  onKeyDown={handleKeyDown}
-                  className={`w-full border ${isInitialFocus ? 'border-indigo-500 pulse-border' : 'border-gray-500 hover:border-indigo-400'} bg-white-100 rounded-xl p-4 md:p-5 pl-10 focus:outline-none text-gray-800 font-medium text-lg md:text-xl lg:text-[22px] text-right placeholder:text-sm md:placeholder:text-base lg:placeholder:text-lg placeholder:text-gray-400 transition-all duration-200`}
-                  inputMode="numeric"
-                  pattern="[0-9,]*"
-                  placeholder="Enter amount"
-                  onFocus={handleAmountFocus}
-                  onBlur={handleAmountBlur}
-                />
+                <div className="relative w-3/5 ml-4 md:ml-6" style={{ minHeight: "64px" }}>
+                  <div className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-700 font-medium text-lg md:text-xl lg:text-[22px]">
+                    {getCurrencySymbol(fromCurrency)}
+                  </div>
+                  <input
+                    ref={amountInputRef}
+                    type="text"
+                    value={inputValue}
+                    onChange={handleAmountChange}
+                    onKeyDown={handleKeyDown}
+                    className={`w-full h-16 border-2 ${
+                      isInitialFocus 
+                        ? 'border-indigo-500 pulse-border-modern' 
+                        : 'border-gray-200 hover:border-indigo-300'
+                    } bg-white rounded-2xl p-4 pl-10 focus:outline-none text-gray-800 font-semibold text-lg md:text-xl lg:text-[22px] text-right placeholder:text-sm md:placeholder:text-base lg:placeholder:text-lg placeholder:text-gray-400 transition-all duration-200 shadow-sm`}
+                    inputMode="numeric"
+                    pattern="[0-9,]*"
+                    placeholder="Enter amount"
+                    onFocus={handleAmountFocus}
+                    onBlur={handleAmountBlur}
+                  />
+                </div>
               </div>
             </div>
-          </div>
-          
-          <div className="mb-6 lg:mb-8">
-            <label className="block text-sm font-medium text-black-600 mb-2 text-left">They receive</label>
-            <CurrencySelector 
-              selectedCurrency={toCurrency}
-              onCurrencyChange={setToCurrency}
-              isOpen={activeDropdown === 'to'}
-              onToggle={handleDropdownToggle}
-              id="to"
-            />
-          </div>
-          
-          <div>
-            <Button 
-              onClick={handleSearch}
-              disabled={isLoading}
-              fullWidth
+            
+            {/* Receive field */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-left">They receive</label>
+              <CurrencySelector 
+                selectedCurrency={toCurrency}
+                onCurrencyChange={setToCurrency}
+                isOpen={activeDropdown === 'to'}
+                onToggle={handleDropdownToggle}
+                id="to"
+              />
+            </div>
+            
+            {/* Button */}
+            <motion.div 
+              className="mt-6"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.3 }}
             >
-              {isLoading ? (
-                <div className="flex items-center justify-center w-full">
-                  <svg className="animate-spin h-5 w-5 mr-3 text-white flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <span className="inline-block">Searching...</span>
-                </div>
-              ) : (
-                <div className="flex items-center justify-center w-full">
-                  <Search size={20} className="mr-2 flex-shrink-0" />
-                  <span className="inline-block">Find the best rates</span>
-                </div>
-              )}
-            </Button>
-          </div>
+              <Button 
+                onClick={handleSearch}
+                disabled={isLoading}
+                fullWidth
+                className="bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-700 hover:from-indigo-700 hover:via-blue-700 hover:to-indigo-800 h-16 rounded-2xl shadow-lg transition-all duration-300 hover:shadow-indigo-200/50 hover:shadow-xl hover:-translate-y-0.5 dark:shadow-indigo-900/20 group relative overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogIDxkZWZzPgogICAgPHBhdHRlcm4gaWQ9Im1pY3JvUGF0dGVybiIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIiBwYXR0ZXJuVHJhbnNmb3JtPSJyb3RhdGUoMjUpIj4KICAgICAgPHBhdGggZD0iTSAwIDEwIEwgMTAgMCBMIDIwIDEwIEwgMTAgMjAgTCAwIDEwIiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4xKSIgc3Ryb2tlLXdpZHRoPSIxIiBmaWxsPSJub25lIi8+CiAgICA8L3BhdHRlcm4+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjbWljcm9QYXR0ZXJuKSIvPgo8L3N2Zz4=')] opacity-30 transition-opacity group-hover:opacity-40"></div>
+                
+                {isLoading ? (
+                  <div className="flex items-center justify-center w-full relative z-10">
+                    <div className="mr-3 h-5 w-5 text-white flex-shrink-0">
+                      <svg className="animate-spin h-full w-full" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                        <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    </div>
+                    <span className="inline-block font-medium text-base tracking-wide">Searching<span className="animate-pulse">...</span></span>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center w-full relative z-10">
+                    <div className="mr-3 flex-shrink-0 bg-white/20 rounded-full p-1 backdrop-blur-sm transition-transform duration-300 group-hover:scale-110 group-hover:bg-white/30">
+                      <Search size={18} strokeWidth={2.5} className="text-white" />
+                    </div>
+                    <span className="inline-block font-medium text-base tracking-wide">Find the best rates</span>
+                    <motion.div 
+                      className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      initial={{ x: -5 }}
+                      animate={{ x: 0 }}
+                      transition={{ repeat: Infinity, duration: 0.6, repeatType: "reverse" }}
+                    >
+                      <svg width="14" height="10" viewBox="0 0 14 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 9L13 5M13 5L9 1M13 5L1 5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </motion.div>
+                  </div>
+                )}
+              </Button>
+            </motion.div>
+          </motion.div>
         </div>
       </motion.div>
       
@@ -515,20 +525,23 @@ const SearchForm = ({ onSearch, initialData }) => {
           100% { transform: translateX(100%); }
         }
         
-        @keyframes pulse-border {
+        .shimmer-effect {
+          animation: shimmer 3s infinite ease-in-out;
+        }
+        
+        @keyframes pulse-border-modern {
           0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
-          70% { box-shadow: 0 0 0 6px rgba(99, 102, 241, 0); }
+          50% { box-shadow: 0 0 0 5px rgba(99, 102, 241, 0.1); }
           100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
         }
         
-        .pulse-border {
-          animation: pulse-border 2s infinite;
-          box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
+        .pulse-border-modern {
+          animation: pulse-border-modern 2s infinite;
         }
         
         input:focus {
           border-color: #6366F1 !important;
-          box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+          box-shadow: 0 4px 12px -2px rgba(99, 102, 241, 0.12);
           transform: translateY(-1px);
         }
       `}</style>

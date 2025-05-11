@@ -16,7 +16,7 @@ const HARDCODED_RATINGS = {
   }
 };
 
-const TrustpilotRating = ({ providerName, preloadedRating, onRatingDetermined }) => {
+const TrustpilotRating = ({ providerName, preloadedRating, onRatingDetermined, compact = false }) => {
   const [rating, setRating] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -229,34 +229,36 @@ const TrustpilotRating = ({ providerName, preloadedRating, onRatingDetermined })
 
   if (loading) {
     return (
-      <div className="trustpilot-rating loading">
+      <div className={`trustpilot-rating loading ${compact ? 'text-xs' : ''}`}>
         <div className="trustpilot-rating-header">
-          <FaStar color="#00b67a" />
+          <FaStar color="#00b67a" size={compact ? 10 : 14} />
           <span className="trustpilot-rating-text">Rating</span>
         </div>
-        <div className="text-sm">Loading...</div>
+        <div className={compact ? "text-xs" : "text-sm"}>Loading...</div>
       </div>
     );
   }
 
   if (error || !rating) {
     return (
-      <div className="trustpilot-rating error">
+      <div className={`trustpilot-rating error ${compact ? 'text-xs' : ''}`}>
         <div className="trustpilot-rating-header">
-          <FaStar color="#00b67a" />
+          <FaStar color="#00b67a" size={compact ? 10 : 14} />
           <span className="trustpilot-rating-text">Rating</span>
         </div>
-        <div className="text-sm text-gray-400">N/A</div>
+        <div className={compact ? "text-xs text-gray-400" : "text-sm text-gray-400"}>N/A</div>
       </div>
     );
   }
 
   return (
-    <div className="trustpilot-rating">
-      <div className="trustpilot-rating-header">
-        <FaStar color="#00b67a" />
-        <span className="trustpilot-rating-text">Rating</span>
-      </div>
+    <div className={`trustpilot-rating ${compact ? 'text-xs' : ''}`}>
+      {!compact && (
+        <div className="trustpilot-rating-header">
+          <FaStar color="#00b67a" />
+          <span className="trustpilot-rating-text">Rating</span>
+        </div>
+      )}
       <div className="trustpilot-rating-stars">
         {renderStars(rating.value)}
         <span className="trustpilot-rating-value">{rating.value.toFixed(1)}</span>

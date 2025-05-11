@@ -139,7 +139,7 @@ const HomePage = ({ onSearch, initialData, onAboutClick, onGuidesClick, onFaqCli
         }}
       >
         {/* Search Tool - centered on mobile and tablet, left-aligned on desktop */}
-        <div className="w-full max-w-md mx-auto md:mx-0 mt-auto md:mt-0 mb-6">
+        <div className="w-full max-w-md mx-auto md:mx-0 mt-auto md:mt-0 mb-4">
           <div
             style={{
               transform: 'translateZ(0)',
@@ -160,9 +160,9 @@ const HomePage = ({ onSearch, initialData, onAboutClick, onGuidesClick, onFaqCli
             href="https://www.britishairways.com/content/information/travel-classes/club-world"
             target="_blank"
             rel="noopener noreferrer"
-            className="block relative text-center max-w-xs mx-auto mb-8 mt-8 md:absolute md:text-right md:max-w-3xl md:mx-0 md:mt-0 md:bottom-10 md:right-10"
+            className="block relative text-center max-w-xs mx-auto mb-24 -mt-2 p-6 text-lg leading-relaxed md:absolute md:text-right md:max-w-3xl md:mx-0 md:mt-0 md:bottom-10 md:right-10"
             style={{
-              padding: '20px',
+              padding: '0px',
               color: 'rgba(255, 255, 250, 0.95)',
               textShadow: '0 2px 4px rgba(0, 0, 0, 0.25)',
               zIndex: 5,
@@ -181,7 +181,7 @@ const HomePage = ({ onSearch, initialData, onAboutClick, onGuidesClick, onFaqCli
               fontWeight: 400,
               lineHeight: 1.2
             }}>
-              Experience British Airways
+              Experience <br></br> British Airways
             </div>
             <div style={{
               fontSize: 'clamp(24px, 2.5vw, 32px)',
