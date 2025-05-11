@@ -7,7 +7,6 @@ import StructuredData from './components/StructuredData';
 import CookieConsent from './components/CookieConsent';
 import Login from './pages/Login';
 import './App.css';
-import Careers from './pages/Careers';
 import { AuthProvider } from './hooks/useAuth';
 
 // Lazy load admin components
@@ -67,7 +66,7 @@ function App() {
   const getPageType = () => {
     const path = initialPath.toLowerCase();
     if (path.includes('/about')) return 'about';
-    if (path === '/' || path.includes('/compare')) return 'comparison';
+    if (path === '/' || path.includes('/compare') || path.includes('/results')) return 'comparison';
     return 'home';
   };
 
@@ -91,28 +90,41 @@ function App() {
     );
   };
 
-  // Check if we're on an admin route
-  const isAdminRoute = initialPath.startsWith('/admin');
+  // Public routes wrapper component
+  const PublicRoutes = () => {
+    return (
+      <>
+        <StructuredData page={getPageType()} />
+        <Analytics measurementId={measurementId} />
+        <FontLoader />
+        <MoneyCompare initialPath={initialPath} />
+        <CookieConsentWithNavigation />
+      </>
+    );
+  };
 
   return (
     <BrowserRouter>
       <AuthProvider>
         <div className="min-h-screen bg-gray-50">
           <div className={`App ${isAppReady ? 'render-ready' : ''}`}>
-            {!isAdminRoute && (
-              <>
-                <StructuredData page={getPageType()} />
-                <Analytics measurementId={measurementId} />
-                <FontLoader />
-                <MoneyCompare initialPath={initialPath} />
-                
-                {/* Cookie Consent Banner */}
-                <CookieConsentWithNavigation />
-              </>
-            )}
-            
-            {/* Admin Routes */}
             <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<PublicRoutes />} />
+              <Route path="/results" element={<PublicRoutes />} />
+              <Route path="/about" element={<PublicRoutes />} />
+              <Route path="/guides" element={<PublicRoutes />} />
+              <Route path="/guides/*" element={<PublicRoutes />} />
+              <Route path="/faq" element={<PublicRoutes />} />
+              <Route path="/historical-rates" element={<PublicRoutes />} />
+              <Route path="/privacy-policy" element={<PublicRoutes />} />
+              <Route path="/terms-of-service" element={<PublicRoutes />} />
+              <Route path="/cookie-policy" element={<PublicRoutes />} />
+              <Route path="/legal-disclosure" element={<PublicRoutes />} />
+              <Route path="/careers" element={<PublicRoutes />} />
+              <Route path="/press" element={<PublicRoutes />} />
+            
+              {/* Admin Routes */}
               <Route path="/login" element={<Login />} />
               <Route path="/admin" element={
                 <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
@@ -173,6 +185,9 @@ function App() {
                   <ContentDetail />
                 </Suspense>
               } />
+              
+              {/* Catch-all route */}
+              <Route path="*" element={<PublicRoutes />} />
             </Routes>
             
             {/* Lazy load non-critical components */}

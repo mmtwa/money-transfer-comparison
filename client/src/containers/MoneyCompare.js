@@ -1,5 +1,5 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import HomePage from './HomePage';
 import ResultsView from './ResultsView';
 import AboutUs from '../pages/AboutUs';
@@ -1814,66 +1814,7 @@ const MoneyCompare = ({ initialPath }) => {
   return (
     <>
       <CanonicalUrl />
-      <Routes>
-        <Route path="/" element={renderPageContent()} />
-        <Route path="/results" element={renderPageContent()} />
-        <Route path="/about" element={renderPageContent()} />
-        <Route path="/guides" element={renderPageContent()} />
-        <Route path="/guides/getting-started" element={renderPageContent()} />
-        <Route path="/guides/exchange-rates" element={renderPageContent()} />
-        <Route path="/guides/transfer-fees" element={renderPageContent()} />
-        <Route path="/guides/family-remittances" element={renderPageContent()} />
-        <Route path="/guides/business-transfers" element={renderPageContent()} />
-        <Route path="/guides/security-tips" element={renderPageContent()} />
-        <Route path="/guides/high-value" element={renderPageContent()} />
-        <Route path="/guides/send-money-to-india" element={renderPageContent()} />
-        <Route path="/guides/send-money-to-philippines" element={renderPageContent()} />
-        <Route path="/guides/send-money-to-mexico" element={renderPageContent()} />
-        <Route path="/guides/send-money-to-pakistan" element={renderPageContent()} />
-        <Route path="/guides/send-money-to-nigeria" element={renderPageContent()} />
-        <Route path="/guides/send-money-to-poland" element={renderPageContent()} />
-        <Route path="/guides/send-money-to-romania" element={renderPageContent()} />
-        <Route path="/guides/send-money-to-china" element={renderPageContent()} />
-        <Route path="/guides/send-money-to-morocco" element={renderPageContent()} />
-        <Route path="/guides/send-money-to-vietnam" element={renderPageContent()} />
-        <Route path="/guides/send-money-to-bangladesh" element={renderPageContent()} />
-        <Route path="/guides/send-money-to-canada" element={renderPageContent()} />
-        <Route path="/guides/mid-value" element={renderPageContent()} />
-        <Route path="/guides/low-value" element={renderPageContent()} />
-        <Route path="/guides/micro" element={renderPageContent()} />
-        <Route path="/guides/purpose/property" element={renderPageContent()} />
-        <Route path="/guides/purpose/study" element={renderPageContent()} />
-        <Route path="/guides/purpose/family" element={renderPageContent()} />
-        <Route path="/guides/purpose/nomad" element={renderPageContent()} />
-        <Route path="/guides/purpose/business" element={renderPageContent()} />
-        <Route path="/guides/frequency/regular" element={renderPageContent()} />
-        <Route path="/guides/frequency/periodic" element={renderPageContent()} />
-        <Route path="/guides/frequency/one-time" element={renderPageContent()} />
-        <Route path="/guides/frequency/occasional" element={renderPageContent()} />
-        <Route path="/guides/corridors/uk-asia" element={renderPageContent()} />
-        <Route path="/guides/corridors/us-latam" element={renderPageContent()} />
-        <Route path="/guides/corridors/eu-africa" element={renderPageContent()} />
-        <Route path="/guides/corridors/aus-pacific" element={renderPageContent()} />
-        <Route path="/guides/corridors/gulf-asia" element={renderPageContent()} />
-        <Route path="/guides/criteria/cost" element={renderPageContent()} />
-        <Route path="/guides/criteria/convenience" element={renderPageContent()} />
-        <Route path="/guides/criteria/security" element={renderPageContent()} />
-        <Route path="/guides/criteria/service" element={renderPageContent()} />
-        <Route path="/guides/method/digital-native" element={renderPageContent()} />
-        <Route path="/guides/method/digital-adapter" element={renderPageContent()} />
-        <Route path="/guides/method/traditional" element={renderPageContent()} />
-        <Route path="/faq" element={renderPageContent()} />
-        <Route path="/historical-rates" element={renderPageContent()} />
-        <Route path="/privacy-policy" element={renderPageContent()} />
-        <Route path="/terms-of-service" element={renderPageContent()} />
-        <Route path="/cookie-policy" element={renderPageContent()} />
-        <Route path="/careers" element={renderPageContent()} />
-        <Route path="/press" element={renderPageContent()} />
-        {/* Legal Disclosure route temporarily hidden
-        <Route path="/legal-disclosure" element={renderPageContent()} />
-        */}
-        <Route path="*" element={renderPageContent()} />
-      </Routes>
+      {renderPageContent()}
       
       {/* Transition Loader */}
       <TransitionLoader 
