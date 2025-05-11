@@ -159,7 +159,7 @@ const Header = ({
             onClick={onAboutClick}
             className="bg-[#4F46E5] hover:bg-[#1B1464] text-white py-2 px-4 rounded-full font-medium transition duration-200"
           >
-            About
+            Why Us?
           </button>
           <button 
             onClick={onGuidesClick}
@@ -197,10 +197,10 @@ const Header = ({
         >
           <div className="container mx-auto px-4 py-4 pb-8">
             <div className="flex flex-col space-y-3">
-              {['About', 'Guides', 'FAQ', 'Rates'].map((item, index) => {
+              {['Why Us?', 'Guides', 'FAQ', 'Rates'].map((item, index) => {
                 const handleClick = () => {
                   const clickHandlers = {
-                    'About': onAboutClick,
+                    'Why Us?': onAboutClick,
                     'Guides': onGuidesClick,
                     'FAQ': onFaqClick,
                     'Rates': onHistoricalRatesClick

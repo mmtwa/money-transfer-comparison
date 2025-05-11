@@ -23,7 +23,7 @@ if (apiKey) {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${apiKey}`
     }
-  }), { maxRequests: 10, perMilliseconds: 1000 });
+  }), { maxRequests: 20, perMilliseconds: 1000 });
 } else if (clientId && clientSecret) {
   console.log('Using Wise Basic Auth authentication');
   // Create rate-limited Axios instance with Basic Auth
@@ -36,7 +36,7 @@ if (apiKey) {
       username: clientId,
       password: clientSecret
     }
-  }), { maxRequests: 10, perMilliseconds: 1000 });
+  }), { maxRequests: 20, perMilliseconds: 1000 });
 } else {
   console.log('No Wise API credentials provided, using unauthenticated client');
   // Create rate-limited Axios instance without auth
@@ -45,17 +45,21 @@ if (apiKey) {
     headers: {
       'Content-Type': 'application/json'
     }
-  }), { maxRequests: 10, perMilliseconds: 1000 });
+  }), { maxRequests: 20, perMilliseconds: 1000 });
 }
 
 // Setup automatic retries
 axiosRetry(http, {
-  retries: 3,
-  retryDelay: axiosRetry.exponentialDelay,
+  retries: 5,
+  retryDelay: (retryCount) => {
+    const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff
+    console.log(`Retrying Wise API request in ${delay}ms...`);
+    return delay;
+  },
   retryCondition: (error) => {
-    // Retry on network errors or 5xx server errors
+    // Retry on network errors, 5xx server errors or 429 rate limiting errors
     return axiosRetry.isNetworkOrIdempotentRequestError(error) || 
-           (error.response && error.response.status >= 500);
+           (error.response && (error.response.status >= 500 || error.response.status === 429));
   }
 });
 

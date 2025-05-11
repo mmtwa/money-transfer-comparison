@@ -70,7 +70,7 @@ const Footer = ({
               <ul className="space-y-3 text-gray-300">
                 <li><a href="/careers" className="text-sm hover:text-white transition-colors duration-200 hover:underline cursor-pointer" onClick={handleClick(onCareersClick, '/careers')}>Careers</a></li>
                 <li><a href="/press" className="text-sm hover:text-white transition-colors duration-200 hover:underline cursor-pointer" onClick={handleClick(onPressClick, '/press')}>Press</a></li>
-                <li><a href="#" className="text-sm hover:text-white transition-colors duration-200 hover:underline cursor-pointer" onClick={onAboutClick}>About</a></li>
+                <li><a href="#" className="text-sm hover:text-white transition-colors duration-200 hover:underline cursor-pointer" onClick={onAboutClick}>Why Us?</a></li>
               </ul>
             </div>
             <div className="space-y-4">
@@ -99,7 +99,7 @@ const Footer = ({
               onClick={onAboutClick}
               className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white py-2 px-5 rounded-full font-medium transition duration-200 transform hover:-translate-y-1 shadow-md"
             >
-              About
+              Why Us?
             </button>
             <button 
               onClick={onGuidesClick}

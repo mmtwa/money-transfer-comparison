@@ -5,7 +5,7 @@ const wiseApiService = require('../services/wiseApiService');
 const { cacheApiResponse, createRateLimiter } = require('../middleware/apiMiddleware');
 
 // Apply rate limiting to all routes
-const rateLimiter = createRateLimiter(100, 15 * 60 * 1000); // 100 requests per 15 minutes
+const rateLimiter = createRateLimiter(300, 15 * 60 * 1000); // 300 requests per 15 minutes
 router.use(rateLimiter);
 
 /**
@@ -196,7 +196,7 @@ router.get('/compare', [
   check('sourceCountry', 'Source country must be a 2-letter code').optional().isLength({ min: 2, max: 2 }),
   check('targetCountry', 'Target country must be a 2-letter code').optional().isLength({ min: 2, max: 2 }),
   check('providerType', 'Provider type must be a string').optional().isString()
-], cacheApiResponse(300), async (req, res) => {
+], cacheApiResponse(900), async (req, res) => {
   console.log('[API] /api/wise/compare endpoint called');
   
   try {

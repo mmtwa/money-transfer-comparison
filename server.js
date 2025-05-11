@@ -144,7 +144,7 @@ if (process.env.NODE_ENV !== 'production') {
 // Rate limiting
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  max: 300, // Limit each IP to 300 requests per windowMs
   message: {
     success: false,
     message: 'Too many requests from this IP, please try again later'

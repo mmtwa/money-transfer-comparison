@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const { cacheApiResponse } = require('../../middleware/apiMiddleware');
 
 // Use AdPartner model if it exists, or create it
 let AdPartner;
@@ -16,7 +17,7 @@ try {
  * @desc    Get all active ad partners
  * @access  Public
  */
-router.get('/active', async (req, res) => {
+router.get('/active', cacheApiResponse(1800), async (req, res) => {
   try {
     if (!AdPartner) {
       return res.status(500).json({

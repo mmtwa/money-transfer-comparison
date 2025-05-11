@@ -11,7 +11,7 @@ const apiCache = new NodeCache({ stdTTL: 300, checkperiod: 60 }); // 5 minute de
  * @param {number} windowMs - Time window in milliseconds
  * @returns {Function} - Rate limiting middleware
  */
-const createRateLimiter = (maxRequests = 100, windowMs = 15 * 60 * 1000) => {
+const createRateLimiter = (maxRequests = 300, windowMs = 15 * 60 * 1000) => {
   return rateLimit({
     windowMs,
     max: maxRequests,
@@ -42,7 +42,7 @@ const cacheApiResponse = (duration = 300) => {
     if (req.originalUrl.includes('rates/compare') && req.query && 
         req.query.fromCurrency && req.query.toCurrency) {
       // Reduce cache time for rate comparison to 60 seconds
-      cacheDuration = 60;
+      cacheDuration = 300; // Increased from 60 to 300 seconds
       console.log(`[apiMiddleware] Using reduced cache duration (${cacheDuration}s) for rates/compare endpoint`);
     }
     
@@ -64,6 +64,7 @@ const cacheApiResponse = (duration = 300) => {
           // Ensure we're caching a plain object, not a MongoDB document
           const cacheableBody = JSON.parse(JSON.stringify(body));
           apiCache.set(cacheKey, cacheableBody, cacheDuration);
+          console.log(`[apiMiddleware] Cached response for ${cacheKey} for ${cacheDuration} seconds`);
         } catch (err) {
           console.error('Error caching API response:', err);
           // Continue without caching
