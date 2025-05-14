@@ -21,16 +21,6 @@ export const providers = [
     features: ['No transfer fees', 'Competitive rates', 'Easy tracking'],
   },
   {
-    id: 3,
-    name: 'OFX',
-    logo: '/OFX_Logo.png',
-    exchangeRateMargin: 0.008, // 0.8%
-    transferFee: 0,
-    transferTime: '3-5 days',
-    rating: 4.4,
-    features: ['No transfer fees', 'Specialized in large transfers', '24/7 support'],
-  },
-  {
     id: 4,
     name: 'Western Union',
     logo: '/Western-Union-Logo.png',

@@ -83,6 +83,57 @@ const HomePage = ({ onSearch, initialData, onAboutClick, onGuidesClick, onFaqCli
         font-style: normal;
         font-display: swap;
       }
+      
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      @keyframes fadeInRight {
+        from {
+          opacity: 0;
+          transform: translateX(-30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      
+      @keyframes fadeInScale {
+        from {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      
+      .ba-text-experience {
+        animation: fadeInRight 1.2s ease-out forwards;
+      }
+      
+      .ba-logo {
+        animation: fadeInScale 1.5s ease-out 0.3s forwards;
+        opacity: 0;
+        transform: scale(0.9);
+        animation-fill-mode: forwards;
+      }
+      
+      .ba-subtitle {
+        animation: fadeInUp 1s ease-out 0.6s forwards;
+        opacity: 0;
+        transform: translateY(30px);
+        animation-fill-mode: forwards;
+      }
     `;
     document.head.appendChild(customFontStyle);
     
@@ -206,33 +257,33 @@ const HomePage = ({ onSearch, initialData, onAboutClick, onGuidesClick, onFaqCli
             onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
           >
             <div style={{
-              fontSize: 'clamp(42px, 4vw, 64px)',
+              fontSize: 'clamp(42px, 6vw, 96px)',
               marginBottom: '-28px',
               lineHeight: 1.2,
-              textAlign: 'inherit' // Ensure alignment is consistent with parent
+              textAlign: 'inherit'
             }}>
-              <span style={{ fontFamily: '"Mylius Italic", serif', fontStyle: 'italic', fontWeight: 400 }}>
+              <span className="ba-text-experience" style={{ fontFamily: '"Mylius Italic", serif', fontStyle: 'italic', fontWeight: 400, display: 'inline-block' }}>
                 Experience 
               </span>
               <br/>
-              {/* Replace text with image */}
               <img 
+                className="ba-logo"
                 src="/partners/ba/British-Airways-Logo-1997-500x281.png" 
                 alt="BRITISH AIRWAYS Logo" 
                 style={{ 
-                  display: 'inline-block', // Align with text flow if needed
-                  verticalAlign: 'middle', // Adjust vertical alignment
-                  maxWidth: '300px', // Adjust size as needed, can be responsive
-                  width: 'auto', // Maintain aspect ratio
-                  height: 'auto', // Maintain aspect ratio
-                  maxHeight: '160px', // User changed
-                  filter: 'drop-shadow(0 2px 12px 2px #fff)', // Increased whiteness/prominence of logo shadow
-                  marginTop: '-42px' // User changed
+                  display: 'inline-block',
+                  verticalAlign: 'middle',
+                  width: 'min(90vw, 500px)',
+                  height: 'auto',
+                  maxHeight: 'min(280px, 35vw)',
+                  filter: 'drop-shadow(0 2px 12px 2px #fff)',
+                  marginTop: '-42px',
+                  objectFit: 'contain'
                 }} 
               />
             </div>
-            <div style={{
-              fontSize: 'clamp(24px, 2.5vw, 32px)',
+            <div className="ba-subtitle" style={{
+              fontSize: 'clamp(24px, 3vw, 48px)',
               fontFamily: '"Mylius Sans", sans-serif',
               fontWeight: 400,
               letterSpacing: '0.02em'

@@ -2,8 +2,8 @@ const axios = require('axios');
 const Provider = require('../models/Provider');
 const RateCache = require('../models/RateCache');
 const NodeCache = require('node-cache');
-const wiseApiService = require('./wiseApiService');
 const ofxApiService = require('./ofxApiService');
+const remitlyService = require('./remitlyService');
 
 // In-memory cache for 15 minutes
 const memoryCache = new NodeCache({ stdTTL: 900, checkperiod: 60 });
@@ -46,6 +46,30 @@ class ProviderService {
         methods: ['bank_transfer', 'debit_card'],
         apiEnabled: true,
         apiHandler: 'wise'
+      };
+      
+      // Add Remitly provider
+      console.log('Setting up Remitly provider');
+      this.providers['remitly'] = {
+        id: 'remitly-api-id',
+        name: 'Remitly',
+        logo: '/images/providers/remitly.png',
+        baseUrl: 'https://api.remitly.io/v3/calculator',
+        transferFeeStructure: {
+          type: 'flat',
+          amount: 3.99,
+          minimum: 0,
+          maximum: 3.99
+        },
+        exchangeRateMargin: 0.015,
+        transferTimeHours: {
+          min: 24,
+          max: 48
+        },
+        rating: 4.5,
+        methods: ['bank_transfer', 'debit_card'],
+        apiEnabled: true,
+        apiHandler: 'remitly'
       };
       
       // Add OFX provider if credentials are set in environment
@@ -150,7 +174,7 @@ class ProviderService {
       cachedRates = await RateCache.findOne({
         fromCurrency,
         toCurrency: targetCurrency,
-        createdAt: { $gte: new Date(Date.now() - 3600000) } // Within the last hour
+        createdAt: { $gte: new Date(Date.now() - 300000) } // Within the last 5 minutes
       });
     } catch (dbError) {
       console.warn('[getExchangeRates] Could not check database cache, continuing with fresh rates:', dbError.message);
@@ -219,35 +243,7 @@ class ProviderService {
     // Check if we got any rates
     if (Object.keys(providerRates).length === 0) {
       console.error('[getExchangeRates] No providers returned valid rates');
-      
-      // Instead of throwing an error, try to use the Wise API directly
-      try {
-        console.log('[getExchangeRates] Trying direct Wise API call as fallback');
-        const wiseRate = await wiseApiService.getExchangeRate(fromCurrency, targetCurrency, amount);
-        
-        if (wiseRate && wiseRate.rate) {
-          console.log(`[getExchangeRates] Direct Wise API call succeeded with rate: ${wiseRate.rate}`);
-          
-          // Add a Wise provider with the direct rate
-          providerRates['wise'] = wiseRate.rate;
-          
-          // If we have the wise provider, store the fee for later use
-          if (this.providers['wise']) {
-            if (!this.providers['wise'].transferFees) {
-              this.providers['wise'].transferFees = {};
-            }
-            
-            // Store the fee for this specific currency pair and amount
-            const feeKey = `${fromCurrency}_${targetCurrency}_${amount}`;
-            this.providers['wise'].transferFees[feeKey] = wiseRate.fee || 0;
-          }
-        } else {
-          throw new Error('Direct Wise API call failed to return a valid rate');
-        }
-      } catch (wiseError) {
-        console.error('[getExchangeRates] Direct Wise API call failed:', wiseError.message);
-        throw new Error(`No valid exchange rates could be obtained for ${fromCurrency} to ${targetCurrency}. Please check your API credentials and try again.`);
-      }
+      throw new Error(`No valid exchange rates could be obtained for ${fromCurrency} to ${targetCurrency}. Please check provider configurations and API statuses.`);
     }
     
     // Try to store in database cache, but don't fail if DB has issues
@@ -284,6 +280,11 @@ class ProviderService {
     const results = [];
     
     for (const [code, rate] of Object.entries(providerRates)) {
+      if (rate === null || typeof rate !== 'number') {
+        console.warn(`[CalculateResults] Skipping provider ${code} due to invalid rate: ${rate}`);
+        continue;
+      }
+      
       const provider = this.providers[code];
       if (!provider) {
         console.warn(`[CalculateResults] Provider ${code} not found in providers list`);
@@ -407,9 +408,13 @@ class ProviderService {
     try {
       switch (provider.apiHandler.toLowerCase()) {
         case 'wise':
-          return await this.fetchWiseRate(provider, fromCurrency, targetCurrency, amount);
+          // return await this.fetchWiseRate(provider, fromCurrency, targetCurrency, amount);
+          console.log(`[fetchRateFromProvider] Skipping Wise provider`);
+          return null;
         case 'ofx':
           return await this.fetchOFXRate(provider, fromCurrency, targetCurrency, amount);
+        case 'remitly':
+          return await this.fetchRemitlyRate(provider, fromCurrency, targetCurrency, amount);
         default:
           console.log(`No specific handler for provider: ${provider.apiHandler}`);
           return null;
@@ -417,40 +422,6 @@ class ProviderService {
     } catch (error) {
       console.error(`Error fetching rate from ${provider.name}:`, error.message);
       return null; // Return null instead of throwing so other providers can still succeed
-    }
-  }
-  
-  async fetchWiseRate(provider, fromCurrency, targetCurrency, amount) {
-    try {
-      console.log(`[fetchWiseRate] Attempting to get rate for ${fromCurrency} to ${targetCurrency}`);
-      
-      // Use the Wise API service to get the rate
-      const rateInfo = await wiseApiService.getExchangeRate(fromCurrency, targetCurrency, amount);
-      
-      if (!rateInfo || !rateInfo.rate) {
-        throw new Error('No rate returned from Wise API');
-      }
-      
-      // Store the fee for later use in calculations
-      if (!provider.transferFees) {
-        provider.transferFees = {};
-      }
-      
-      const feeKey = `${fromCurrency}_${targetCurrency}_${amount}`;
-      provider.transferFees[feeKey] = rateInfo.fee || 0;
-      
-      // Store delivery time if available
-      if (rateInfo.deliveryTime) {
-        if (!provider.deliveryTimes) {
-          provider.deliveryTimes = {};
-        }
-        provider.deliveryTimes[`${fromCurrency}_${targetCurrency}`] = rateInfo.deliveryTime;
-      }
-      
-      return rateInfo.rate;
-    } catch (error) {
-      console.error('[fetchWiseRate] Error:', error.message);
-      throw error;
     }
   }
   
@@ -505,6 +476,52 @@ class ProviderService {
         console.error('[fetchOFXRate] Response data:', JSON.stringify(error.response.data));
       }
       // Do not return a fallback or mock rate. OFX will not be included for this pair.
+      return null;
+    }
+  }
+  
+  async fetchRemitlyRate(provider, fromCurrency, targetCurrency, amount) {
+    try {
+      console.log(`[fetchRemitlyRate] Attempting to get rate for ${fromCurrency} to ${targetCurrency}`);
+      
+      // Clear any existing rate cache for this currency pair
+      await this.clearCache(fromCurrency, targetCurrency);
+      
+      // Use the Remitly service to get the exchange rate
+      const rateInfo = await remitlyService.getExchangeRate(fromCurrency, targetCurrency, amount);
+      
+      if (!rateInfo || !rateInfo.success) {
+        console.error('[fetchRemitlyRate] Failed to get exchange rate from Remitly:', rateInfo?.error || 'Unknown error');
+        return null;
+      }
+      
+      const { data } = rateInfo;
+      console.log(`[fetchRemitlyRate] Received rate from Remitly API: ${data.exchange_rate}`);
+      
+      // Store the fee for later use in calculations
+      if (!provider.transferFees) {
+        provider.transferFees = {};
+      }
+      
+      const feeKey = `${fromCurrency}_${targetCurrency}_${amount}`;
+      provider.transferFees[feeKey] = parseFloat(data.total_fee) || 0;
+      
+      // Store delivery time info in provider for later use
+      if (!provider.deliveryTimes) {
+        provider.deliveryTimes = {};
+      }
+      
+      const currencyPairKey = `${fromCurrency}_${targetCurrency}`;
+      provider.deliveryTimes[currencyPairKey] = "1-2 days";
+      
+      // Return the exchange rate as a number
+      return parseFloat(data.exchange_rate);
+    } catch (error) {
+      console.error('[fetchRemitlyRate] Error:', error.message);
+      if (error.response) {
+        console.error('[fetchRemitlyRate] Response status:', error.response.status);
+        console.error('[fetchRemitlyRate] Response data:', JSON.stringify(error.response.data));
+      }
       return null;
     }
   }

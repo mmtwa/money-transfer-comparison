@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { ExternalLink, Check, ThumbsUp, ArrowUp, ArrowDown, Minus, Clock, Info } from 'lucide-react';
+import { ExternalLink, Check, ThumbsUp, ArrowUp, ArrowDown, Minus, Clock, Info, Shield } from 'lucide-react';
 import { formatAmount, getCurrencySymbol } from '../../utils/currency';
 import TrustpilotRating from './TrustpilotRating';
 import './TrustpilotRating.css';
@@ -100,6 +100,34 @@ try {
 } catch (error) {
   console.error('Error loading saved provider websites:', error);
 }
+
+// Add a helper function to extract clean provider name
+const getCleanProviderName = (provider) => {
+  // Extract name from provider object
+  let name = '';
+  
+  if (provider?.name) {
+    name = provider.name;
+  } else if (typeof provider === 'string') {
+    name = provider;
+  }
+  
+  // Capitalize first letter of each word
+  name = name.split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+  
+  // Remove any non-alphanumeric characters except spaces
+  name = name.replace(/[^a-zA-Z0-9\s]/g, '');
+  
+  // Limit to first two words to keep button width reasonable
+  const words = name.split(' ');
+  if (words.length > 2) {
+    name = words.slice(0, 2).join(' ');
+  }
+  
+  return name || 'Provider';
+};
 
 /**
  * Component to display a provider's information in a card
@@ -413,17 +441,7 @@ const ProviderCard = ({
     if (provider?.transferTime || transferTime) {
       const timeValue = provider?.transferTime || transferTime;
       
-      // Handle OFX specific transfer time format
-      if (provider?.providerCode?.toLowerCase() === 'ofx') {
-        if (provider.transferTimeHours) {
-          const { min, max } = provider.transferTimeHours;
-          if (min === max) {
-            return `Within ${min} hours`;
-          }
-          return `${min}-${max} hours`;
-        }
-        return '1-48 hours'; // Default OFX transfer time range
-      }
+
       
       // Check if this is an ISO date string (delivered from the Wise API)
       if (timeValue && typeof timeValue === 'string' && timeValue.includes('T') && timeValue.includes('Z')) {
@@ -511,6 +529,27 @@ const ProviderCard = ({
     document.body.style.overflow = '';
   };
 
+  // Check if provider is FCA authorized based on provider data
+  const isFcaAuthorized = React.useMemo(() => {
+    if (!provider) return false;
+    
+    // Check provider code first (direct match)
+    const providerCode = (provider.providerCode || '').toLowerCase();
+    
+    // List of known FCA authorized providers based on the regulations data in providerScraperService
+    const fcaProviders = [
+      'wise', 'transferwise', 'westernunion', 'wu', 'moneygram', 'ofx',
+      'worldremit', 'remitly', 'xe', 'torfx', 'instarem', 'ria', 'skrill'
+    ];
+    
+    // Check if the provider code matches any of the known FCA authorized providers
+    if (fcaProviders.includes(providerCode)) return true;
+    
+    // Check the provider name as fallback
+    const providerName = (provider.name || name || '').toLowerCase();
+    return fcaProviders.some(p => providerName.includes(p));
+  }, [provider, name]);
+
   return (
     <>
       <style jsx="true" global="true">{`
@@ -563,43 +602,15 @@ const ProviderCard = ({
           background: rgba(79, 70, 229, 0.1);
         }
 
-        .tooltip {
-          position: absolute;
-          z-index: 9999;
-          background: white;
-          border-radius: 8px;
-          padding: 12px;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-          width: 280px;
-          font-size: 13px;
-          line-height: 1.4;
-          color: #4B5563;
-          border: 1px solid #E5E7EB;
-          opacity: 0;
-          visibility: hidden;
-          transition: all 0.2s ease;
-          text-align: left;
-          right: calc(100% + 12px);
-          top: 50%;
-          transform: translateY(-50%) translateX(4px);
-          pointer-events: none;
-        }
-
-        .tooltip.show {
-          opacity: 1;
-          visibility: visible;
-          transform: translateY(-50%) translateX(0);
-        }
-
-        .tooltip::before {
-          content: '';
-          position: absolute;
-          top: 50%;
-          right: -6px;
-          transform: translateY(-50%);
-          border-width: 6px 0 6px 6px;
-          border-style: solid;
-          border-color: transparent transparent transparent white;
+        .provider-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 120px;
+          max-width: 180px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         .tooltip-backdrop {
@@ -614,16 +625,23 @@ const ProviderCard = ({
           touch-action: auto;
         }
 
-        .tooltip-mobile {
+        .tooltip-popup {
           position: fixed !important;
-          z-index: 10000 !important;
+          z-index: 9999 !important;
           box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2) !important;
           padding: 16px !important;
           background-color: white;
           border-radius: 8px;
           border: 1px solid #E5E7EB;
-          width: auto;
+          width: 320px;
           min-width: 250px;
+          left: 50% !important;
+          top: 50% !important;
+          transform: translate(-50%, -50%) !important;
+          display: flex;
+          flex-direction: column;
+          max-width: 90vw;
+          text-align: center;
         }
 
         @media (max-width: 640px) {
@@ -761,7 +779,7 @@ const ProviderCard = ({
             touch-action: auto;
           }
 
-          .tooltip-mobile {
+          .tooltip-popup {
             position: fixed !important;
             z-index: 2147483647 !important;
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2) !important;
@@ -786,7 +804,11 @@ const ProviderCard = ({
             padding: 5px 12px;
             font-size: 0.88rem;
             border-radius: 8px;
-            min-width: 80px;
+            min-width: 110px;
+            max-width: 150px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
           }
         }
       `}</style>
@@ -876,8 +898,7 @@ const ProviderCard = ({
                       ></div>
                       <div 
                         ref={desktopTooltipRef}
-                        className="tooltip-mobile"
-                        style={{ width: '320px' }}
+                        className="tooltip-popup"
                       >
                         <div className="text-sm font-medium mb-2 text-gray-800">Indicative Rate</div>
                         <div className="text-xs text-gray-600 leading-relaxed">
@@ -958,7 +979,36 @@ const ProviderCard = ({
                         </div>
                       )
                     ) : (
-                      `${((provider?.exchangeRateMargin || exchangeRateMargin || 0) * 100).toFixed(2)}%`
+                      // Check if this is Wise - if so, show as 0% margin (mid-market rate)
+                      (provider?.providerCode?.toLowerCase() === 'wise' || 
+                       (provider?.name || '').toLowerCase() === 'wise' ||
+                       (provider?.provider?.name || '').toLowerCase() === 'wise') ? (
+                        <div className="flex items-center text-green-600 font-medium">
+                          <Minus size={12} className="mr-1" />
+                          <span>0% (Mid-Market Rate)</span>
+                        </div>
+                      ) : (
+                        provider?.marginPercentage !== undefined ? (
+                          provider.marginPercentage > 0 ? (
+                            <div className="flex items-center text-green-600 font-medium">
+                              <ArrowUp size={12} className="mr-1" />
+                              <span>{`${provider.marginPercentage.toFixed(2)}% above mid-market`}</span>
+                            </div>
+                          ) : provider.marginPercentage < 0 ? (
+                            <div className="flex items-center text-red-600 font-medium">
+                              <ArrowDown size={12} className="mr-1" />
+                              <span>{`${Math.abs(provider.marginPercentage).toFixed(2)}% below mid-market`}</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center text-gray-600 font-medium">
+                              <Minus size={12} className="mr-1" />
+                              <span>Same as mid-market</span>
+                            </div>
+                          )
+                        ) : (
+                          `${((provider?.exchangeRateMargin || exchangeRateMargin || 0) * 100).toFixed(2)}%`
+                        )
+                      )
                     )}
                   </div>
                 </div>
@@ -982,15 +1032,20 @@ const ProviderCard = ({
           </div>
           
           {/* Card Footer - CTA */}
-          <div className="px-4 py-2 border-t border-gray-100 flex items-center justify-end">
+          <div className="px-4 py-2 border-t border-gray-100 flex items-center justify-between">
+            <div className="flex items-center">
+              <Shield size={18} className="text-green-500 mr-1.5" />
+              <span className="text-xs text-gray-600">We don't make an affiliate fee or commission. Zilch.</span>
+            </div>
             <a 
               href={getProviderWebsite(provider?.providerCode || provider?.code || provider?.name || name || '')} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="bg-indigo-600 hover:bg-indigo-700 text-white py-1.5 px-4 rounded-lg flex items-center justify-center font-medium text-sm transition-all duration-300 hover:shadow-lg hover:shadow-indigo-200"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white py-1.5 px-4 rounded-lg flex items-center justify-center font-medium text-sm transition-all duration-300 hover:shadow-lg hover:shadow-indigo-200 provider-btn"
+              title={`Goto ${getCleanProviderName(provider?.name || name || provider?.providerCode || provider?.code || '')}`}
             >
-              Get Deal
-              <ExternalLink size={14} className="ml-1.5" />
+              Goto {getCleanProviderName(provider?.name || name || provider?.providerCode || provider?.code || '')}
+              <ExternalLink size={14} className="ml-1.5 flex-shrink-0" />
             </a>
           </div>
         </div>
@@ -1000,23 +1055,49 @@ const ProviderCard = ({
           {/* Mobile Header - Provider info & amount */}
           <div className="mobile-header">
             <div className="mobile-provider-info">
-              <img 
-                src={provider?.logo || logo || '/images/providers/default.png'} 
-                alt={`${provider?.name || name || 'Provider'} logo`} 
-                className="provider-img object-contain"
-                onError={(e) => {
-                  const code = (provider?.providerCode || '').toLowerCase();
-                  let fallbackUrl = '/images/providers/default.png';
-                  if (code === 'xe') fallbackUrl = '/images/providers/xe.png';
-                  else if (code === 'torfx') fallbackUrl = '/images/providers/torfx.png';
-                  else if (code === 'wise') fallbackUrl = '/images/providers/wise.png';
-                  else if (code === 'western-union' || code === 'westernunion') fallbackUrl = '/images/providers/westernunion.png';
-                  else if (code === 'ofx' || (provider?.name || name || '').toLowerCase().includes('ofx')) fallbackUrl = '/images/providers/OFX_Logo.webp';
-                  e.target.onerror = null;
-                  e.target.src = fallbackUrl;
-                  e.target.onerror = () => { e.target.src = fallbackUrl.startsWith('/') ? fallbackUrl.substring(1) : '/' + fallbackUrl; };
-                }}
-              />
+              <div className="relative">
+                <img
+                  src={provider?.logo || logo || '/images/providers/default.png'}
+                  alt={`${provider?.name || name || 'Provider'} logo`}
+                  className="provider-img object-contain"
+                  onError={(e) => {
+                    const providerCode = (provider?.providerCode || '').toLowerCase();
+                    const providerName = (provider?.name || name || '').toLowerCase();
+                    
+                    if (providerCode === 'xe' || providerName.includes('xe')) {
+                      e.target.src = '/images/providers/xe.png';
+                      // If that fails, try without the leading slash
+                      e.target.onerror = () => { e.target.src = 'images/providers/xe.png'; };
+                    } else if (providerCode === 'wise' || providerName.includes('wise') || providerName.includes('transferwise')) {
+                      e.target.src = '/images/providers/wise.png';
+                      // If that fails, try without the leading slash
+                      e.target.onerror = () => { e.target.src = 'images/providers/wise.png'; };
+                    } else if (providerCode === 'western-union' || providerCode === 'westernunion' || 
+                              providerName.includes('western') || providerName.includes('union')) {
+                      e.target.src = '/images/providers/westernunion.png';
+                      // If that fails, try without the leading slash
+                      e.target.onerror = () => { e.target.src = 'images/providers/westernunion.png'; };
+                    } else if (providerCode === 'ofx' || providerName.includes('ofx')) {
+                      e.target.src = '/images/providers/OFX_Logo.webp';
+                      // If that fails, try without the leading slash
+                      e.target.onerror = () => { e.target.src = 'images/providers/OFX_Logo.webp'; };
+                    } else if (providerName.includes('torfx')) { // Add specific case for TorFX
+                      e.target.src = '/images/providers/torfx.png';
+                      // If that fails, try without the leading slash
+                      e.target.onerror = () => { e.target.src = 'images/providers/torfx.png'; };
+                    } else if (providerName.includes('panda') || providerName.includes('remit')) { // Add specific case for Panda Remit
+                      e.target.src = '/images/providers/pandaremit.png';
+                      // If that fails, try without the leading slash
+                      e.target.onerror = () => { e.target.src = 'images/providers/pandaremit.png'; };
+                    } else {
+                      // Default fallback
+                      e.target.src = '/images/providers/default.png';
+                      // If that fails, try without the leading slash
+                      e.target.onerror = () => { e.target.src = 'images/providers/default.png'; };
+                    }
+                  }}
+                />
+              </div>
             </div>
             
             <div className="mobile-amount-container">
@@ -1051,7 +1132,7 @@ const ProviderCard = ({
                       ></div>
                       <div 
                         ref={mobileTooltipRef}
-                        className="tooltip-mobile"
+                        className="tooltip-popup"
                       >
                         <div className="text-sm font-medium mb-2 text-gray-800">Indicative Rate</div>
                         <div className="text-xs text-gray-600 leading-relaxed">
@@ -1130,31 +1211,68 @@ const ProviderCard = ({
                 )}
               </div>
             )}
+            
+            {/* Commission-free message - centered at the bottom of the summary box */}
+            <div className="flex items-center justify-center mt-2 border-t border-gray-100 pt-2">
+              <Shield size={10} className="text-green-500 mr-1" />
+              <span className="text-xs text-gray-600 whitespace-nowrap">We don't make an affiliate fee or commission. Zilch.</span>
+            </div>
           </div>
           
           {/* Mobile Footer - Rate Margin & CTA */}
           <div className="mobile-footer">
-            <div className="mobile-rate-margin">
-              {provider?.effectiveRate && provider?.baseRate ? (
-                provider.effectiveRate > provider.baseRate ? (
-                  <div className="flex items-center text-green-600 text-xs font-medium">
-                    <ArrowUp size={8} className="mr-1" />
-                    <span>{`${((provider.effectiveRate / provider.baseRate - 1) * 100).toFixed(2)}% above mid-market`}</span>
-                  </div>
-                ) : provider.effectiveRate < provider.baseRate ? (
-                  <div className="flex items-center text-red-600 text-xs font-medium">
-                    <ArrowDown size={8} className="mr-1" />
-                    <span>{`${((1 - provider.effectiveRate / provider.baseRate) * 100).toFixed(2)}% below mid-market`}</span>
-                  </div>
+            <div className="flex flex-col">
+              <div className="mobile-rate-margin">
+                {provider?.effectiveRate && provider?.baseRate ? (
+                  provider.effectiveRate > provider.baseRate ? (
+                    <div className="flex items-center text-green-600 text-xs font-medium">
+                      <ArrowUp size={8} className="mr-1" />
+                      <span>{`${((provider.effectiveRate / provider.baseRate - 1) * 100).toFixed(2)}% above mid-market`}</span>
+                    </div>
+                  ) : provider.effectiveRate < provider.baseRate ? (
+                    <div className="flex items-center text-red-600 text-xs font-medium">
+                      <ArrowDown size={8} className="mr-1" />
+                      <span>{`${((1 - provider.effectiveRate / provider.baseRate) * 100).toFixed(2)}% below mid-market`}</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center text-gray-600 text-xs font-medium">
+                      <Minus size={8} className="mr-1" />
+                      <span>Same as mid-market</span>
+                    </div>
+                  )
                 ) : (
-                  <div className="flex items-center text-gray-600 text-xs font-medium">
-                    <Minus size={8} className="mr-1" />
-                    <span>Same as mid-market</span>
-                  </div>
-                )
-              ) : (
-                <span className="text-xs">{`${((provider?.exchangeRateMargin || exchangeRateMargin || 0) * 100).toFixed(2)}% margin`}</span>
-              )}
+                  // Check if this is Wise - if so, show as 0% margin (mid-market rate)
+                  (provider?.providerCode?.toLowerCase() === 'wise' || 
+                   (provider?.name || '').toLowerCase() === 'wise' ||
+                   (provider?.provider?.name || '').toLowerCase() === 'wise') ? (
+                    <div className="flex items-center text-green-600 text-xs font-medium">
+                      <Minus size={8} className="mr-1" />
+                      <span>0% (Mid-Market Rate)</span>
+                    </div>
+                  ) : (
+                    provider?.marginPercentage !== undefined ? (
+                      provider.marginPercentage > 0 ? (
+                        <div className="flex items-center text-green-600 text-xs font-medium">
+                          <ArrowUp size={8} className="mr-1" />
+                          <span>{`${provider.marginPercentage.toFixed(2)}% above mid-market`}</span>
+                        </div>
+                      ) : provider.marginPercentage < 0 ? (
+                        <div className="flex items-center text-red-600 text-xs font-medium">
+                          <ArrowDown size={8} className="mr-1" />
+                          <span>{`${Math.abs(provider.marginPercentage).toFixed(2)}% below mid-market`}</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center text-gray-600 text-xs font-medium">
+                          <Minus size={8} className="mr-1" />
+                          <span>Same as mid-market</span>
+                        </div>
+                      )
+                    ) : (
+                      <span className="text-xs">{`${((provider?.exchangeRateMargin || exchangeRateMargin || 0) * 100).toFixed(2)}% margin`}</span>
+                    )
+                  )
+                )}
+              </div>
             </div>
             
             <a 
@@ -1162,9 +1280,10 @@ const ProviderCard = ({
               target="_blank" 
               rel="noopener noreferrer"
               className="bg-indigo-600 hover:bg-indigo-700 text-white get-deal-btn flex items-center justify-center font-semibold"
+              title={`Goto ${getCleanProviderName(provider?.name || name || provider?.providerCode || provider?.code || '')}`}
             >
-              Get Deal
-              <ExternalLink size={14} className="ml-1" />
+              Goto {getCleanProviderName(provider?.name || name || provider?.providerCode || provider?.code || '')}
+              <ExternalLink size={14} className="ml-1 flex-shrink-0" />
             </a>
           </div>
         </div>

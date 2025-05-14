@@ -15,6 +15,7 @@
     "author": "",
     "license": "MIT",
     "dependencies": {
+        "@heroicons/react": "^2.2.0",
         "axios": "^1.6.7",
         "axios-rate-limit": "^1.4.0",
         "axios-retry": "^4.5.0",
@@ -32,7 +33,7 @@
         "mongoose": "^8.2.0",
         "morgan": "^1.10.0",
         "node-cache": "^5.1.2",
-        "node-fetch": "^3.3.2",
+        "node-fetch": "^2.7.0",
         "querystring": "^0.2.1"
     },
     "devDependencies": {

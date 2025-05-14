@@ -1,14 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const axios = require('axios');
 const rateLimit = require('express-rate-limit');
-const cheerio = require('cheerio');
 const TrustpilotRating = require('../models/TrustpilotRating');
 
-// Rate limiting for GET requests (MongoDB cache) - very lenient
+// Rate limiting for GET requests
 const getLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
-  max: 500, // Allow 500 requests per minute for cached data (increased from 100)
+  max: 500, // Allow 500 requests per minute for cached data
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -17,75 +15,32 @@ const getLimiter = rateLimit({
   }
 });
 
-// Rate limiting for POST requests (Trustpilot updates) - very strict
-const postLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 50, // Only 50 updates per hour (increased from 5)
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: {
-    success: false,
-    message: 'Too many update requests from this IP, please try again later'
-  }
-});
-
-// Provider name to Trustpilot URL mapping
-const PROVIDER_URLS = {
-  'torfx': 'www.torfx.com',
-  'worldremit': 'www.worldremit.com',
-  'regency fx': 'regencyfx.com',
-  'pandaremit': 'pandaremit.com',
-  'wise': 'wise.com',
-  'westernunion': 'westernunion.com',
-  'moneygram': 'moneygram.com',
-  'worldremit': 'worldremit.com',
-  'remitly': 'remitly.com',
-  'xe': 'xe.com',
-  'currencyfair': 'currencyfair.com',
-  'transferwise': 'wise.com', // TransferWise is now Wise
-  'paypal': 'paypal.com',
-  // Updated Skrill URLs to point to the correct Trustpilot review page (TrustScore 4.5)
-  'skrill': 'transfers.skrill.com', 
-  'skrillmoneytransfer': 'transfers.skrill.com',
-  'skrill money transfer': 'transfers.skrill.com',
-  'revolut': 'revolut.com',
-  'monzo': 'monzo.com',
-  'starling': 'starlingbank.com',
-  'hsbc': 'hsbc.co.uk',
-  'barclays': 'barclays.co.uk',
-  'lloyds': 'lloydsbank.com',
-  'halifax': 'halifax.co.uk',
-  'natwest': 'natwest.com',
-  'rbs': 'rbs.co.uk',
-  'santander': 'santander.co.uk',
-  'nationwide': 'nationwide.co.uk',
-  'ofx': 'ofx.com',
-  'profee': 'profee.com',
-  'chase': 'chase.co.uk',
-  'firstdirect': 'firstdirect.com',
-  'metrobank': 'metrobank.co.uk',
-  'virginmoney': 'virginmoney.co.uk',
-  'tsb': 'tsb.co.uk',
-  'coopbank': 'co-operativebank.co.uk',
-  'yorkshirebank': 'yorkshirebank.co.uk',
-  'clydesdalebank': 'clydesdalebank.co.uk',
-  'bankofscotland': 'bankofscotland.co.uk',
-  'ulsterbank': 'ulsterbank.co.uk',
-  'bankofireland': 'bankofireland.co.uk',
-  'aib': 'aib.ie',
-  'permanenttsb': 'permanenttsb.ie',
-  'kbc': 'kbc.ie',
-  'boi': 'bankofireland.co.uk',
-  'ptsb': 'permanenttsb.ie',
-  'ulster': 'ulsterbank.co.uk'
+// Provider name normalization map - helps map different versions of provider names to consistent values
+const PROVIDER_ALIASES = {
+  'transferwise': 'wise', // TransferWise is now Wise
+  'wise': 'wise',
+  'worldremit': 'worldremit',
+  'regency fx': 'regencyfx',
+  'regencyfx': 'regencyfx',
+  'pandaremit': 'pandaremit',
+  'westernunion': 'westernunion',
+  'western union': 'westernunion',
+  'western-union': 'westernunion',
+  'moneygram': 'moneygram',
+  'remitly': 'remitly',
+  'xe': 'xe',
+  'currencyfair': 'currencyfair',
+  'paypal': 'paypal',
+  'skrill': 'skrill',
+  'skrillmoneytransfer': 'skrill',
+  'skrill money transfer': 'skrill',
+  'revolut': 'revolut',
+  'torfx': 'torfx',
+  'profee': 'profee'
 };
-
-// Cache duration in milliseconds (7 days)
-const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000;
 
 // In-memory request cache to prevent duplicate simultaneous requests
 const requestCache = {
-  ongoing: new Map(), // Map of ongoing requests by normalizedName
   results: new Map(),  // Map of cached results by normalizedName
   timestamps: new Map() // Map of timestamps by normalizedName
 };
@@ -104,71 +59,18 @@ setInterval(() => {
   }
 }, 10 * 60 * 1000); // Run every 10 minutes
 
-// Apply rate limiting to specific routes
+// Apply rate limiting
 router.get('/:providerName', getLimiter);
-router.post('/update/:providerName', postLimiter);
-
-// Helper function to fetch and save a Trustpilot rating
-async function fetchAndSaveTrustpilotRating(normalizedName) {
-  // Get the provider's Trustpilot URL
-  const providerUrl = PROVIDER_URLS[normalizedName];
-  if (!providerUrl) {
-    throw new Error('Provider not found in Trustpilot mapping');
-  }
-
-  // Construct Trustpilot URL
-  const trustpilotUrl = `https://uk.trustpilot.com/review/${providerUrl}`;
-  console.log(`Fetching Trustpilot rating from: ${trustpilotUrl}`);
-
-  // Fetch the Trustpilot page
-  const response = await axios.get(trustpilotUrl, {
-    headers: {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-    },
-    timeout: 10000
-  });
-
-  // Load the HTML into cheerio
-  const $ = cheerio.load(response.data);
-  
-  // Debug: Log the page title and content
-  console.log('Page title:', $('title').text());
-  console.log('TrustScore text:', $('.trustscore').text());
-  console.log('Headline trustscore:', $('.headline__trustscore').text());
-  
-  const rating = extractRating($);
-  console.log('Extracted rating:', rating);
-
-  if (!rating) {
-    throw new Error('Could not find rating');
-  }
-
-  // Cache the rating in MongoDB
-  console.log(`Attempting to save rating ${rating} to MongoDB for provider ${normalizedName}`);
-  const updatedRating = await TrustpilotRating.findOneAndUpdate(
-    { providerName: normalizedName },
-    { 
-      providerName: normalizedName,
-      rating: rating,
-      lastUpdated: new Date()
-    },
-    { upsert: true, new: true }
-  );
-  console.log('MongoDB save result:', updatedRating);
-
-  return updatedRating;
-}
 
 /**
  * @route   GET /api/trustpilot-ratings/:providerName
- * @desc    Get Trustpilot rating for a specific provider from MongoDB cache
+ * @desc    Get Trustpilot rating for a specific provider from MongoDB
  * @access  Public
  */
 router.get('/:providerName', async (req, res) => {
   try {
     const { providerName } = req.params;
     console.log(`GET /api/trustpilot-ratings/${providerName}`);
-    console.log('Request headers:', req.headers);
     
     if (!providerName) {
       console.log('No provider name provided');
@@ -178,248 +80,177 @@ router.get('/:providerName', async (req, res) => {
       });
     }
 
+    // Log the raw provider name
+    console.log(`Raw provider name: "${providerName}"`);
+
     // Clean and normalize the provider name
     const normalizedName = providerName.toLowerCase()
       .replace(/^provider-/, '')
-      .replace(/[^a-z0-9\s]/g, '')
+      .replace(/[^a-z0-9]/g, '')
       .trim();
 
-    console.log(`Normalized provider name: ${normalizedName}`);
-    console.log('Provider URL mapping:', PROVIDER_URLS[normalizedName]);
+    // Apply any known aliases
+    const standardizedName = PROVIDER_ALIASES[normalizedName] || normalizedName;
+    
+    console.log(`Normalization process: "${providerName}" → "${normalizedName}" → "${standardizedName}"`);
     
     // Check in-memory cache first
-    if (requestCache.results.has(normalizedName)) {
-      console.log(`Returning in-memory cached result for ${normalizedName}`);
-      return res.json(requestCache.results.get(normalizedName));
+    if (requestCache.results.has(standardizedName)) {
+      console.log(`Returning in-memory cached result for ${standardizedName}`);
+      return res.json(requestCache.results.get(standardizedName));
     }
     
-    // Check MongoDB cache
-    const cachedRating = await TrustpilotRating.findOne({ providerName: normalizedName });
-    console.log('MongoDB cached rating:', cachedRating);
+    // Check MongoDB
+    console.log(`Querying MongoDB for provider name: "${standardizedName}"`);
+    const rating = await TrustpilotRating.findOne({ providerName: standardizedName });
     
-    if (cachedRating) {
-      console.log(`Returning cached rating for ${normalizedName} from MongoDB`);
-      const result = {
-        success: true,
-        data: {
-          value: cachedRating.rating,
-          source: 'Trustpilot (cached)',
-          lastUpdated: cachedRating.lastUpdated
-        }
-      };
-      
-      // Cache the result
-      requestCache.results.set(normalizedName, result);
-      requestCache.timestamps.set(normalizedName, Date.now());
-      
-      return res.json(result);
-    }
-
-    console.log(`No cached rating found for ${normalizedName}, checking if we can fetch from Trustpilot`);
-    
-    // Check if this provider is in our mapping
-    if (!PROVIDER_URLS[normalizedName]) {
-      console.log(`Provider ${normalizedName} not found in URL mapping`);
-      
-      const notFoundResult = {
-        success: false,
-        message: 'Provider not found in Trustpilot mapping'
-      };
-      
-      // Cache the not found result
-      requestCache.results.set(normalizedName, notFoundResult);
-      requestCache.timestamps.set(normalizedName, Date.now());
-      
-      return res.json(notFoundResult);
-    }
-    
-    // Try to fetch from Trustpilot
-    try {
-      const newRating = await fetchAndSaveTrustpilotRating(normalizedName);
-      
-      console.log(`Created new rating for ${normalizedName}:`, newRating);
+    if (rating) {
+      console.log(`Found rating for ${standardizedName} in MongoDB:`, rating.rating);
       
       const result = {
         success: true,
         data: {
-          value: newRating.rating,
-          source: 'Trustpilot (new)',
-          lastUpdated: newRating.lastUpdated
+          value: rating.rating,
+          source: 'Trustpilot',
+          lastUpdated: rating.lastUpdated
         }
       };
       
       // Cache the result
-      requestCache.results.set(normalizedName, result);
-      requestCache.timestamps.set(normalizedName, Date.now());
+      requestCache.results.set(standardizedName, result);
+      requestCache.timestamps.set(standardizedName, Date.now());
       
       return res.json(result);
-    } catch (fetchError) {
-      console.error(`Error fetching Trustpilot rating for ${normalizedName}:`, fetchError.message);
+    }
+    
+    // If we get here, no rating found in MongoDB
+    console.log(`No rating found for ${standardizedName} in MongoDB`);
+    console.log(`Checking for any ratings with similar names...`);
+    
+    // Try to find a rating with a similar name
+    const allRatings = await TrustpilotRating.find({});
+    console.log(`Found ${allRatings.length} total ratings in database.`);
+    console.log(`Available provider names in database: ${allRatings.map(r => r.providerName).join(', ')}`);
+    
+    // Use default fallback ratings for common providers
+    const fallbackRatings = {
+      'wise': 4.7,
+      'ofx': 4.2,
+      'westernunion': 3.9,
+      'moneygram': 3.7,
+      'worldremit': 4.1,
+      'remitly': 4.3,
+      'xe': 4.1,
+      'torfx': 4.4,
+      'regencyfx': 4.9,
+      'pandaremit': 4.1,
+      'profee': 4.4
+    };
+    
+    if (fallbackRatings[standardizedName]) {
+      console.log(`Using fallback rating for ${standardizedName}: ${fallbackRatings[standardizedName]}`);
       
-      const errorResult = {
-        success: false,
-        message: `Could not fetch Trustpilot rating: ${fetchError.message}`
+      const fallbackResult = {
+        success: true,
+        data: {
+          value: fallbackRatings[standardizedName],
+          source: 'Default rating',
+          lastUpdated: new Date(),
+          isFallback: true
+        }
       };
       
-      // Cache the error
-      requestCache.results.set(normalizedName, errorResult);
-      requestCache.timestamps.set(normalizedName, Date.now());
+      // Cache the fallback result
+      requestCache.results.set(standardizedName, fallbackResult);
+      requestCache.timestamps.set(standardizedName, Date.now());
       
-      return res.json(errorResult);
+      return res.json(fallbackResult);
     }
-  } catch (error) {
-    console.error(`Error in rating route for ${req.params.providerName}:`, error);
-    return res.json({
+    
+    // No rating found, return error
+    const notFoundResult = {
       success: false,
-      message: 'Internal server error',
-      error: error.message
+      message: 'Provider rating not found'
+    };
+    
+    // Cache the not found result
+    requestCache.results.set(standardizedName, notFoundResult);
+    requestCache.timestamps.set(standardizedName, Date.now());
+    
+    return res.json(notFoundResult);
+  } catch (error) {
+    console.error('Error retrieving provider rating:', error);
+    return res.status(500).json({
+      success: false,
+      message: `Error retrieving provider rating: ${error.message}`
     });
   }
 });
 
 /**
- * @route   POST /api/trustpilot-ratings/update/:providerName
- * @desc    Force update Trustpilot rating for a specific provider from Trustpilot.com
- * @access  Public with rate limiting
+ * @route   POST /api/trustpilot-ratings/update
+ * @desc    Admin route to manually update a provider rating
+ * @access  Admin
  */
-router.post('/update/:providerName', async (req, res) => {
+router.post('/update', async (req, res) => {
   try {
-    const { providerName } = req.params;
-    console.log(`POST /api/trustpilot-ratings/update/${providerName}`);
+    const { providerName, rating, authKey } = req.body;
     
-    if (!providerName) {
-      return res.json({
+    // Basic authorization check using an auth key (should use proper auth in production)
+    if (!authKey || authKey !== process.env.ADMIN_AUTH_KEY) {
+      return res.status(403).json({
         success: false,
-        message: 'Provider name is required'
+        message: 'Not authorized to update ratings'
       });
     }
     
-    // Clean and normalize the provider name
+    if (!providerName || !rating || isNaN(rating) || rating < 0 || rating > 5) {
+      return res.status(400).json({
+        success: false,
+        message: 'Valid provider name and rating (0-5) are required'
+      });
+    }
+    
+    // Normalize the provider name
     const normalizedName = providerName.toLowerCase()
       .replace(/^provider-/, '')
       .replace(/[^a-z0-9\s]/g, '')
       .trim();
     
-    console.log(`Normalized provider name for update: ${normalizedName}`);
+    // Apply any known aliases
+    const standardizedName = PROVIDER_ALIASES[normalizedName] || normalizedName;
     
-    // Check if this provider is in our mapping
-    if (!PROVIDER_URLS[normalizedName]) {
-      console.log(`Provider ${normalizedName} not found in URL mapping`);
-      return res.json({
-        success: false,
-        message: 'Provider not found in Trustpilot mapping'
-      });
-    }
-
-    try {
-      const updatedRating = await fetchAndSaveTrustpilotRating(normalizedName);
-      
-      const result = {
-        success: true,
-        data: {
-          value: updatedRating.rating,
-          source: 'Trustpilot (updated)',
-          lastUpdated: updatedRating.lastUpdated
-        }
-      };
-      
-      // Update the in-memory cache
-      requestCache.results.set(normalizedName, result);
-      requestCache.timestamps.set(normalizedName, Date.now());
-      
-      // Set cache headers
-      res.set('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
-      
-      return res.json(result);
-    } catch (error) {
-      console.error(`Error fetching Trustpilot rating for ${providerName}:`, error);
-      return res.json({
-        success: false,
-        message: 'Could not fetch Trustpilot rating',
-        error: error.message
-      });
-    }
-  } catch (error) {
-    console.error(`Error in update route for ${req.params.providerName}:`, error);
+    // Update or create the rating in MongoDB
+    const updatedRating = await TrustpilotRating.findOneAndUpdate(
+      { providerName: standardizedName },
+      { 
+        providerName: standardizedName,
+        rating: parseFloat(rating),
+        lastUpdated: new Date()
+      },
+      { upsert: true, new: true }
+    );
+    
+    // Clear any cached results for this provider
+    requestCache.results.delete(standardizedName);
+    requestCache.timestamps.delete(standardizedName);
+    
     return res.json({
+      success: true,
+      data: {
+        provider: standardizedName,
+        rating: updatedRating.rating,
+        lastUpdated: updatedRating.lastUpdated
+      },
+      message: 'Rating updated successfully'
+    });
+  } catch (error) {
+    console.error('Error updating provider rating:', error);
+    return res.status(500).json({
       success: false,
-      message: 'Internal server error',
-      error: error.message
+      message: `Error updating provider rating: ${error.message}`
     });
   }
 });
-
-// Helper function to extract rating from cheerio object
-function extractRating($) {
-  // Log the title to help with debugging
-  console.log('Page title:', $('title').text());
-  
-  // Additional logging to help with debugging
-  console.log('Page content snippet:', $('body').text().slice(0, 500) + '...');
-  
-  // Try multiple selectors for the rating
-  const selectors = [
-    // Look for TrustScore x.x out of 5 text pattern (common on newer Trustpilot pages)
-    () => {
-      const trustScoreText = $('body').text().match(/TrustScore\s+([\d\.]+)\s+out of\s+5/i);
-      if (trustScoreText && trustScoreText[1]) {
-        console.log('Found TrustScore from text pattern:', trustScoreText[1]);
-        return parseFloat(trustScoreText[1]);
-      }
-      return null;
-    },
-    // Look for the exact rating text in the page
-    () => {
-      const ratingText = $('body').text().match(/TrustScore\s+([\d\.]+)/i);
-      if (ratingText && ratingText[1]) {
-        console.log('Found rating from TrustScore text:', ratingText[1]);
-        return parseFloat(ratingText[1]);
-      }
-      return null;
-    },
-    // Look for the rating in the headline section
-    () => {
-      const headlineRating = $('.headline__trustscore').text().trim();
-      console.log('Found headline rating:', headlineRating);
-      const ratingMatch = headlineRating.match(/([\d\.]+)/);
-      if (ratingMatch) {
-        return parseFloat(ratingMatch[1]);
-      }
-      return null;
-    },
-    // Look for the rating in the trustscore section
-    () => {
-      const trustScore = $('.trustscore').text().trim();
-      console.log('Found trustscore:', trustScore);
-      const ratingMatch = trustScore.match(/([\d\.]+)/);
-      if (ratingMatch) {
-        return parseFloat(ratingMatch[1]);
-      }
-      return null;
-    },
-    // Look for meta tags with rating information
-    () => {
-      const metaRating = $('meta[itemprop="ratingValue"]').attr('content');
-      if (metaRating) {
-        console.log('Found rating from meta tag:', metaRating);
-        return parseFloat(metaRating);
-      }
-      return null;
-    }
-  ];
-
-  // Try each selector until we find a rating
-  for (const selector of selectors) {
-    const rating = selector();
-    if (rating !== null) {
-      console.log('Found rating:', rating);
-      // Ensure we return the exact decimal rating
-      return parseFloat(rating.toFixed(1));
-    }
-  }
-
-  console.log('No rating found with any selector');
-  return null;
-}
 
 module.exports = router; 

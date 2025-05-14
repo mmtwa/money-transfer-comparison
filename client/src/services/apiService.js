@@ -75,6 +75,12 @@ const HARDCODED_RATINGS = {
     source: 'Money Transfer Comparison',
     lastUpdated: new Date().toISOString(),
     isFallback: false
+  },
+  'instarem': {
+    value: 4.3,
+    source: 'Money Transfer Comparison',
+    lastUpdated: new Date().toISOString(),
+    isFallback: false
   }
 };
 
@@ -122,6 +128,54 @@ const apiService = {
   
   getCurrentUser: async () => {
     return api.get('/auth/me');
+  },
+  
+  // InstaReM API endpoints
+  getInstaremRate: async (fromCurrency, toCurrency, amount, countryCode = null, bankId = null) => {
+    // Auto-detect country code based on currency if not provided
+    const autoCountryCode = countryCode || getCurrencyCountryCode(fromCurrency);
+    
+    return api.get('/instarem/rate', {
+      params: {
+        fromCurrency,
+        toCurrency,
+        amount,
+        countryCode: autoCountryCode,
+        bankId
+      }
+    });
+  },
+  
+  getInstaremComparison: async (fromCurrency, toCurrency, amount, countryCode = null, bankId = null) => {
+    // Auto-detect country code based on currency if not provided
+    const autoCountryCode = countryCode || getCurrencyCountryCode(fromCurrency);
+    
+    return api.get('/instarem/compare', {
+      params: {
+        fromCurrency,
+        toCurrency,
+        amount,
+        countryCode: autoCountryCode,
+        bankId
+      }
+    });
+  },
+  
+  // Remitly API endpoint
+  getRemitlyComparison: async (fromCurrency, toCurrency, amount, sourceCountry = null, destCountry = null) => {
+    // Auto-detect country codes based on currencies if not provided
+    const autoSourceCountry = sourceCountry || getCurrencyCountryCode(fromCurrency, true);
+    const autoDestCountry = destCountry || getCurrencyCountryCode(toCurrency, true);
+    
+    return api.get('/remitly/compare', {
+      params: {
+        fromCurrency,
+        toCurrency,
+        amount,
+        sourceCountry: autoSourceCountry,
+        destCountry: autoDestCountry
+      }
+    });
   },
   
   // Price comparison API
@@ -191,13 +245,38 @@ const apiService = {
     
     console.log(`Making request with validated dates: from=${validFromDate}, to=${validToDate}`);
     
-    return api.get('/wise/historical', {
+    return api.get('/wise-rates/historical', {
       params: { 
         source: fromCurrency, 
         target: toCurrency, 
         from: validFromDate, 
         to: validToDate, 
         group 
+      }
+    });
+  },
+  
+  // Get current exchange rate from Wise API (mid-market rate)
+  getCurrentRate: async (fromCurrency, toCurrency) => {
+    console.log(`Getting current rate for ${fromCurrency} to ${toCurrency}`);
+    
+    return api.get('/wise-rates', {
+      params: {
+        source: fromCurrency,
+        target: toCurrency
+      }
+    });
+  },
+  
+  // Get historical exchange rate from Wise API for a specific time (mid-market rate)
+  getHistoricalRateAtTime: async (fromCurrency, toCurrency, time) => {
+    console.log(`Getting historical rate for ${fromCurrency} to ${toCurrency} at time ${time}`);
+    
+    return api.get('/wise-rates', {
+      params: {
+        source: fromCurrency,
+        target: toCurrency,
+        time
       }
     });
   },
@@ -428,6 +507,43 @@ const apiService = {
       return null;
     }
   }
+};
+
+// Helper function to get a default country code for a currency
+// Pass use3LetterCode=true to get 3-letter ISO codes (ISO 3166-1 alpha-3) for Remitly
+const getCurrencyCountryCode = (currency, use3LetterCode = false) => {
+  const currencyToCountry = {
+    // 2-letter ISO codes (ISO 3166-1 alpha-2)
+    'GBP': use3LetterCode ? 'GBR' : 'GB',
+    'USD': use3LetterCode ? 'USA' : 'US',
+    'EUR': use3LetterCode ? 'DEU' : 'DE', // Using Germany as default for EUR
+    'AUD': use3LetterCode ? 'AUS' : 'AU',
+    'CAD': use3LetterCode ? 'CAN' : 'CA',
+    'NZD': use3LetterCode ? 'NZL' : 'NZ',
+    'SGD': use3LetterCode ? 'SGP' : 'SG',
+    'JPY': use3LetterCode ? 'JPN' : 'JP',
+    'CHF': use3LetterCode ? 'CHE' : 'CH',
+    'INR': use3LetterCode ? 'IND' : 'IN',
+    'MYR': use3LetterCode ? 'MYS' : 'MY',
+    'THB': use3LetterCode ? 'THA' : 'TH',
+    'PHP': use3LetterCode ? 'PHL' : 'PH',
+    'IDR': use3LetterCode ? 'IDN' : 'ID',
+    'ZAR': use3LetterCode ? 'ZAF' : 'ZA',
+    'MXN': use3LetterCode ? 'MEX' : 'MX',
+    'BRL': use3LetterCode ? 'BRA' : 'BR',
+    'PLN': use3LetterCode ? 'POL' : 'PL',
+    'SEK': use3LetterCode ? 'SWE' : 'SE',
+    'NOK': use3LetterCode ? 'NOR' : 'NO',
+    'DKK': use3LetterCode ? 'DNK' : 'DK',
+    'CZK': use3LetterCode ? 'CZE' : 'CZ',
+    'HUF': use3LetterCode ? 'HUN' : 'HU',
+    'ILS': use3LetterCode ? 'ISR' : 'IL',
+    'TRY': use3LetterCode ? 'TUR' : 'TR',
+    'AED': use3LetterCode ? 'ARE' : 'AE',
+    'HKD': use3LetterCode ? 'HKG' : 'HK'
+  };
+  
+  return currencyToCountry[currency] || (use3LetterCode ? 'GBR' : 'GB'); // Default to GB/GBR if no match
 };
 
 export default apiService;

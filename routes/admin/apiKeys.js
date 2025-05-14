@@ -5,6 +5,9 @@ const auth = require('../../middleware/auth');
 const admin = require('../../middleware/admin');
 const apiKeyManager = require('../../utils/apiKeyManager');
 const { clearApiCache } = require('../../middleware/apiMiddleware');
+const providerService = require('../../services/providerService');
+const ofxApiService = require('../../services/ofxApiService'); // Assuming OFX test might be needed
+// const wiseApiService = require('../../services/wiseApiService'); // Remove Wise service import
 
 // Apply auth and admin middleware to all routes
 router.use([auth, admin]);
@@ -190,23 +193,19 @@ router.post('/:provider/test', async (req, res) => {
       });
     }
     
-    // Test the API key based on provider type
-    let testResult;
+    // Test API credentials based on provider code
+    let testResult = { success: false, message: 'Provider code not recognized or API testing not implemented' };
     
-    switch (provider.apiHandler.toLowerCase()) {
-      case 'wise':
-      case 'transferwise':
-        const wiseApiService = require('../../services/wiseApiService');
-        testResult = await wiseApiService.testApiCredentials();
-        break;
-        
-      // Add other provider test implementations here
-        
-      default:
-        return res.status(400).json({
-          success: false,
-          message: `No test implementation for provider type ${provider.apiHandler}`
-        });
+    // Remove or comment out the Wise case
+    /*
+    if (provider.code === 'wise') {
+      console.log('Testing Wise API Credentials');
+      testResult = await wiseApiService.testApiCredentials();
+    }
+    */
+   
+    if (provider.code === 'ofx') {
+      // ... existing code ...
     }
     
     // Update the last tested date

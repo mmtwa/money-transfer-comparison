@@ -18,7 +18,7 @@ const RateCacheSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now,
-    expires: 3600 // TTL index: 1 hour
+    expires: 600 // TTL index: 10 minutes
   }
 });
 

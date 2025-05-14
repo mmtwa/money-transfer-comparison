@@ -16,6 +16,11 @@ dotenv.config();
 // Log environment for debugging
 console.log(`Environment: ${process.env.NODE_ENV}`);
 console.log(`Port: ${process.env.PORT}`);
+console.log(`WISE_CLIENT_SECRET is ${process.env.WISE_CLIENT_SECRET ? 'set' : 'not set'}`);
+if (process.env.WISE_CLIENT_SECRET) {
+  const token = process.env.WISE_CLIENT_SECRET;
+  console.log(`WISE_CLIENT_SECRET length: ${token.length}, first/last chars: ${token.substring(0, 4)}...${token.substring(token.length - 4)}`);
+}
 console.log(`Using Wise ${process.env.WISE_CLIENT_ID ? 'Basic Auth' : 'API Key'} authentication`);
 
 // Run the logo copying script to ensure logos are available
@@ -31,9 +36,12 @@ const authRoutes = require('./routes/auth');
 const providerRoutes = require('./routes/providers');
 const ofxRoutes = require('./routes/ofx');
 const userRoutes = require('./routes/users');
-const wiseRoutes = require('./routes/wiseRates');
 const providerInfoRoutes = require('./routes/providerInfo');
 const trustpilotRatingsRoutes = require('./routes/trustpilotRatings');
+const wiseCompareRoutes = require('./routes/wiseCompare'); // Import Wise compare routes
+const wiseRatesRoutes = require('./routes/wiseRates'); // Import Wise rates routes
+const instaremRoutes = require('./routes/instarem'); // Import InstaReM routes
+const remitlyRoutes = require('./routes/remitly'); // Import Remitly routes
 const adminRoutes = require('./routes/admin/index'); // Import admin routes
 const adPartnerRoutes = require('./routes/api/adPartners'); // Import ad partners API
 
@@ -107,13 +115,32 @@ const sourceDir = path.join(__dirname, 'client', 'public');
 const logoFiles = [
   { source: 'wiselogo.png', dest: 'wise.png' },
   { source: 'XELogo.svg', dest: 'xe.png' },
-  { source: 'Western-Union-Logo.png', dest: 'westernunion.png' }
+  { source: 'Western-Union-Logo.png', dest: 'westernunion.png' },
+  { source: 'InstaReM-Logo.png', dest: 'instarem.png' },
+  { source: 'remitlylogo.svg', dest: 'remitly.png' },
+  // Add a fallback for instarem.png in case the logo file doesn't exist
+  { source: 'default-logo.png', dest: 'instarem.png', fallback: true }
 ];
 
 logoFiles.forEach(logo => {
   const source = path.join(sourceDir, logo.source);
   const dest = path.join(providersDir, logo.dest);
   
+  // Check if the destination file already exists (to avoid overwriting actual image files)
+  if (fs.existsSync(dest)) {
+    // Get file stats to check if it's a real image or just a placeholder
+    try {
+      const stats = fs.statSync(dest);
+      // If file is larger than a placeholder text file (> 100 bytes), assume it's a valid image
+      if (stats.size > 100) {
+        console.log(`Skipping ${logo.dest} as it already exists and appears to be a valid image file (${stats.size} bytes)`);
+        return;
+      }
+    } catch (err) {
+      console.error(`Error checking file ${dest}:`, err);
+    }
+  }
+
   if (fs.existsSync(source)) {
     try {
       fs.copyFileSync(source, dest);
@@ -123,6 +150,17 @@ logoFiles.forEach(logo => {
     }
   } else {
     console.log(`Source file ${logo.source} does not exist at ${source}`);
+    
+    // If this is a fallback logo and the destination doesn't already exist, create a placeholder
+    if (logo.fallback && !fs.existsSync(dest)) {
+      try {
+        // Create a minimal text file as a placeholder if real logo is missing
+        fs.writeFileSync(dest, '// Placeholder logo');
+        console.log(`Created placeholder for ${logo.dest}`);
+      } catch (err) {
+        console.error(`Error creating placeholder for ${logo.dest}:`, err);
+      }
+    }
   }
 });
 
@@ -157,8 +195,11 @@ app.use('/api/auth', authRoutes);
 app.use('/api/providers', providerRoutes);
 app.use('/api/ofx', ofxRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/wise', wiseRoutes);
 app.use('/api/provider-info', providerInfoRoutes);
+app.use('/api/wise/compare', wiseCompareRoutes); // Update Wise compare route path
+app.use('/api/wise-rates', wiseRatesRoutes); // Add Wise rates routes
+app.use('/api/instarem', instaremRoutes); // Add InstaReM routes
+app.use('/api/remitly', remitlyRoutes); // Add Remitly routes
 app.use('/api/trustpilot-ratings', (req, res, next) => {
   console.log('Trustpilot ratings API called:', req.method, req.url);
   next();
