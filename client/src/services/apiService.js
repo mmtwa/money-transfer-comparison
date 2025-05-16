@@ -178,6 +178,23 @@ const apiService = {
     });
   },
   
+  // Revolut API endpoint
+  getRevolutComparison: async (fromCurrency, toCurrency, amount, sourceCountry = null, destCountry = null) => {
+    // Auto-detect country codes based on currencies if not provided
+    const autoSourceCountry = sourceCountry || getCurrencyCountryCode(fromCurrency, true);
+    const autoDestCountry = destCountry || getCurrencyCountryCode(toCurrency, true);
+    
+    return api.get('/revolut/compare', {
+      params: {
+        fromCurrency,
+        toCurrency,
+        amount,
+        sourceCountry: autoSourceCountry,
+        destCountry: autoDestCountry
+      }
+    });
+  },
+  
   // Price comparison API
   getWiseComparison: async (fromCurrency, toCurrency, amount, sourceCountry = null, targetCountry = null, providerType = null) => {
     return api.get('/wise/compare', {

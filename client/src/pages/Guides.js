@@ -11,78 +11,210 @@ import {
 import CurrencyFlag from '../components/ui/CurrencyFlag';
 
 /**
+ * FloatingCurrencySymbols - Animated currency symbols that float in the background
+ */
+const FloatingCurrencySymbols = () => {
+  const currencySymbols = ['$', '€', '£', '¥', '₹', '₽', '₣', '₩', '₺', '₴', 'R$'];
+  
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {currencySymbols.map((symbol, index) => {
+        // Create random positions and sizes
+        const top = Math.random() * 100;
+        const left = Math.random() * 100;
+        const size = Math.random() * 2 + 1; // between 1-3rem
+        const opacity = Math.random() * 0.07 + 0.02; // subtle opacity between 0.02-0.09
+        const delay = Math.random() * 5;
+        const duration = Math.random() * 15 + 20; // between 20-35s
+        
+        return (
+          <motion.div
+            key={`${symbol}-${index}`}
+            className="absolute text-indigo-600/10 font-medium"
+            style={{
+              top: `${top}%`,
+              left: `${left}%`,
+              fontSize: `${size}rem`,
+              opacity
+            }}
+            animate={{
+              y: [0, -30, 0],
+              x: [0, 15, 0],
+              rotate: [0, 5, 0, -5, 0],
+            }}
+            transition={{
+              duration,
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "easeInOut",
+              delay
+            }}
+          >
+            {symbol}
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+};
+
+/**
  * Guides page component
  */
 const Guides = () => {
   useEffect(() => {
     // Smooth scroll behavior for the entire page
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Add scroll margin to the guides-menu section
+    const guidesMenu = document.getElementById('guides-menu');
+    if (guidesMenu) {
+      guidesMenu.style.scrollMarginTop = '72px';
+    }
   }, []);
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-900 overflow-hidden">
-      {/* Hero Section with Gradient Background */}
-      <section className="py-16 md:py-24 relative border-b border-gray-100">
-        <div className="absolute inset-0 bg-gradient-to-r from-indigo-50 via-purple-50 to-indigo-50 -z-10"></div>
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzMDJmNDMiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djI2aDI0di0yNkgzNnpNNiA2djI2aDI0VjZINnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30 -z-10"></div>
+      {/* Hero Section with 2025 Design Trends */}
+      <section className="py-20 md:py-28 lg:py-32 relative overflow-hidden">
+        {/* Modern gradient background with subtle noise texture */}
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 opacity-90 -z-10"></div>
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzMDJmNDMiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djI2aDI0di0yNkgzNnpNNiA2djI2aDI0VjZINnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-20 -z-10"></div>
         
-        <div className="container mx-auto px-4">
+        {/* Floating currency symbols animation */}
+        <FloatingCurrencySymbols />
+        
+        {/* Decorative elements - blurred circles */}
+        <div className="absolute top-20 right-[10%] w-64 h-64 rounded-full bg-gradient-to-r from-indigo-300/20 to-purple-300/20 blur-3xl -z-5"></div>
+        <div className="absolute bottom-20 left-[5%] w-72 h-72 rounded-full bg-gradient-to-r from-pink-300/20 to-purple-300/20 blur-3xl -z-5"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-gradient-to-r from-blue-300/10 to-cyan-300/10 blur-3xl -z-5"></div>
+        
+        <div className="container mx-auto px-4 relative">
           <motion.div 
-            className="max-w-4xl mx-auto text-center"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            className="max-w-5xl mx-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1 }}
           >
+            {/* Badge - Glass morphism style */}
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-            >
-              <span className="inline-block px-4 py-1 mb-6 text-sm font-medium text-indigo-700 bg-indigo-100 rounded-full">Knowledge Center</span>
-            </motion.div>
-            
-            <motion.h1 
-              className="text-5xl md:text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.8 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+              className="flex justify-center mb-8"
             >
-              Money Transfer Guides
-            </motion.h1>
-            
-            <motion.p 
-              className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6, duration: 0.8 }}
-            >
-              Helpful resources to understand international money transfers and make informed decisions for your financial journey
-            </motion.p>
-            
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.8, duration: 0.8 }}
-              className="flex justify-center"
-            >
-              <Link 
-                to="/"
-                className="inline-flex items-center gap-2 bg-indigo-600 text-white font-medium px-6 py-3 rounded-full hover:bg-indigo-700 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-indigo-500/20"
-              >
-                Compare Providers
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+              <span className="inline-flex items-center px-5 py-2 rounded-full backdrop-blur-sm bg-white/30 border border-white/40 shadow-sm text-sm font-medium text-indigo-800">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-indigo-600" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
                 </svg>
-              </Link>
+                Trusted Knowledge Hub
+              </span>
             </motion.div>
-
+            
+            <div className="text-center">
+              {/* Title with gradient text and modern typography */}
+              <motion.h1 
+                className="text-5xl md:text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-purple-600 to-fuchsia-600 leading-tight tracking-tight"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.8 }}
+              >
+                Your Guide to Smarter <br className="hidden md:block" />
+                <span className="relative inline-block">
+                  Money Transfers
+                  <motion.svg 
+                    className="absolute -bottom-1 left-0 w-full" 
+                    height="5" 
+                    viewBox="0 0 300 5" 
+                    fill="none" 
+                    xmlns="http://www.w3.org/2000/svg"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: 1 }}
+                    transition={{ delay: 1.2, duration: 0.8 }}
+                  >
+                    <path d="M1 3.5C30 0.5 270 0.5 299 3.5" stroke="url(#paint0_linear)" strokeWidth="3" strokeLinecap="round"/>
+                    <defs>
+                      <linearGradient id="paint0_linear" x1="1" y1="3.5" x2="299" y2="3.5" gradientUnits="userSpaceOnUse">
+                        <stop stopColor="#8B5CF6" />
+                        <stop offset="1" stopColor="#EC4899" />
+                      </linearGradient>
+                    </defs>
+                  </motion.svg>
+                </span>
+              </motion.h1>
+              
+              {/* Subtitle with warm, friendly tone */}
+              <motion.p 
+                className="text-xl md:text-2xl text-gray-700 mb-10 max-w-3xl mx-auto leading-relaxed"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6, duration: 0.8 }}
+              >
+                From family support to business transactions, discover secure and cost-effective ways to send money worldwide. We're here to help every step of the way.
+              </motion.p>
+              
+              {/* Call-to-action buttons with 3D effect */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8, duration: 0.8 }}
+                className="flex flex-col sm:flex-row justify-center gap-4 mb-16"
+              >
+                <Link 
+                  to="/"
+                  className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-8 py-4 rounded-full hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-indigo-500/30 hover:-translate-y-1 transform-gpu"
+                >
+                  Compare Providers
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </Link>
+                <a 
+                  href="#guides-menu"
+                  className="inline-flex items-center justify-center gap-2 bg-white/80 backdrop-blur-sm border border-indigo-100 text-indigo-700 font-medium px-8 py-4 rounded-full hover:bg-white hover:text-indigo-800 transition-all duration-300 shadow-md hover:shadow-indigo-100/60 hover:-translate-y-1 transform-gpu"
+                >
+                  Explore Guides
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </a>
+              </motion.div>
+            </div>
+            
+            {/* Trust indicators */}
+            <motion.div 
+              className="flex flex-wrap justify-center items-center gap-6 md:gap-12"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1, duration: 0.8 }}
+            >
+              <div className="flex items-center gap-2 text-gray-600">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span className="text-sm font-medium">Expert Verified</span>
+              </div>
+              <div className="flex items-center gap-2 text-gray-600">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                </svg>
+                <span className="text-sm font-medium">Helping 50K+ Users Monthly</span>
+              </div>
+              <div className="flex items-center gap-2 text-gray-600">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                </svg>
+                <span className="text-sm font-medium">Updated Daily</span>
+              </div>
+            </motion.div>
+              
             {/* Animated scroll indicator */}
             <motion.div 
-              className="flex justify-center mt-8"
-              animate={{ y: [0, 10, 0] }}
-              transition={{ repeat: Infinity, duration: 1.5 }}
+              className="flex justify-center mt-16"
+              animate={{ y: [0, 8, 0] }}
+              transition={{ repeat: Infinity, duration: 2 }}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-indigo-400/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-indigo-400/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
               </svg>
             </motion.div>
@@ -1085,7 +1217,7 @@ const GuidesMenu = () => {
   };
   
   return (
-    <section className="py-10 bg-indigo-50 relative">
+    <section id="guides-menu" className="py-10 bg-indigo-50 relative">
       <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-indigo-300 to-transparent"></div>
       
       <div className="container mx-auto px-4">

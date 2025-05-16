@@ -1172,61 +1172,234 @@ const LiveHistoricalRates = () => {
       `}</style>
       
       {/* Hero Section */}
-      <section className="py-16 md:py-20 border-b border-gray-100 bg-gradient-to-b from-indigo-900 to-indigo-800 text-white relative overflow-hidden">
-        <div className="absolute inset-0 overflow-hidden">
+      <section className="py-20 md:py-28 relative overflow-hidden">
+        {/* Background elements */}
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-violet-800 to-purple-900 z-0">
+          {/* Subtle animated wave pattern */}
           <div className="absolute inset-0 opacity-10">
-            {/* Animated background grid */}
-            <div className="absolute inset-0" style={{ backgroundImage: 'linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+            <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <motion.path 
+                d="M0,50 C30,60 70,40 100,50 L100,100 L0,100 Z" 
+                fill="rgba(255,255,255,0.1)"
+                animate={{ 
+                  d: ["M0,50 C30,60 70,40 100,50 L100,100 L0,100 Z", 
+                     "M0,50 C30,40 70,60 100,50 L100,100 L0,100 Z"] 
+                }}
+                transition={{ duration: 10, repeat: Infinity, repeatType: "reverse" }}
+              />
+              <motion.path 
+                d="M0,60 C20,75 50,50 100,60 L100,100 L0,100 Z" 
+                fill="rgba(255,255,255,0.05)"
+                animate={{ 
+                  d: ["M0,60 C20,75 50,50 100,60 L100,100 L0,100 Z", 
+                     "M0,60 C40,45 80,70 100,60 L100,100 L0,100 Z"] 
+                }}
+                transition={{ duration: 8, repeat: Infinity, repeatType: "reverse" }}
+              />
+            </svg>
           </div>
-          <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/80 to-purple-900/60"></div>
+          
+          {/* Modern grain texture overlay */}
+          <div className="absolute inset-0 opacity-20" 
+            style={{ 
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23ffffff' fill-opacity='0.4' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E")`,
+              backgroundSize: '4px 4px'
+            }}
+          ></div>
+          
+          {/* Floating currency symbols */}
+          <div className="absolute inset-0 overflow-hidden">
+            <motion.div 
+              className="absolute text-white/5 text-8xl font-bold" 
+              style={{ top: '10%', left: '5%' }}
+              animate={{ y: [0, -10, 0], opacity: [0.05, 0.08, 0.05] }}
+              transition={{ duration: 5, repeat: Infinity, repeatType: "reverse" }}
+            >
+              $
+            </motion.div>
+            <motion.div 
+              className="absolute text-white/5 text-9xl font-bold" 
+              style={{ top: '30%', right: '10%' }}
+              animate={{ y: [0, 15, 0], opacity: [0.03, 0.06, 0.03] }}
+              transition={{ duration: 7, delay: 1, repeat: Infinity, repeatType: "reverse" }}
+            >
+              €
+            </motion.div>
+            <motion.div 
+              className="absolute text-white/5 text-8xl font-bold" 
+              style={{ bottom: '20%', left: '15%' }}
+              animate={{ y: [0, 8, 0], opacity: [0.04, 0.07, 0.04] }}
+              transition={{ duration: 6, delay: 2, repeat: Infinity, repeatType: "reverse" }}
+            >
+              £
+            </motion.div>
+            <motion.div 
+              className="absolute text-white/5 text-7xl font-bold" 
+              style={{ bottom: '30%', right: '20%' }}
+              animate={{ y: [0, -12, 0], opacity: [0.03, 0.05, 0.03] }}
+              transition={{ duration: 8, delay: 0.5, repeat: Infinity, repeatType: "reverse" }}
+            >
+              ¥
+            </motion.div>
+          </div>
         </div>
-        
-        <div className="container mx-auto px-4 relative z-10">
+
+        {/* Content */}
+        <div className="container mx-auto px-6 relative z-10">
           <motion.div 
-            className="max-w-4xl mx-auto"
+            className="max-w-4xl mx-auto text-center"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
+            {/* Main heading with glossy effect */}
+            <div className="inline-block mb-3 px-5 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20">
+              <motion.p 
+                className="text-sm md:text-base font-semibold text-indigo-200"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.1, duration: 0.8 }}
+              >
+                Trusted by 10,000+ users worldwide
+              </motion.p>
+            </div>
+            
             <motion.h1 
-              className="text-4xl md:text-6xl font-bold mb-4 text-center text-white leading-tight tracking-tight"
+              className="text-4xl md:text-6xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-white via-indigo-100 to-indigo-200 leading-tight tracking-tight"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.8 }}
+              transition={{ delay: 0.3, duration: 0.8 }}
             >
-              <span className="relative inline-block">
-                Live
-                <span className="absolute -bottom-1 left-0 w-full h-1 bg-indigo-400"></span>
-              </span>{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-purple-300">
-                & Historical Exchange Rates
-              </span>
+              <span className="block">Monitor Exchange Rates</span>
+              <span className="block">with Real-Time Precision</span>
             </motion.h1>
-            <motion.p 
-              className="text-lg md:text-xl text-indigo-100 text-center"
+            
+            <motion.div 
+              className="max-w-3xl mx-auto"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.8 }}
+              transition={{ delay: 0.5, duration: 0.8 }}
             >
-              Track currency trends over time for smarter international transfers
-            </motion.p>
+              <p className="text-lg md:text-xl text-indigo-100 mb-8 leading-relaxed">
+                Track currency trends over time with our advanced historical data visualization. 
+                Make smarter international transfers with confidence using up-to-the-minute rates.
+              </p>
+              
+              {/* Trust signals */}
+              <div className="flex flex-wrap justify-center gap-6 mb-10">
+                <div className="flex items-center text-indigo-100">
+                  <div className="mr-2 bg-indigo-700/30 p-1.5 rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                  </div>
+                  <span className="text-sm">Bank-grade security</span>
+                </div>
+                
+                <div className="flex items-center text-indigo-100">
+                  <div className="mr-2 bg-indigo-700/30 p-1.5 rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  <span className="text-sm">Real-time updates</span>
+                </div>
+                
+                <div className="flex items-center text-indigo-100">
+                  <div className="mr-2 bg-indigo-700/30 p-1.5 rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                  </div>
+                  <span className="text-sm">100% accurate data</span>
+                </div>
+              </div>
+            </motion.div>
+            
+            {/* Interactive 3D card with current rates preview */}
+            <motion.div 
+              className="relative max-w-2xl mx-auto"
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.7, duration: 0.8 }}
+            >
+              <div className="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-2xl shadow-xl">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {[
+                    { pair: "EUR/USD", rate: "1.0821", change: "+0.3%" },
+                    { pair: "GBP/USD", rate: "1.2649", change: "-0.1%" },
+                    { pair: "USD/JPY", rate: "151.47", change: "+0.2%" },
+                    { pair: "USD/CAD", rate: "1.3602", change: "-0.4%" }
+                  ].map((item, index) => (
+                    <motion.div 
+                      key={item.pair}
+                      className="flex flex-col items-center justify-center p-3 rounded-xl bg-gradient-to-br from-white/5 to-white/10 border border-white/10"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.8 + (index * 0.1), duration: 0.5 }}
+                      whileHover={{ 
+                        scale: 1.05, 
+                        boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)",
+                        background: "linear-gradient(to bottom right, rgba(255,255,255,0.1), rgba(255,255,255,0.15))" 
+                      }}
+                    >
+                      <p className="text-indigo-200 font-medium mb-1">{item.pair}</p>
+                      <p className="text-white text-xl font-bold">{item.rate}</p>
+                      <p className={`text-xs ${item.change.startsWith('+') ? 'text-green-400' : 'text-red-400'}`}>
+                        {item.change}
+                      </p>
+                    </motion.div>
+                  ))}
+                </div>
+                
+                <div className="mt-5 text-center">
+                  <motion.button 
+                    className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-medium text-sm hover:from-indigo-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-indigo-500/30"
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Explore All Currency Pairs
+                  </motion.button>
+                </div>
+              </div>
+              
+              {/* Decorative elements */}
+              <div className="absolute -top-6 -left-6 w-12 h-12 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full opacity-50 blur-xl"></div>
+              <div className="absolute -bottom-8 -right-8 w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full opacity-50 blur-xl"></div>
+            </motion.div>
           </motion.div>
         </div>
         
-        {/* Animated scroll indicator */}
+        {/* Bottom wave decoration */}
+        <div className="absolute bottom-0 left-0 right-0 h-16 md:h-24">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" className="absolute bottom-0 w-full">
+            <path fill="#fff" fillOpacity="1" d="M0,224L60,229.3C120,235,240,245,360,240C480,235,600,213,720,197.3C840,181,960,171,1080,176C1200,181,1320,203,1380,213.3L1440,224L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"></path>
+          </svg>
+        </div>
+        
+        {/* Scroll indicator */}
         <motion.div 
-          className="absolute bottom-6 left-0 right-0 flex justify-center"
-          animate={{ y: [0, 10, 0] }}
+          className="absolute bottom-6 left-0 right-0 flex justify-center z-10"
+          animate={{ y: [0, 8, 0] }}
           transition={{ repeat: Infinity, duration: 1.5 }}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-          </svg>
+          <motion.div 
+            className="flex flex-col items-center cursor-pointer group"
+            onClick={() => {
+              const mainContent = document.getElementById('main-content');
+              if (mainContent) mainContent.scrollIntoView({ behavior: 'smooth' });
+            }}
+          >
+            <span className="text-white/70 text-sm font-medium mb-1 group-hover:text-white/90 transition-colors">Explore</span>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white/70 group-hover:text-white/90 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+          </motion.div>
         </motion.div>
       </section>
 
       {/* Main Content */}
-      <section className="py-10 md:py-16">
+      <section id="main-content" className="py-10 md:py-16">
         <div className="container mx-auto px-4">
           <motion.div 
             className="max-w-4xl mx-auto"

@@ -99,10 +99,62 @@ exports.getExchangeRate = async (fromCurrency, toCurrency, amount, countryCode =
  * @returns {Object} - Formatted provider data
  */
 exports.formatForProviderCard = (rateData, fromCurrency, toCurrency, amount) => {
-  const { 'Exchange rate': exchangeRate, 'Total fee': fee, 'Delivery ETA': deliveryETA, 'Amount received': amountReceived } = rateData;
+  const { 'Exchange rate': exchangeRate, 'Total fee': fee, 'Delivery ETA': deliveryETA, 'Amount received': amountReceived, 'Rail type': railType, 'additional_info': additionalInfo } = rateData;
   
   // Calculate margin against mid-market rate (this is a placeholder - in production you'd compare with an actual mid-market rate)
   const marginPercentage = 0.5; // Placeholder, typically calculated based on mid-market rate
+  
+  // Check for service_time in additionalInfo first
+  let serviceTime = null;
+  if (additionalInfo && additionalInfo.service_time && additionalInfo.service_time !== '') {
+    serviceTime = additionalInfo.service_time;
+  }
+  
+  // Enhance delivery time based on corridor information if available
+  let transferTime = serviceTime || deliveryETA;
+  let transferTimeHours = parseDeliveryTime(transferTime);
+  
+  // If we have rail type but no clear delivery ETA, use the rail type to determine the ETA
+  if (railType && (!transferTime || transferTime === 'n/a')) {
+    if (railType.toUpperCase() === 'LOCAL') {
+      transferTime = 'Instant (< 60 seconds)';
+      transferTimeHours = { min: 0, max: 1 };
+    } else if (railType.toUpperCase() === 'SWIFT') {
+      transferTime = '1-2 business days';
+      transferTimeHours = { min: 24, max: 48 };
+    } else if (railType.toUpperCase() === 'CASH_PAYOUT') {
+      transferTime = 'Within 4 hours';
+      transferTimeHours = { min: 0, max: 4 };
+    } else if (railType.toUpperCase().includes('VISA') || railType.toUpperCase().includes('CARD')) {
+      // Default for card payments without explicit Fast Funds indicator
+      transferTime = 'Within 2 days';
+      transferTimeHours = { min: 24, max: 48 };
+    }
+  }
+  
+  // If still no clear delivery time, use a fallback based on currency corridor
+  if (!transferTime || transferTime === 'n/a') {
+    const corridorKey = `${fromCurrency}-${toCurrency}`;
+    // Common corridor estimates based on typical InstaReM behavior
+    const commonCorridors = {
+      'USD-INR': { time: '1-2 business days', hours: { min: 24, max: 48 } },
+      'GBP-EUR': { time: 'Same day', hours: { min: 0, max: 24 } },
+      'SGD-INR': { time: '1-2 business days', hours: { min: 24, max: 48 } },
+      'AUD-INR': { time: '1-2 business days', hours: { min: 24, max: 48 } },
+      'USD-PHP': { time: 'Within 1 hour', hours: { min: 0, max: 1 } },
+      'USD-MYR': { time: 'Same day', hours: { min: 0, max: 24 } },
+      'GBP-INR': { time: '1-2 business days', hours: { min: 24, max: 48 } }
+    };
+    
+    if (commonCorridors[corridorKey]) {
+      transferTime = commonCorridors[corridorKey].time;
+      transferTimeHours = commonCorridors[corridorKey].hours;
+    } else {
+      // Most conservative default if we can't determine
+      transferTime = '1-2 business days';
+      transferTimeHours = { min: 24, max: 48 };
+    }
+  }
   
   return {
     providerId: 'provider-instarem',
@@ -116,10 +168,11 @@ exports.formatForProviderCard = (rateData, fromCurrency, toCurrency, amount) => 
     marginCost: (amount * marginPercentage) / 100,
     totalCost: parseFloat(fee) + ((amount * marginPercentage) / 100),
     amountReceived: parseFloat(amountReceived),
-    transferTime: deliveryETA,
-    transferTimeHours: parseDeliveryTime(deliveryETA),
+    transferTime: transferTime,
+    transferTimeHours: transferTimeHours,
     rating: 4.3,
-    realTimeApi: true
+    realTimeApi: true,
+    railType: railType || 'Unknown'
   };
 };
 
@@ -318,10 +371,51 @@ function runInstaRemCalculator(scriptPath, amount, fromCurrency, toCurrency, cou
  */
 function parseDeliveryTime(deliveryETA) {
   try {
+    // If no ETA is provided, determine based on corridor logic
+    if (!deliveryETA || deliveryETA === 'n/a') {
+      // Default fallback when we can't determine
+      return {
+        min: 48,
+        max: 72
+      };
+    }
+    
     const etaLower = deliveryETA.toLowerCase();
     
-    // Match patterns like "1-2 days", "24 hours", etc.
-    const daysMatch = etaLower.match(/(\d+)(?:-(\d+))?\s*days?/);
+    // Check for "LOCAL" rail type which is real-time (<60 seconds)
+    if (etaLower.includes('local') || etaLower.includes('instant') || etaLower.includes('real-time') || etaLower.includes('realtime')) {
+      return {
+        min: 0,
+        max: 1  // Less than an hour
+      };
+    }
+    
+    // Check for "SWIFT" rail type which is T+1/T+2
+    if (etaLower.includes('swift')) {
+      return {
+        min: 24,  // T+1 = 24 hours
+        max: 48   // T+2 = 48 hours
+      };
+    }
+    
+    // Check for Visa Fast Funds indicator
+    if (etaLower.includes('fast funds') || etaLower.includes('fastfunds')) {
+      if (etaLower.includes('t+2')) {
+        return {
+          min: 24,
+          max: 48
+        };
+      } else {
+        // "realtime" Fast Funds
+        return {
+          min: 0,
+          max: 1
+        };
+      }
+    }
+    
+    // Match patterns like "1-2 business days", "24 hours", etc.
+    const daysMatch = etaLower.match(/(\d+)(?:-(\d+))?\s*(?:business\s*)?days?/);
     const hoursMatch = etaLower.match(/(\d+)(?:-(\d+))?\s*hours?/);
     
     if (daysMatch) {
@@ -344,7 +438,59 @@ function parseDeliveryTime(deliveryETA) {
       };
     }
     
-    // Default fallback for n/a or other formats
+    // Check for same day
+    if (etaLower.includes('same day')) {
+      return {
+        min: 0,
+        max: 24
+      };
+    }
+    
+    // Default mapping of common corridors
+    // This is a simplified version of the hard-coded mapping Instarem uses
+    const corridorMap = {
+      'cash_payout': { min: 0, max: 4 * 60 }, // "Within 4 hours"
+      'local': { min: 0, max: 1 },            // "Instant" (< 60 seconds)
+      'swift': { min: 24, max: 48 }           // "1-2 business days"
+    };
+    
+    // Look for corridor keywords
+    for (const [corridor, time] of Object.entries(corridorMap)) {
+      if (etaLower.includes(corridor)) {
+        return time;
+      }
+    }
+    
+    // ISO date or service_time handling
+    const isoDateMatch = deliveryETA.match(/^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2})?/);
+    if (isoDateMatch) {
+      try {
+        const estimateDate = new Date(deliveryETA);
+        const now = new Date();
+        
+        // Calculate hours difference
+        const diffMs = estimateDate.getTime() - now.getTime();
+        const diffHours = Math.ceil(diffMs / (1000 * 60 * 60));
+        
+        // Make sure we don't return negative values
+        if (diffHours <= 0) {
+          // If the estimated date is in the past, treat it as "already delivered" or "very soon"
+          return {
+            min: 0,
+            max: 1
+          };
+        }
+        
+        return {
+          min: diffHours,
+          max: diffHours
+        };
+      } catch (e) {
+        console.error(`Error parsing ISO date: ${e.message}`);
+      }
+    }
+    
+    // Default fallback for other formats
     return {
       min: 48,
       max: 72

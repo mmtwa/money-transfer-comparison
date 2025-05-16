@@ -42,6 +42,7 @@ const wiseCompareRoutes = require('./routes/wiseCompare'); // Import Wise compar
 const wiseRatesRoutes = require('./routes/wiseRates'); // Import Wise rates routes
 const instaremRoutes = require('./routes/instarem'); // Import InstaReM routes
 const remitlyRoutes = require('./routes/remitly'); // Import Remitly routes
+const revolutRoutes = require('./routes/revolut'); // Import Revolut routes
 const adminRoutes = require('./routes/admin/index'); // Import admin routes
 const adPartnerRoutes = require('./routes/api/adPartners'); // Import ad partners API
 
@@ -118,8 +119,11 @@ const logoFiles = [
   { source: 'Western-Union-Logo.png', dest: 'westernunion.png' },
   { source: 'InstaReM-Logo.png', dest: 'instarem.png' },
   { source: 'remitlylogo.svg', dest: 'remitly.png' },
+  { source: 'revolutlogo.png', dest: 'revolut.png' },
   // Add a fallback for instarem.png in case the logo file doesn't exist
-  { source: 'default-logo.png', dest: 'instarem.png', fallback: true }
+  { source: 'default-logo.png', dest: 'instarem.png', fallback: true },
+  // Add a fallback for revolut.png
+  { source: 'default-logo.png', dest: 'revolut.png', fallback: true }
 ];
 
 logoFiles.forEach(logo => {
@@ -200,6 +204,7 @@ app.use('/api/wise/compare', wiseCompareRoutes); // Update Wise compare route pa
 app.use('/api/wise-rates', wiseRatesRoutes); // Add Wise rates routes
 app.use('/api/instarem', instaremRoutes); // Add InstaReM routes
 app.use('/api/remitly', remitlyRoutes); // Add Remitly routes
+app.use('/api/revolut', revolutRoutes); // Add Revolut routes
 app.use('/api/trustpilot-ratings', (req, res, next) => {
   console.log('Trustpilot ratings API called:', req.method, req.url);
   next();

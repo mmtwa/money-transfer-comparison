@@ -441,7 +441,15 @@ const ProviderCard = ({
     if (provider?.transferTime || transferTime) {
       const timeValue = provider?.transferTime || transferTime;
       
-
+      // If it's already a human-readable format with seconds, minutes, hours or days
+      // from our Revolut service, just return it as is
+      if (typeof timeValue === 'string' && 
+          (timeValue.includes('second') || 
+           timeValue.includes('minute') || 
+           timeValue.includes('hour') || 
+           timeValue.includes('day'))) {
+        return timeValue;
+      }
       
       // Check if this is an ISO date string (delivered from the Wise API)
       if (timeValue && typeof timeValue === 'string' && timeValue.includes('T') && timeValue.includes('Z')) {
@@ -450,15 +458,27 @@ const ProviderCard = ({
           const deliveryDate = new Date(timeValue);
           const now = new Date();
           
-          // Calculate hours difference
-          const diffHours = Math.round((deliveryDate - now) / (1000 * 60 * 60));
+          // Calculate time differences
+          const diffMs = deliveryDate.getTime() - now.getTime();
+          const diffSeconds = Math.floor(diffMs / 1000);
+          const diffMinutes = Math.floor(diffMs / (1000 * 60));
+          const diffHours = Math.round(diffMs / (1000 * 60 * 60));
+          const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
           
-          // If it's the same day
-          if (diffHours < 24 && deliveryDate.getDate() === now.getDate()) {
-            if (diffHours <= 1) {
-              return 'Within 1 hour';
-            }
-            return `Within ${diffHours} hours`;
+          // Format based on how much time is left
+          if (diffSeconds < 60) {
+            // Less than a minute
+            return diffSeconds <= 0 ? 'Very soon' : 
+                   diffSeconds === 1 ? 'In 1 second' : 
+                   `In ${diffSeconds} seconds`;
+          } else if (diffMinutes < 60) {
+            // Less than an hour
+            return diffMinutes === 1 ? 'In 1 minute' : 
+                   `In ${diffMinutes} minutes`;
+          } else if (diffHours < 24 && deliveryDate.getDate() === now.getDate()) {
+            // Same day delivery
+            return diffHours <= 1 ? 'Within 1 hour' : 
+                   `Within ${diffHours} hours`;
           }
           
           // If it's tomorrow
@@ -471,9 +491,8 @@ const ProviderCard = ({
           }
           
           // If it's within a week
-          const daysDiff = Math.round((deliveryDate - now) / (1000 * 60 * 60 * 24));
-          if (daysDiff <= 7) {
-            return `Within ${daysDiff} days`;
+          if (diffDays <= 7) {
+            return `Within ${diffDays} days`;
           }
           
           // Otherwise show the date
@@ -930,7 +949,20 @@ const ProviderCard = ({
                 <div className="w-1 h-full min-h-[30px] bg-indigo-400 mr-2 self-stretch rounded-full transition-all duration-300 group-hover:bg-indigo-500"></div>
                 <div className="text-left">
                   <div className="text-xs text-gray-600 font-medium mb-0.5">Exchange Rate</div>
-                  <div className="font-bold text-sm">{`1 ${fromCurrency} = ${(provider?.rate || rate || 0).toFixed(4)} ${toCurrency}`}</div>
+                  <div className="font-bold text-sm">
+                    {`1 ${fromCurrency} = ${(provider?.rate || rate || 0).toFixed(4)} ${toCurrency}`}
+                    {provider?.rateTimestamp && (
+                      <span className="text-xs text-gray-500 ml-2">
+                        (Updated: {new Date(provider.rateTimestamp).toLocaleDateString(undefined, {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          second: '2-digit'
+                        })})
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
               
@@ -1156,7 +1188,19 @@ const ProviderCard = ({
               {/* Exchange Rate */}
               <div className="mobile-detail-item">
                 <div className="mobile-detail-label">Exchange Rate</div>
-                <div className="mobile-detail-value">{`1 ${fromCurrency} = ${(provider?.rate || rate || 0).toFixed(4)} ${toCurrency}`}</div>
+                <div className="mobile-detail-value">
+                  {`1 ${fromCurrency} = ${(provider?.rate || rate || 0).toFixed(4)} ${toCurrency}`}
+                  {provider?.rateTimestamp && (
+                    <div className="text-xs text-gray-500 mt-0.5">
+                      Updated: {new Date(provider.rateTimestamp).toLocaleDateString(undefined, {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </div>
+                  )}
+                </div>
               </div>
               
               {/* Delivery Time */}

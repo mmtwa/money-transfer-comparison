@@ -64,7 +64,7 @@ export const trustpilotRatingsMap = {
   "provider-worldremit": 3.9,
   "currencyfair": 4.4,
   "provider-currencyfair": 4.4,
-  "revolut": 4.3,
+  "revolut": 4.4,
   "provider-revolut": 4.3,
   "transfergo": 4.3,
   "provider-transfergo": 4.3

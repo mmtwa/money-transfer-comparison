@@ -372,6 +372,9 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
         // Track if we have a Remitly result from our direct API
         let hasDirectRemitlyResult = false;
         
+        // Track if we have a Revolut result from our direct API
+        let hasDirectRevolutResult = false;
+        
         // Fetch data from the regular backend API
         const regularResponse = await fetch(`/api/providers/compare?fromCurrency=${fromCurrency}&toCurrency=${toCurrency}&amount=${amount}`);
         
@@ -423,6 +426,23 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
           // Continue with other providers
         }
         
+        // Try to fetch Revolut rates from the dedicated API
+        try {
+          console.log('Fetching Revolut rates from dedicated API');
+          const revolutResponse = await apiService.getRevolutComparison(fromCurrency, toCurrency, amount);
+          
+          if (revolutResponse.data && revolutResponse.data.success && revolutResponse.data.data) {
+            console.log('Received data from Revolut API:', revolutResponse.data.data);
+            allProviderResults = [...allProviderResults, ...revolutResponse.data.data];
+            
+            // Mark that we have a direct Revolut result
+            hasDirectRevolutResult = true;
+          }
+        } catch (revolutError) {
+          console.error('Error fetching from Revolut API:', revolutError);
+          // Continue with other providers
+        }
+        
         // Fetch data from the Wise API endpoint
         try {
           const wiseResponse = await apiService.getWiseComparison(fromCurrency, toCurrency, amount);
@@ -433,7 +453,7 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
             if (wiseData.success && wiseData.data) {
               console.log('Received data from Wise API:', wiseData.data);
               
-              // Filter out InstaReM from Wise results if we already have direct InstaReM results
+              // Filter out InstaReM and Remitly from Wise results if we already have direct results
               const filteredWiseResults = wiseData.data.filter(provider => {
                 // If we have a direct InstaReM result, filter out InstaReM from Wise API
                 if (hasDirectInstaremResult && 
@@ -452,6 +472,16 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
                     (provider.provider && provider.provider.name && 
                      provider.provider.name.toLowerCase().includes('remitly')))) {
                   console.log('Filtering out Remitly from Wise API results as we have direct results');
+                  return false;
+                }
+                
+                // If we have a direct Revolut result, filter out Revolut from Wise API
+                if (hasDirectRevolutResult && 
+                   (provider.providerCode === 'revolut' || 
+                    provider.providerName?.toLowerCase().includes('revolut') ||
+                    (provider.provider && provider.provider.name && 
+                     provider.provider.name.toLowerCase().includes('revolut')))) {
+                  console.log('Filtering out Revolut from Wise API results as we have direct results');
                   return false;
                 }
                 
@@ -709,7 +739,7 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
           // Continue with existing baseRate values
         }
         
-        // Final step: ensure no duplicate InstaReM providers
+        // Final step: ensure no duplicate providers
         const providerMap = new Map();
         const deduplicatedResults = [];
         
@@ -726,6 +756,12 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
             provider.providerName?.toLowerCase().includes('remitly') ||
             (provider.provider && provider.provider.name && 
              provider.provider.name.toLowerCase().includes('remitly'));
+          
+          const isRevolut = 
+            provider.providerCode === 'revolut' || 
+            provider.providerName?.toLowerCase().includes('revolut') ||
+            (provider.provider && provider.provider.name && 
+             provider.provider.name.toLowerCase().includes('revolut'));
           
           // Generate a unique key for this provider
           const providerKey = provider.providerCode || provider.providerName?.toLowerCase() || 'unknown';
@@ -751,6 +787,17 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
               providerMap.set('remitly', provider);
             }
             // If we already have a Remitly provider from our direct API, skip this one
+          }
+          // For Revolut, only add if we don't already have it, or if the existing one isn't from our direct API
+          else if (isRevolut) {
+            const existingProvider = providerMap.get('revolut');
+            
+            // If we don't have a Revolut provider yet, or this one is from our direct API (realTimeApi = true)
+            if (!existingProvider || provider.realTimeApi) {
+              // Add or replace the Revolut provider
+              providerMap.set('revolut', provider);
+            }
+            // If we already have a Revolut provider from our direct API, skip this one
           } else {
             // For all other providers, just add them (no duplicates should exist)
             providerMap.set(providerKey, provider);
@@ -1283,7 +1330,7 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
           height: 100%;
           top: 0;
           left: 0;
-          background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%236366f1' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+          background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%236366f1' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
           opacity: 0.4;
         }
         
@@ -1546,7 +1593,7 @@ const ResultsView = ({ searchData, onBackToSearch }) => {
                   <img 
                     src={bestDealProvider.providerLogo} 
                     alt={`${bestDealProvider.providerName} logo`} 
-                    className="w-12 h-12 md:w-16 md:h-16 object-contain md:mb-0 md:mr-4"
+                    className="h-20 w-20 md:h-28 md:w-28 object-contain md:mb-0 md:mr-4"
                     onError={(e) => {
                       // Try to fix the path if it starts with "/"
                       if ((bestDealProvider.providerLogo || '').startsWith('/')) {

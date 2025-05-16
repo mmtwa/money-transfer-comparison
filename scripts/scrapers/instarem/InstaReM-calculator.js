@@ -102,7 +102,75 @@ const payIdCLI    = payIdArg && Number(payIdArg);
                           + (q.payout_method_fee_amount ?? 0))
                           .toFixed(2);
     const receiveAmount = q.destination_amount;
-    const eta           = payout?.estimated_transfer_time || 'n/a';
+    
+    /* New: Determine delivery estimate based on rail type */
+    let eta = payout?.estimated_transfer_time || 'n/a';
+    let railType = null;
+    
+    // Extract rail type (LOCAL, SWIFT, etc.) from the response data
+    if (q.payout_type) {
+      railType = q.payout_type;
+    } else if (payout?.payout_type) {
+      railType = payout.payout_type;
+    } else if (q.payout_method_type) {
+      railType = q.payout_method_type;
+    }
+    
+    console.log(`Detected rail type: ${railType || 'Unknown'}`);
+    
+    // Apply rail-based estimate as per documentation
+    if (railType) {
+      if (railType.toUpperCase() === 'LOCAL') {
+        eta = 'Instant (< 60 seconds)';
+      } else if (railType.toUpperCase() === 'SWIFT') {
+        eta = '1-2 business days';
+      } else if (railType.toUpperCase() === 'CASH_PAYOUT') {
+        eta = 'Within 4 hours';
+      }
+    }
+    
+    // Check for Visa Fast Funds if relevant
+    const hasVisaFastFunds = q.has_visa_fast_funds || payout?.has_visa_fast_funds;
+    if (railType && railType.includes('VISA') || railType && railType.includes('CARD')) {
+      if (hasVisaFastFunds) {
+        eta = 'Instant (Visa Fast Funds)';
+      } else {
+        eta = 'Within 2 days (Card)';
+      }
+    }
+    
+    // Check for service_time in the additional_info
+    if (q.additional_info && q.additional_info.service_time) {
+      // service_time is usually an ISO date when provided
+      console.log(`Service time from API: ${q.additional_info.service_time}`);
+      
+      // Only override if we actually have a value
+      if (q.additional_info.service_time && q.additional_info.service_time !== '') {
+        try {
+          // Attempt to parse as ISO date
+          const serviceDate = new Date(q.additional_info.service_time);
+          
+          // If valid date, use it as the estimate
+          if (!isNaN(serviceDate.getTime())) {
+            const now = new Date();
+            const diffMs = serviceDate.getTime() - now.getTime();
+            const diffHours = Math.ceil(diffMs / (1000 * 60 * 60));
+            
+            if (diffHours <= 1) {
+              eta = 'Less than 1 hour';
+            } else if (diffHours < 24) {
+              eta = `Within ${diffHours} hours`;
+            } else {
+              const days = Math.ceil(diffHours / 24);
+              eta = `Approximately ${days} day${days > 1 ? 's' : ''}`;
+            }
+          }
+        } catch (e) {
+          console.log(`Error parsing service_time: ${e.message}`);
+          // Keep existing eta if parsing fails
+        }
+      }
+    }
 
     /* 5️⃣  show results in multiple formats for reliable parsing */
     // Plain text output
@@ -125,7 +193,8 @@ const payIdCLI    = payIdArg && Number(payIdArg);
       'Exchange rate': exchangeRate,
       'Total fee':     totalFee,
       'Delivery ETA':  eta,
-      'Amount received': receiveAmount
+      'Amount received': receiveAmount,
+      'Rail type': railType || 'Unknown'
     }));
     
   } catch (err) {
