@@ -102,6 +102,7 @@ app.use(express.json()); // Parse JSON request body
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 app.use(cookieParser()); // Parse cookies
 app.use(logger); // Request logging
+app.use(require('prerender-node').set('prerenderToken', '7bhaoyM3pgdGdwgPTM7f')); // Prerender.io for SEO
 
 // After middleware setup, add static middleware for images and logos
 // Create directory structure for provider images if it doesn't exist

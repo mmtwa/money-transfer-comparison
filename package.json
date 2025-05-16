@@ -35,6 +35,7 @@
         "morgan": "^1.10.0",
         "node-cache": "^5.1.2",
         "node-fetch": "^2.7.0",
+        "prerender-node": "^3.8.0",
         "querystring": "^0.2.1"
     },
     "devDependencies": {
