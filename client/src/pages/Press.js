@@ -6,6 +6,8 @@ import skylineBackground from '../assets/images/backgrounds/skyline.webp';
 /**
  * Press page component showcasing press releases and media information
  */
+
+import SEO from '../components/SEO';
 const Press = () => {
   useEffect(() => {
     // Smooth scroll behavior for the entire page
@@ -61,6 +63,11 @@ The feature will have particular relevance for UK property owners abroad, busine
 
   return (
     <div className="flex flex-col bg-white text-gray-900 overflow-hidden">
+      <SEO 
+        title=" Press | MyMoneyTransfers"
+        description=" Press - MyMoneyTransfers provides detailed information to help you make informed decisions about international money transfers."
+        canonicalUrl="/press"
+      />
       {/* Hero Section */}
       <section className="py-20 md:py-32 relative min-h-[60vh] flex items-center">
         <div className="absolute inset-0 overflow-hidden">

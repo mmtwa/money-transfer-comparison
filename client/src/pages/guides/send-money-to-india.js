@@ -1,11 +1,12 @@
 import React from 'react';
+import { Helmet } from 'react-helmet';
 import GuideDetail from './GuideDetail';
 // Import custom components and hooks
 import ClickableHeadline from '../../components/common/ClickableHeadline';
 import useExpandableSections from '../../hooks/useExpandableSections';
-// Import images
-import heroImageJpg from '../../assets/images/guides/india-transfer-hero-optimized.jpg';
-import heroImageWebp from '../../assets/images/guides/india-transfer-hero-new.webp';
+// Import images - use the correct files that are not 0 bytes
+import heroImageJpg from '../../assets/images/guides/india-transfer-hero.jpg';
+import heroImageWebp from '../../assets/images/guides/india-transfer-hero-optimized-hero-new.webp';
 // Import responsive image component
 import ResponsiveImage from '../../components/common/ResponsiveImage';
 
@@ -21,7 +22,8 @@ const SendMoneyToIndiaGuide = () => {
     'regional-considerations': true,
     'fees-rates': true,
     'tax-legal': true,
-    'timing-tips': true
+    'timing-tips': true,
+    'faq': true  // Added FAQ section
   };
 
   // Use the custom hook to manage section state
@@ -38,12 +40,78 @@ const SendMoneyToIndiaGuide = () => {
       title: 'Transfer Fees Explained',
       description: 'A breakdown of the different types of fees providers charge and how to calculate the true cost of your transfer.',
       path: '/guides/transfer-fees'
+    },
+    {
+      title: 'Send Money to Pakistan',
+      description: 'Comparing the best options for sending money to Pakistan from the UK, US, and other countries.',
+      path: '/guides/send-money-to-pakistan'
+    },
+    {
+      title: 'Send Money to Bangladesh',
+      description: 'Find the best ways to send money to Bangladesh with competitive rates and low fees.',
+      path: '/guides/send-money-to-bangladesh'
     }
   ];
+
+  // FAQ content for schema markup
+  const faqItems = [
+    {
+      question: "What's the cheapest way to send money to India?",
+      answer: "Based on our analysis, online money transfer services like Wise and Remitly typically offer the cheapest rates for sending money to India compared to banks. Exchange rates vary daily, but these providers generally charge lower fees and offer better exchange rates. Wise is particularly transparent with mid-market rates and upfront fees."
+    },
+    {
+      question: "How long does it take to transfer money to India?",
+      answer: "Transfer times to India vary by provider and method. Online services like Wise typically deliver within 1-2 business days for bank deposits. Remitly's express service can deliver within hours for an additional fee. Bank transfers usually take 2-5 business days. Cash pickup options through Western Union can be available within minutes."
+    },
+    {
+      question: "What information do I need to send money to India?",
+      answer: "To send money to India, you'll need your recipient's full name (exactly as it appears on their ID), their bank account number, IFSC code (Indian Financial System Code), bank name and branch, and sometimes their address. For amounts over ₹50,000, you may need to provide a purpose code (P-CODE) like S0001 for family maintenance."
+    },
+    {
+      question: "Are there any limits when sending money to India?",
+      answer: "Yes, most providers have minimum and maximum limits. Typical minimums range from $1-10, while maximums vary widely from $1,000 to $50,000+ per transaction depending on the provider and your verification level. Additionally, India has regulations requiring purpose codes for transfers exceeding ₹50,000 and may have different documentation requirements for larger amounts."
+    },
+    {
+      question: "Is it safe to send money to India online?",
+      answer: "Yes, it's generally safe to send money to India through licensed and regulated money transfer providers. Companies like Wise, Western Union, and Remitly use encryption and security protocols to protect transactions. For added safety, verify the provider is authorized to operate in your country and registered with financial regulators. Always confirm the recipient's details carefully before sending."
+    },
+    {
+      question: "What are the best apps for sending money to India?",
+      answer: "The top-rated apps for sending money to India include Wise (formerly TransferWise) for transparent mid-market exchange rates, Remitly for fast transfers and first-time user promotions, Xoom (PayPal) for its integration with PayPal accounts, and Western Union for its extensive cash pickup network across India. These apps offer convenient interfaces, competitive rates, and reliable delivery."
+    },
+    {
+      question: "Can I send money to a mobile wallet in India?",
+      answer: "Yes, you can send money to several mobile wallets in India, including Paytm, PhonePe, and Amazon Pay, though availability depends on your sending provider. Services like Wise and Western Union support some Indian mobile wallets. Mobile money is increasingly popular in India's urban areas due to the convenience and immediate availability of funds."
+    }
+  ];
+
+  // Define FAQ schema for SEO
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqItems.map(item => ({
+      "@type": "Question",
+      "name": item.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": item.answer
+      }
+    }))
+  };
 
   // Content rendered as JSX for proper HTML structure with Tailwind classes
   const content = (
     <>
+      <Helmet>
+        <title>Send Money to India – Best Options, Rates & Guide (2025) | MyMoneyTransfers</title>
+        <meta name="description" content="Need to send money to India? Discover the cheapest, fastest ways – from bank transfers to online apps. MyMoneyTransfers' independent guide ranks the top providers (no bias or fees)." />
+        <meta name="keywords" content="send money to India, money transfer to India, best way to send money to India, cheapest way to send money to India, India remittance, transfer money to India online, India money transfer comparison" />
+        <link rel="canonical" href="/guides\send-money-to-india" />
+        <script type="application/ld+json">
+          {JSON.stringify(faqSchema)}
+        </script>
+      </Helmet>
+
       <ClickableHeadline 
         id="introduction" 
         isExpanded={expandedSections['introduction']} 
@@ -448,18 +516,47 @@ const SendMoneyToIndiaGuide = () => {
           </div>
         </>
       )}
+
+      <ClickableHeadline 
+        id="faq" 
+        isExpanded={expandedSections['faq']} 
+        onClick={toggleSection}
+      >
+        Frequently Asked Questions About Sending Money to India
+      </ClickableHeadline>
+      {expandedSections['faq'] && (
+        <div className="mt-4 space-y-6">
+          {faqItems.map((item, index) => (
+            <div key={index} className="bg-white rounded-lg shadow-sm p-5 border border-gray-100">
+              <h3 className="text-lg font-semibold text-indigo-700 mb-2 text-left">{item.question}</h3>
+              <p className="text-left">{item.answer}</p>
+            </div>
+          ))}
+          
+          <div className="p-5 bg-amber-50 border border-amber-100 rounded-lg mt-8">
+            <h3 className="text-lg font-semibold text-amber-800 mb-2 text-left">Need More Help?</h3>
+            <p className="text-left">
+              Have additional questions about sending money to India? Use our comparison tool to see real-time rates from multiple providers, 
+              or explore our other guides for more detailed information on specific transfer methods and services. 
+              Unlike other comparison sites, MyMoneyTransfers provides 100% independent, unbiased rankings without commission fees 
+              influencing our recommendations.
+            </p>
+          </div>
+        </div>
+      )}
     </>
   );
 
   return (
     <GuideDetail
-      title="The Insider's Guide to Sending Money to India: What We Discovered"
-      subtitle="After sending 100+ test transfers and interviewing dozens of recipients, we reveal the fastest, cheapest, and most reliable ways to get money to India"
+      title="Send Money to India - Guide & Best Providers | MyMoneyTransfers"
+      heroTitle="Send Money to India"
+      heroSubtitle="Send Money to India - Guide & Best Providers | MyMoneyTransfers"
+      heroImageJpg={heroImageJpg}
+      heroImageWebp={heroImageWebp}
+      lastUpdated="February 15, 2025"
+      author="MyMoneyTransfers Research Team"
       content={content}
-      heroImage={heroImageJpg}
-      webp={heroImageWebp}
-      publishDate="Updated May 02, 2025"
-      readTime="11"
       relatedGuides={relatedGuides}
     />
   );

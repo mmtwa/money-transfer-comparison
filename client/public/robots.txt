@@ -1,4 +1,27 @@
-# https://www.robotstxt.org/robotstxt.html
+# robots.txt file for https://www.mymoneytransfers.com/
+# Last updated: 2025-03-15
+
 User-agent: *
 Allow: /
+Disallow: /admin/
+Disallow: /login
+Disallow: /api/
+
+# Allow important files and directories 
+Allow: /sitemap.xml
+Allow: /images/
+Allow: /guides/
+Allow: /faq
+Allow: /about
+Allow: /historical-rates
+Allow: /guides/send-money-to-*
+
+# Country-specific guides - ensure these are crawled
+Allow: /guides/send-money-to-india
+Allow: /guides/send-money-to-kenya
+Allow: /guides/send-money-to-nigeria
+Allow: /guides/send-money-to-pakistan
+Allow: /guides/send-money-to-philippines
+
+# Sitemap location
 Sitemap: https://www.mymoneytransfers.com/sitemap.xml

@@ -1,9 +1,11 @@
 import React from 'react';
-import GuideDetail from '../../guides/GuideDetail';
+import GuideDetail from '../GuideDetail';
 import ClickableHeadline from '../../../components/common/ClickableHeadline';
 import useExpandableSections from '../../../hooks/useExpandableSections';
 import heroImageJpg from '../../../assets/images/guides/occasional-transfers-hero-optimized.jpg';
 import heroImageWebp from '../../../assets/images/guides/occasional-transfers-hero.webp';
+import ResponsiveImage from '../../../components/common/ResponsiveImage';
+import SEO from '../../../components/SEO';
 
 const OccasionalTransfers = () => {
   const sections = {
@@ -223,16 +225,23 @@ const OccasionalTransfers = () => {
   );
 
   return (
-    <GuideDetail
-      title="The Smart Guide to Occasional International Money Transfers"
-      subtitle="Learn how to handle irregular international payments effectively"
-      content={content}
-      heroImage={heroImageJpg}
-      webp={heroImageWebp}
-      publishDate="Updated May 5, 2025"
-      readTime="6"
-      relatedGuides={relatedGuides}
-    />
+    <>
+      <SEO
+        title="Occasional Transfers - Money Transfer Guide | MyMoneyTransfers"
+        description="Occasional Transfers - MyMoneyTransfers provides detailed information to help you make informed decisions about international money transfers."
+        canonicalUrl="/guides/frequency/occasional-transfers"
+      />
+      <GuideDetail
+        title="Occasional Transfers - Money Transfer Guide"
+        subtitle="Making the most of infrequent international transfers"
+        content={content}
+        heroImage={heroImageJpg}
+        webp={heroImageWebp}
+        publishDate="Updated May 5, 2025"
+        readTime="10"
+        relatedGuides={relatedGuides}
+      />
+    </>
   );
 };
 

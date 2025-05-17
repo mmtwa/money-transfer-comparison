@@ -2,6 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
+import SEO from '../components/SEO';
+
+/**
+ * Login page for admin functionality
+ */
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -37,6 +42,11 @@ const Login = () => {
   
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <SEO 
+        title="MyMoneyTransfers Admin Login"
+        description="Admin Login for MyMoneyTransfers"
+        canonicalUrl="/login"
+      />
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import SEO from '../components/SEO';
 
 /**
  * FAQ page component with enhanced UI/UX
  */
+
 const FAQ = () => {
   const [openItem, setOpenItem] = useState(null);
   
@@ -115,7 +117,12 @@ const FAQ = () => {
   };
   
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-indigo-50/30 to-white text-gray-900">
+    <div className="flex flex-col bg-white text-gray-900 overflow-hidden">
+      <SEO 
+        title="Frequently Asked Questions | MyMoneyTransfers"
+        description=" F A Q - MyMoneyTransfers provides detailed information to help you make informed decisions about international money transfers."
+        canonicalUrl="/faq"
+      />
       {/* Hero Section with advanced design elements */}
       <section className="pt-14 pb-20 md:pt-20 md:pb-32 relative overflow-hidden">
         {/* Glass morphism top bar */}

@@ -30,7 +30,6 @@ import SendMoneyToVietnamGuide from '../pages/guides/send-money-to-vietnam';
 import SendMoneyToBangladeshGuide from '../pages/guides/send-money-to-bangladesh';
 import SendMoneyToCanadaGuide from '../pages/guides/send-money-to-canada';
 import SendMoneyToMoroccoGuide from '../pages/guides/send-money-to-morocco';
-import CanonicalUrl from '../pages/CanonicalUrl';
 import PrivacyPolicy from '../pages/PrivacyPolicy';
 import TermsOfService from '../pages/TermsOfService';
 import CookiePolicy from '../pages/CookiePolicy';
@@ -1813,7 +1812,6 @@ const MoneyCompare = ({ initialPath }) => {
   
   return (
     <>
-      <CanonicalUrl />
       {renderPageContent()}
       
       {/* Transition Loader */}

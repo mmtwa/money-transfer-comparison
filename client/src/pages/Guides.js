@@ -1,6 +1,8 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import CurrencyFlag from '../components/ui/CurrencyFlag';
+import SEO from '../components/SEO';
 import {
   ComposableMap,
   Geographies,
@@ -8,7 +10,6 @@ import {
   Marker,
   ZoomableGroup
 } from "react-simple-maps";
-import CurrencyFlag from '../components/ui/CurrencyFlag';
 
 /**
  * FloatingCurrencySymbols - Animated currency symbols that float in the background
@@ -74,7 +75,12 @@ const Guides = () => {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen bg-white text-gray-900 overflow-hidden">
+    <div className="flex flex-col bg-white text-gray-900 overflow-hidden">
+      <SEO 
+        title=" Guides | MyMoneyTransfers"
+        description=" Guides - MyMoneyTransfers provides detailed information to help you make informed decisions about international money transfers."
+        canonicalUrl="/guides"
+      />
       {/* Hero Section with 2025 Design Trends */}
       <section className="py-20 md:py-28 lg:py-32 relative overflow-hidden">
         {/* Modern gradient background with subtle noise texture */}
@@ -1521,16 +1527,17 @@ export const CountryGuideSelector = () => {
   };
 
   useEffect(() => {
-    function handleClickOutside(event) {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
-        setIsSearchFocused(false);
-      }
-    }
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [searchContainerRef]);
+  }, []);
+
+  function handleClickOutside(event) {
+    if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+      setIsSearchFocused(false);
+    }
+  }
   
   return (
     <div className="space-y-8">

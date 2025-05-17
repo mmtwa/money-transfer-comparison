@@ -8,10 +8,12 @@ import heroImageJpg from '../../../assets/images/guides/regular-transfers-hero-o
 import heroImageWebp from '../../../assets/images/guides/regular-transfers-hero.webp';
 // Import responsive image component
 import ResponsiveImage from '../../../components/common/ResponsiveImage';
+import SEO from '../../../components/SEO';
 
 /**
  * Guide to regular international money transfers
  */
+
 const RegularTransfers = () => {
   // Define sections to be expandable
   const sections = {
@@ -318,16 +320,23 @@ const RegularTransfers = () => {
 
   // Return the GuideDetail component with our content
   return (
-    <GuideDetail
-      title="Regular International Money Transfers"
-      subtitle="Learn how to optimize your recurring international transfers for better rates, lower fees, and maximum convenience."
-      content={content}
-      heroImage={heroImageJpg}
-      webp={heroImageWebp}
-      publishDate="March 15, 2024"
-      readTime={12}
-      relatedGuides={relatedGuides}
-    />
+    <>
+      <SEO
+        title="Regular Transfers - Money Transfer Guide | MyMoneyTransfers"
+        description="Regular Transfers - MyMoneyTransfers provides detailed information to help you make informed decisions about international money transfers."
+        canonicalUrl="/guides/frequency/regular-transfers"
+      />
+      <GuideDetail
+        title="Regular Transfers - Money Transfer Guide"
+        subtitle="Maximizing value on recurring international payments"
+        content={content}
+        heroImage={heroImageJpg}
+        webp={heroImageWebp}
+        publishDate="Updated May 5, 2025"
+        readTime="10"
+        relatedGuides={relatedGuides}
+      />
+    </>
   );
 };
 

@@ -102,7 +102,37 @@ app.use(express.json()); // Parse JSON request body
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 app.use(cookieParser()); // Parse cookies
 app.use(logger); // Request logging
-app.use(require('prerender-node').set('prerenderToken', '7bhaoyM3pgdGdwgPTM7f')); // Prerender.io for SEO
+
+// Configure Prerender.io for SEO
+const prerenderMiddleware = require('prerender-node');
+prerenderMiddleware.set('prerenderToken', '7bhaoyM3pgdGdwgPTM7f');
+prerenderMiddleware.set('protocol', 'https');
+prerenderMiddleware.set('host', 'www.mymoneytransfers.com');
+prerenderMiddleware.set('forwardHeaders', true);
+prerenderMiddleware.set('beforeRender', function(req, done) {
+  // Log prerender requests for debugging
+  console.log(`Prerender.io rendering: ${req.url}`);
+  done();
+});
+// Add any paths that should be ignored by prerender
+prerenderMiddleware.blacklisted([
+  '^/admin',
+  '^/login',
+  '/api',
+  '.json',
+  '.js',
+  '.css',
+  '.xml',
+  '.less',
+  '.png',
+  '.jpg',
+  '.jpeg',
+  '.svg',
+  '.gif',
+  '.pdf',
+  '.txt'
+]);
+app.use(prerenderMiddleware);
 
 // After middleware setup, add static middleware for images and logos
 // Create directory structure for provider images if it doesn't exist

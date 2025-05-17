@@ -4,6 +4,8 @@ import ClickableHeadline from '../../../components/common/ClickableHeadline';
 import useExpandableSections from '../../../hooks/useExpandableSections';
 import heroImageJpg from '../../../assets/images/guides/us-latam-hero-optimized.jpg';
 import heroImageWebp from '../../../assets/images/guides/us-latam-hero.webp';
+import ResponsiveImage from '../../../components/common/ResponsiveImage';
+import SEO from '../../../components/SEO';
 
 /**
  * Guide to US to Latin America money transfers
@@ -284,7 +286,9 @@ const UsLatam = () => {
             <h3 className="text-xl font-bold text-indigo-800 mb-3 text-left">Learning from Experience</h3>
             <div className="space-y-4">
               <p className="text-left">
-                "By using a specialist provider and timing my transfers around market hours, I've saved over $800 in the last year on my regular transfers to Mexico," shares Carlos Mendez, a Chicago-based construction worker.
+                "By using a specialist provider and timing my transfers around market hours, I've saved over $800 in the last year on my regular transfers to Mexico," shares Carlos Mendez, a Chicago-based 
+import SEO from '../../components/SEO';
+construction worker.
               </p>
               <p className="text-left">
                 "Setting up a regular transfer schedule with my provider not only saved me money but also made the process much more convenient," says Ana Garcia, who sends money to Guatemala weekly.
@@ -306,16 +310,23 @@ const UsLatam = () => {
 
   // Return the GuideDetail component with our content
   return (
-    <GuideDetail
-      title="The Complete Guide to Sending Money from the US to Latin America: Your Essential Resource for 2025"
-      subtitle="Everything you need to know about transferring money from the US to Latin American countries, from costs to compliance"
-      content={content}
-      heroImage={heroImageJpg}
-      webp={heroImageWebp}
-      publishDate="Updated May 5, 2025"
-      readTime="10"
-      relatedGuides={relatedGuides}
-    />
+    <>
+      <SEO 
+        title=" Us Latam | MyMoneyTransfers"
+        description=" Us Latam - MyMoneyTransfers provides detailed information to help you make informed decisions about international money transfers."
+        canonicalUrl="/guides\corridors\us-latam"
+      />
+      <GuideDetail
+        title=" Us Latam | MyMoneyTransfers"
+        subtitle=" Us Latam | MyMoneyTransfers"
+        content={content}
+        heroImage={heroImageJpg}
+        webp={heroImageWebp}
+        publishDate="Updated May 5, 2025"
+        readTime="10"
+        relatedGuides={relatedGuides}
+      />
+    </>
   );
 };
 

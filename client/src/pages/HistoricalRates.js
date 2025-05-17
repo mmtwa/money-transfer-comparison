@@ -9,6 +9,7 @@ import CurrencyFlag from '../components/ui/CurrencyFlag';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { motion } from 'framer-motion';
+import { Helmet } from 'react-helmet';
 
 // Register Chart.js components manually
 Chart.register(
@@ -34,6 +35,15 @@ const LiveHistoricalRates = () => {
   const [activeRange, setActiveRange] = useState('1month');
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [historicalData, setHistoricalData] = useState([]);
+  
+  // Add state for popular currency pairs
+  const [popularPairs, setPopularPairs] = useState([
+    { pair: "EUR/USD", fromCurrency: "EUR", toCurrency: "USD", rate: null, change: null },
+    { pair: "GBP/USD", fromCurrency: "GBP", toCurrency: "USD", rate: null, change: null },
+    { pair: "USD/JPY", fromCurrency: "USD", toCurrency: "JPY", rate: null, change: null },
+    { pair: "USD/CAD", fromCurrency: "USD", toCurrency: "CAD", rate: null, change: null }
+  ]);
+  const [isLoadingPopularPairs, setIsLoadingPopularPairs] = useState(false);
   
   // Add state for the second currency pair
   const [showSecondPair, setShowSecondPair] = useState(false);
@@ -1144,8 +1154,85 @@ const LiveHistoricalRates = () => {
     }
   };
 
+  // Add function to fetch popular pair rates
+  const fetchPopularPairRates = async () => {
+    try {
+      setIsLoadingPopularPairs(true);
+      const updatedPairs = await Promise.all(popularPairs.map(async (pair) => {
+        try {
+          // Get current rate
+          const response = await apiService.getCurrentRate(pair.fromCurrency, pair.toCurrency);
+          
+          if (response.data && response.data.success && response.data.data) {
+            const currentRate = response.data.data.rate;
+            
+            // Get historical rate from 24h ago for change calculation
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const fromDate = yesterday.toISOString().split('T')[0];
+            const toDate = new Date().toISOString().split('T')[0];
+            
+            const historicalResponse = await apiService.getHistoricalRates(
+              pair.fromCurrency,
+              pair.toCurrency,
+              fromDate,
+              toDate,
+              'day'
+            );
+            
+            let change = null;
+            if (historicalResponse.data && historicalResponse.data.success && 
+                historicalResponse.data.data && historicalResponse.data.data.length > 0) {
+              const historicalRate = historicalResponse.data.data[0].rate;
+              change = ((currentRate - historicalRate) / historicalRate) * 100;
+            }
+            
+            return {
+              ...pair,
+              rate: currentRate,
+              change: change ? change.toFixed(2) : null
+            };
+          }
+          return pair;
+        } catch (err) {
+          console.error(`Error fetching rate for ${pair.pair}:`, err);
+          return pair;
+        }
+      }));
+      
+      setPopularPairs(updatedPairs);
+    } catch (err) {
+      console.error('Error fetching popular pair rates:', err);
+    } finally {
+      setIsLoadingPopularPairs(false);
+    }
+  };
+
+  // Add useEffect to fetch popular pair rates on mount and every 2 minutes
+  useEffect(() => {
+    fetchPopularPairRates();
+    const intervalId = setInterval(fetchPopularPairRates, 120000); // 2 minutes
+    return () => clearInterval(intervalId);
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-indigo-50/30 to-white text-gray-900 py-10 pt-[1px]">
+      {/* Additional SEO meta tags */}
+      <Helmet>
+        <title>Historical Exchange Rates & Currency Trends | MyMoneyTransfers</title>
+        <meta name="description" content="Monitor real-time and historical exchange rates with our interactive currency charts. Track trends, analyze volatility, and make informed decisions for international money transfers." />
+        <meta name="keywords" content="exchange rates, historical rates, currency trends, currency volatility, currency converter, currency charts, forex charts, GBP to USD, EUR to USD" />
+        <link rel="canonical" href="/historical-rates" />
+        <meta property="og:title" content="Historical Exchange Rates & Currency Trends | MyMoneyTransfers" />
+        <meta property="og:description" content="Monitor real-time and historical exchange rates with our interactive currency charts. Track trends, analyze volatility, and make informed decisions for international money transfers." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://www.mymoneytransfers.com/historical-rates" />
+        <meta property="og:image" content="https://www.mymoneytransfers.com/mmtlogo.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Historical Exchange Rates & Currency Trends | MyMoneyTransfers" />
+        <meta name="twitter:description" content="Monitor real-time and historical exchange rates with our interactive currency charts. Track trends, analyze volatility, and make informed decisions for international money transfers." />
+      </Helmet>
+
       {/* Add shimmer styles */}
       <style jsx="true" global="true">{`
         .text-shimmer {
@@ -1290,15 +1377,6 @@ const LiveHistoricalRates = () => {
                 <div className="flex items-center text-indigo-100">
                   <div className="mr-2 bg-indigo-700/30 p-1.5 rounded-full">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                  </div>
-                  <span className="text-sm">Bank-grade security</span>
-                </div>
-                
-                <div className="flex items-center text-indigo-100">
-                  <div className="mr-2 bg-indigo-700/30 p-1.5 rounded-full">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                   </div>
@@ -1325,12 +1403,7 @@ const LiveHistoricalRates = () => {
             >
               <div className="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-2xl shadow-xl">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {[
-                    { pair: "EUR/USD", rate: "1.0821", change: "+0.3%" },
-                    { pair: "GBP/USD", rate: "1.2649", change: "-0.1%" },
-                    { pair: "USD/JPY", rate: "151.47", change: "+0.2%" },
-                    { pair: "USD/CAD", rate: "1.3602", change: "-0.4%" }
-                  ].map((item, index) => (
+                  {popularPairs.map((item, index) => (
                     <motion.div 
                       key={item.pair}
                       className="flex flex-col items-center justify-center p-3 rounded-xl bg-gradient-to-br from-white/5 to-white/10 border border-white/10"
@@ -1344,10 +1417,24 @@ const LiveHistoricalRates = () => {
                       }}
                     >
                       <p className="text-indigo-200 font-medium mb-1">{item.pair}</p>
-                      <p className="text-white text-xl font-bold">{item.rate}</p>
-                      <p className={`text-xs ${item.change.startsWith('+') ? 'text-green-400' : 'text-red-400'}`}>
-                        {item.change}
-                      </p>
+                      {isLoadingPopularPairs ? (
+                        <div className="animate-pulse">
+                          <div className="h-6 w-20 bg-white/20 rounded"></div>
+                        </div>
+                      ) : (
+                        <p className="text-white text-xl font-bold">
+                          {item.rate ? item.rate.toFixed(4) : '—'}
+                        </p>
+                      )}
+                      {isLoadingPopularPairs ? (
+                        <div className="animate-pulse mt-1">
+                          <div className="h-4 w-12 bg-white/20 rounded"></div>
+                        </div>
+                      ) : (
+                        <p className={`text-xs ${item.change ? (parseFloat(item.change) >= 0 ? 'text-green-400' : 'text-red-400') : 'text-gray-400'}`}>
+                          {item.change ? `${parseFloat(item.change) >= 0 ? '+' : ''}${item.change}%` : '—'}
+                        </p>
+                      )}
                     </motion.div>
                   ))}
                 </div>
@@ -1357,6 +1444,19 @@ const LiveHistoricalRates = () => {
                     className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-medium text-sm hover:from-indigo-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-indigo-500/30"
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      const currencySelector = document.getElementById('currency-selector-section');
+                      if (currencySelector) {
+                        const headerOffset = 100; // Adjust this value based on your header height
+                        const elementPosition = currencySelector.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                        window.scrollTo({
+                          top: offsetPosition,
+                          behavior: 'smooth'
+                        });
+                      }
+                    }}
                   >
                     Explore All Currency Pairs
                   </motion.button>
@@ -1409,6 +1509,7 @@ const LiveHistoricalRates = () => {
           >
             {/* Currency Converter Box */}
             <motion.div 
+              id="currency-selector-section"
               className="bg-white rounded-2xl p-6 mb-8 shadow-lg border border-indigo-50 relative"
               variants={itemVariants}
             >
@@ -1916,7 +2017,7 @@ const LiveHistoricalRates = () => {
                         whileHover={{ rotate: 180 }}
                         transition={{ duration: 0.5 }}
                         disabled={isLoadingHeatMap}
-                        title="Refresh current period data"
+                        title=" Historical Rates | MyMoneyTransfers"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -1935,7 +2036,7 @@ const LiveHistoricalRates = () => {
                         whileHover={{ scale: 1.1 }}
                         transition={{ duration: 0.3 }}
                         disabled={isLoadingHeatMap}
-                        title="Clear all cached volatility data"
+                        title=" Historical Rates | MyMoneyTransfers"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

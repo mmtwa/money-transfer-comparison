@@ -1,9 +1,11 @@
 import React from 'react';
-import GuideDetail from '../../guides/GuideDetail';
+import GuideDetail from '../GuideDetail';
 import ClickableHeadline from '../../../components/common/ClickableHeadline';
 import useExpandableSections from '../../../hooks/useExpandableSections';
 import heroImageJpg from '../../../assets/images/guides/one-time-transfers-hero-optimized.jpg';
 import heroImageWebp from '../../../assets/images/guides/one-time-transfers-hero.webp';
+import ResponsiveImage from '../../../components/common/ResponsiveImage';
+import SEO from '../../../components/SEO';
 
 const OneTimeTransfers = () => {
   const sections = {
@@ -223,16 +225,23 @@ const OneTimeTransfers = () => {
   );
 
   return (
-    <GuideDetail
-      title="The Essential Guide to One-Time International Money Transfers"
-      subtitle="Everything you need to know about making single international money transfers"
-      content={content}
-      heroImage={heroImageJpg}
-      webp={heroImageWebp}
-      publishDate="Updated May 5, 2025"
-      readTime="7"
-      relatedGuides={relatedGuides}
-    />
+    <>
+      <SEO
+        title="One Time Transfers - Money Transfer Guide | MyMoneyTransfers"
+        description="One Time Transfers - MyMoneyTransfers provides detailed information to help you make informed decisions about international money transfers."
+        canonicalUrl="/guides/frequency/one-time-transfers"
+      />
+      <GuideDetail
+        title="One Time Transfers - Money Transfer Guide"
+        subtitle="Getting the best value for single international transfers"
+        content={content}
+        heroImage={heroImageJpg}
+        webp={heroImageWebp}
+        publishDate="Updated May 5, 2025"
+        readTime="10"
+        relatedGuides={relatedGuides}
+      />
+    </>
   );
 };
 

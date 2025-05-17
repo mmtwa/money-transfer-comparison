@@ -1,9 +1,11 @@
 import React from 'react';
-import GuideDetail from '../../guides/GuideDetail';
+import GuideDetail from '../GuideDetail';
 import ClickableHeadline from '../../../components/common/ClickableHeadline';
 import useExpandableSections from '../../../hooks/useExpandableSections';
 import heroImageJpg from '../../../assets/images/guides/periodic-transfers-hero-optimized.jpg';
 import heroImageWebp from '../../../assets/images/guides/periodic-transfers-hero.webp';
+import ResponsiveImage from '../../../components/common/ResponsiveImage';
+import SEO from '../../../components/SEO';
 
 const PeriodicTransfers = () => {
   const sections = {
@@ -223,16 +225,23 @@ const PeriodicTransfers = () => {
   );
 
   return (
-    <GuideDetail
-      title="The Complete Guide to Setting Up Periodic International Money Transfers"
-      subtitle="Learn how to set up and optimize your regular international payments"
-      content={content}
-      heroImage={heroImageJpg}
-      webp={heroImageWebp}
-      publishDate="Updated May 5, 2025"
-      readTime="6"
-      relatedGuides={relatedGuides}
-    />
+    <>
+      <SEO
+        title="Periodic Transfers - Money Transfer Guide | MyMoneyTransfers"
+        description="Periodic Transfers - MyMoneyTransfers provides detailed information to help you make informed decisions about international money transfers."
+        canonicalUrl="/guides/frequency/periodic-transfers"
+      />
+      <GuideDetail
+        title="Periodic Transfers - Money Transfer Guide"
+        subtitle="Optimizing scheduled international payments"
+        content={content}
+        heroImage={heroImageJpg}
+        webp={heroImageWebp}
+        publishDate="Updated May 5, 2025"
+        readTime="10"
+        relatedGuides={relatedGuides}
+      />
+    </>
   );
 };
 

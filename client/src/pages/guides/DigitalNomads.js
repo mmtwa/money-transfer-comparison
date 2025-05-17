@@ -12,6 +12,8 @@ import ResponsiveImage from '../../components/common/ResponsiveImage';
 /**
  * Guide for digital nomads managing international money transfers
  */
+
+import SEO from '../../components/SEO';
 const DigitalNomads = () => {
   // Define sections to be expandable
   const sections = {
@@ -337,16 +339,23 @@ const DigitalNomads = () => {
 
   // Return the GuideDetail component with our content
   return (
-    <GuideDetail
-      title="Digital Nomad's Guide to International Money Management"
-      subtitle="Master your finances while working remotely across borders: from multi-currency management to tax considerations"
-      content={content}
-      heroImage={heroImageJpg}
-      webp={heroImageWebp}
-      publishDate="Updated April 25, 2025"
-      readTime="8"
-      relatedGuides={relatedGuides}
-    />
+    <div>
+      <SEO
+        title=" Digital Nomads | MyMoneyTransfers"
+        description=" Digital Nomads - MyMoneyTransfers provides detailed information to help you make informed decisions about international money transfers."
+        canonicalUrl="/guides/digital-nomads"
+      />
+      <GuideDetail
+        title="Digital Nomad Finance: Managing Money Across Borders"
+        subtitle="First-hand expertise on banking, taxes, and transfers for location-independent professionals"
+        content={content}
+        heroImage={heroImageJpg}
+        webp={heroImageWebp}
+        publishDate="September 2, 2023"
+        readTime="11"
+        relatedGuides={relatedGuides}
+      />
+    </div>
   );
 };
 

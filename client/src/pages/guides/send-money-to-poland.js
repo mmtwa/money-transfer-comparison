@@ -12,6 +12,8 @@ import ResponsiveImage from '../../components/common/ResponsiveImage';
 /**
  * Guide to sending money to Poland - Journalistic Style
  */
+
+import SEO from '../../components/SEO';
 const SendMoneyToPolandGuide = () => {
   // Define sections to be expandable
   const sections = {
@@ -497,16 +499,23 @@ const SendMoneyToPolandGuide = () => {
   );
 
   return (
-    <GuideDetail
-      title="Sending Money to Poland: The Insider's Guide UK Residents Need"
-      subtitle="We tested 12 services, tracked real exchange rates, and traveled across Poland to find the cheapest, fastest and most reliable ways to send your money east"
-      content={content}
-      heroImage={heroImageJpg}
-      webp={heroImageWebp}
-      publishDate="Updated April 19, 2025"
-      readTime="9"
-      relatedGuides={relatedGuides}
-    />
+    <>
+      <SEO 
+        title="Send Money to Poland - Guide & Best Providers | MyMoneyTransfers"
+        description="Send Money To Poland - MyMoneyTransfers provides detailed information to help you make informed decisions about international money transfers."
+        canonicalUrl="/guides\send-money-to-poland"
+      />
+      <GuideDetail
+        title="Send Money to Poland - Guide & Best Providers | MyMoneyTransfers"
+        subtitle="Send Money to Poland - Guide & Best Providers | MyMoneyTransfers"
+        content={content}
+        heroImage={heroImageJpg}
+        webp={heroImageWebp}
+        publishDate="Updated April 19, 2025"
+        readTime="9"
+        relatedGuides={relatedGuides}
+      />
+    </>
   );
 };
 

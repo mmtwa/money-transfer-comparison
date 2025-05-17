@@ -2,10 +2,12 @@ import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import skylineBackground from '../assets/images/backgrounds/skyline.webp';
+import SEO from '../components/SEO';
 
 /**
  * Careers page component with a design inspired by modern UI/UX principles
  */
+
 const Careers = () => {
   useEffect(() => {
     // Smooth scroll behavior for the entire page
@@ -14,6 +16,11 @@ const Careers = () => {
   
   return (
     <div className="flex flex-col bg-white text-gray-900 overflow-hidden">
+      <SEO 
+        title=" Careers | MyMoneyTransfers"
+        description=" Careers - MyMoneyTransfers provides detailed information to help you make informed decisions about international money transfers."
+        canonicalUrl="/careers"
+      />
       {/* Hero Section with Gradient Background */}
       <section 
         className="py-20 md:py-32 border-b border-gray-100 relative min-h-[80vh] flex items-center"

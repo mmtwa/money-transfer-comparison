@@ -6,6 +6,9 @@ import useExpandableSections from '../../../hooks/useExpandableSections';
 // Import images
 import heroImageJpg from '../../../assets/images/guides/security-hero-optimized.jpg';
 import heroImageWebp from '../../../assets/images/guides/security-hero-new.webp';
+// Import responsive image component
+import ResponsiveImage from '../../../components/common/ResponsiveImage';
+import SEO from '../../../components/SEO';
 
 /**
  * Guide to secure and trustworthy international transfers
@@ -302,7 +305,8 @@ const Security = () => {
 
           <h2 className="text-2xl font-bold text-gray-800 mb-4 text-left">Final Thoughts: Security in Practice</h2>
           <p className="mb-6 text-left">
-            Security in international transfers is about creating multiple layers of protection. While this guide provides a comprehensive framework, remember that security is an ongoing process that requires constant attention and adaptation.
+            Security in international transfers is about creating multiple layers of protection. While this guide provides a comprehensive framework, remember that security is an ongoing process that requires 
+            constant attention and adaptation.
           </p>
           <p className="text-left">
             The most secure transfer experiences combine knowledge of security best practices with careful provider selection and personal vigilance. By following these guidelines and staying informed about new security threats and solutions, you can make international transfers as secure as possible.
@@ -314,16 +318,23 @@ const Security = () => {
 
   // Return the GuideDetail component with our content
   return (
-    <GuideDetail
-      title="The Complete Guide to Secure and Trustworthy International Money Transfers"
-      subtitle="Learn how to protect your money and personal information when making international transfers"
-      content={content}
-      heroImage={heroImageJpg}
-      webp={heroImageWebp}
-      publishDate="Updated May 5, 2025"
-      readTime="8"
-      relatedGuides={relatedGuides}
-    />
+    <>
+      <SEO 
+        title="Security in Money Transfers | MyMoneyTransfers"
+        description="Learn how to protect your money with secure transfer options and best practices for safe international payments."
+        canonicalUrl="/guides/criteria/security"
+      />
+      <GuideDetail
+        title="Security in Money Transfers"
+        subtitle="Protecting your money when sending internationally"
+        content={content}
+        heroImage={heroImageJpg}
+        webp={heroImageWebp}
+        publishDate="Updated May 5, 2025"
+        readTime="10"
+        relatedGuides={relatedGuides}
+      />
+    </>
   );
 };
 

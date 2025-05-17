@@ -8,6 +8,7 @@ import heroImageJpg from '../../assets/images/guides/business-purpose-hero-optim
 import heroImageWebp from '../../assets/images/guides/business-purpose-hero-new.webp';
 // Import responsive image component
 import ResponsiveImage from '../../components/common/ResponsiveImage';
+import SEO from '../../components/SEO';
 
 /**
  * Guide for business purposes international transfers
@@ -317,7 +318,9 @@ const BusinessPurpose = () => {
             Throughout our six-month investigation into business transfer best practices, certain companies consistently stood out. These "transfer masters" weren't always the largest enterprises, but they shared a strategic approach to international payments that transformed this necessary expense into a competitive advantage.
           </p>
           <p className="mb-6 text-left">
-            At the headquarters of a midsize electronics manufacturer, we observed their weekly "transfer huddle" – a cross-functional meeting where procurement, finance, and sales teams aligned on upcoming international payment needs. "This 30-minute meeting saves us approximately £4,200 per month," their CFO told us, pointing to their tracking dashboard.
+            At the headquarters of a midsize electronics manufacturer, we observed their weekly "transfer huddle" – a cross-
+import SEO from '../../components/SEO';
+functional meeting where procurement, finance, and sales teams aligned on upcoming international payment needs. "This 30-minute meeting saves us approximately £4,200 per month," their CFO told us, pointing to their tracking dashboard.
           </p>
           <div className="bg-indigo-50 p-6 rounded-lg my-8">
             <h3 className="text-xl font-bold text-indigo-800 mb-3 text-left">Best Practices We've Observed in Action</h3>
@@ -347,16 +350,23 @@ const BusinessPurpose = () => {
 
   // Return the GuideDetail component with our content
   return (
-    <GuideDetail
-      title="The Insider's Guide to Business Money Transfers: What Every Finance Team Needs to Know"
-      subtitle="Our team spent six months investigating how leading companies manage international payments – here's what we discovered about slashing costs, preventing disasters, and turning transfers into a competitive advantage"
-      content={content}
-      heroImage={heroImageJpg}
-      webp={heroImageWebp}
-      publishDate="Updated April 25, 2025"
-      readTime="10"
-      relatedGuides={relatedGuides}
-    />
+    <div>
+      <SEO 
+        title=" Business Purpose | MyMoneyTransfers"
+        description=" Business Purpose - MyMoneyTransfers provides detailed information to help you make informed decisions about international money transfers."
+        canonicalUrl="/guides\business-purpose"
+      />
+      <GuideDetail
+        title="Business Purpose Transfers: Navigating the Complexities"
+        subtitle="Our firsthand investigation into strategies for effective business transfers"
+        content={content}
+        heroImage={heroImageJpg}
+        webp={heroImageWebp}
+        publishDate="August 15, 2023"
+        readTime="10"
+        relatedGuides={relatedGuides}
+      />
+    </div>
   );
 };
 

@@ -4,8 +4,11 @@ import GuideDetail from '../GuideDetail';
 import ClickableHeadline from '../../../components/common/ClickableHeadline';
 import useExpandableSections from '../../../hooks/useExpandableSections';
 // Import images
-import heroImageJpg from '../../../assets/images/guides/convenience-hero-optimized.jpg';
-import heroImageWebp from '../../../assets/images/guides/convenience-hero-new.webp';
+import heroImageJpg from '../../../assets/images/guides/periodic-transfers-hero-optimized.jpg';
+import heroImageWebp from '../../../assets/images/guides/periodic-transfers-hero.webp';
+// Import responsive image component
+import ResponsiveImage from '../../../components/common/ResponsiveImage';
+import SEO from '../../../components/SEO';
 
 /**
  * Guide to convenient international transfers
@@ -126,7 +129,9 @@ const Convenience = () => {
               <li className="mb-2 text-left"><strong>Biometric Authentication</strong>: Quick and secure access</li>
               <li className="mb-2 text-left"><strong>QR Code Payments</strong>: Instant recipient setup</li>
               <li className="mb-2 text-left"><strong>Contact Integration</strong>: Easy recipient management</li>
-              <li className="mb-2 text-left"><strong>Offline Capabilities</strong>: Basic functions without internet</li>
+              <li className="mb-2 text-left"><strong>Offline Capabilities</strong>: Basic 
+import SEO from '../../components/SEO';
+functions without internet</li>
             </ul>
           </div>
         </>
@@ -314,16 +319,23 @@ const Convenience = () => {
 
   // Return the GuideDetail component with our content
   return (
-    <GuideDetail
-      title="The Ultimate Guide to Convenient International Money Transfers"
-      subtitle="Learn how to make international transfers as easy and convenient as possible"
-      content={content}
-      heroImage={heroImageJpg}
-      webp={heroImageWebp}
-      publishDate="Updated May 5, 2025"
-      readTime="8"
-      relatedGuides={relatedGuides}
-    />
+    <>
+      <SEO 
+        title="Convenience in Money Transfers | MyMoneyTransfers"
+        description="Understand how convenience features affect your money transfer experience and learn to balance ease-of-use with cost and security."
+        canonicalUrl="/guides/criteria/convenience"
+      />
+      <GuideDetail
+        title="Convenience in Money Transfers"
+        subtitle="Finding the right balance between ease-of-use and other important factors"
+        content={content}
+        heroImage={heroImageJpg}
+        webp={heroImageWebp}
+        publishDate="Updated May 5, 2025"
+        readTime="10"
+        relatedGuides={relatedGuides}
+      />
+    </>
   );
 };
 

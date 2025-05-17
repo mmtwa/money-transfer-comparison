@@ -6,10 +6,14 @@ import useExpandableSections from '../../../hooks/useExpandableSections';
 // Import images
 import heroImageJpg from '../../../assets/images/guides/service-hero-optimized.jpg';
 import heroImageWebp from '../../../assets/images/guides/service-hero-new.webp';
+// Import responsive image component
+import ResponsiveImage from '../../../components/common/ResponsiveImage';
+import SEO from '../../../components/SEO';
 
 /**
  * Guide to service quality in international transfers
  */
+
 const Service = () => {
   // Define sections to be expandable
   const sections = {
@@ -314,16 +318,23 @@ const Service = () => {
 
   // Return the GuideDetail component with our content
   return (
-    <GuideDetail
-      title="The Ultimate Guide to Quality Service in International Money Transfers"
-      subtitle="Learn how to identify and benefit from high-quality transfer services"
-      content={content}
-      heroImage={heroImageJpg}
-      webp={heroImageWebp}
-      publishDate="Updated May 5, 2025"
-      readTime="8"
-      relatedGuides={relatedGuides}
-    />
+    <>
+      <SEO 
+        title="Service Quality in Money Transfers | MyMoneyTransfers"
+        description="Learn how to evaluate customer service when choosing a money transfer provider and why it matters for your experience."
+        canonicalUrl="/guides/criteria/service"
+      />
+      <GuideDetail
+        title="Service Quality in Money Transfers"
+        subtitle="Why customer support matters when sending money internationally"
+        content={content}
+        heroImage={heroImageJpg}
+        webp={heroImageWebp}
+        publishDate="Updated May 5, 2025"
+        readTime="10"
+        relatedGuides={relatedGuides}
+      />
+    </>
   );
 };
 

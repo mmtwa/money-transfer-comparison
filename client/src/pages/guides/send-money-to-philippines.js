@@ -8,6 +8,7 @@ import heroImageJpg from '../../assets/images/guides/philippines-transfer-hero-o
 import heroImageWebp from '../../assets/images/guides/philippines-transfer-hero-new.webp';
 // Import responsive image component
 import ResponsiveImage from '../../components/common/ResponsiveImage';
+import SEO from '../../components/SEO';
 
 /**
  * Guide to sending money to the Philippines - Journalistic Style
@@ -546,16 +547,23 @@ const SendMoneyToPhilippinesGuide = () => {
   );
 
   return (
-    <GuideDetail
-      title="The Padala Pipeline: Inside the $31 Billion Filipino Remittance Machine"
-      subtitle="From Dubai construction sites to London hospitals, how overseas Filipinos keep their families afloat – and the insider secrets to maximizing every peso sent home"
-      content={content}
-      heroImage={heroImageJpg}
-      webp={heroImageWebp}
-      publishDate="Updated May 2, 2025"
-      readTime="12"
-      relatedGuides={relatedGuides}
-    />
+    <>
+      <SEO 
+        title="Send Money to Philippines - Guide & Best Providers | MyMoneyTransfers"
+        description="Send Money To Philippines - MyMoneyTransfers provides detailed information to help you make informed decisions about international money transfers."
+        canonicalUrl="/guides/send-money-to-philippines"
+      />
+      <GuideDetail
+        title="Send Money to Philippines - Guide & Best Providers | MyMoneyTransfers"
+        subtitle="Send Money to Philippines - Guide & Best Providers | MyMoneyTransfers"
+        content={content}
+        heroImage={heroImageJpg}
+        webp={heroImageWebp}
+        publishDate="Updated May 2, 2025"
+        readTime="12"
+        relatedGuides={relatedGuides}
+      />
+    </>
   );
 };
 

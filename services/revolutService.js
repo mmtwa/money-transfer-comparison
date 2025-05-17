@@ -340,14 +340,23 @@ exports.formatForProviderCard = (rateData, fromCurrency, toCurrency, amount) => 
   
   // Convert timestamp from API to ISO string (if available)
   // Timestamp is expected to be in milliseconds since epoch
-  let rateTimestamp = new Date().toISOString(); // Default to current time if timestamp not provided
+  let rateTimestamp = new Date().toISOString();
   if (timestamp) {
     try {
       // Ensure timestamp is treated as a number
       const timestampNum = typeof timestamp === 'string' ? parseInt(timestamp, 10) : timestamp;
       if (!isNaN(timestampNum) && timestampNum > 0) {
-        rateTimestamp = new Date(timestampNum).toISOString();
-        console.log(`[Revolut] Using API timestamp: ${timestamp} (${rateTimestamp})`);
+        // Check if timestamp is stale (more than 2 hours old)
+        const currentTime = Date.now();
+        const twoHoursInMs = 2 * 60 * 60 * 1000;
+        
+        if ((currentTime - timestampNum) > twoHoursInMs) {
+          console.warn(`[Revolut] Timestamp is stale: ${timestampNum} (${new Date(timestampNum).toISOString()}) - more than 2 hours old, using current time instead`);
+          rateTimestamp = new Date().toISOString();
+        } else {
+          rateTimestamp = new Date(timestampNum).toISOString();
+          console.log(`[Revolut] Using API timestamp: ${timestamp} (${rateTimestamp})`);
+        }
       } else {
         console.warn(`[Revolut] Invalid timestamp format: ${timestamp}, using current time instead`);
       }
@@ -469,15 +478,32 @@ function runRevolutCalculator(scriptPath, amount, fromCurrency, toCurrency, sour
             // Look for the timestamp field in the top-level response
             // This should be extracted from the "timestamp" field in the API response
             if (jsonData.timestamp) {
-              console.log(`[Revolut] Found timestamp in API response: ${jsonData.timestamp}`);
+              console.log(`[Revolut] Found timestamp in API response: ${jsonData.timestamp} (${new Date(jsonData.timestamp).toISOString()})`);
+              
+              // Verify the timestamp is recent (within the last 24 hours)
+              const currentTime = Date.now();
+              const oneDayInMs = 24 * 60 * 60 * 1000;
+              if ((currentTime - jsonData.timestamp) > oneDayInMs) {
+                console.warn(`[Revolut] API timestamp is more than 24 hours old: ${jsonData.timestamp} (${new Date(jsonData.timestamp).toISOString()})`);
+                console.warn(`[Revolut] This may indicate an issue with the Revolut API caching old rate data.`);
+              }
             } else {
               // If we don't have a timestamp field directly, look for it in the raw output
               const timestampMatch = stdout.match(/"timestamp"\s*:\s*(\d+)/);
               if (timestampMatch && timestampMatch[1]) {
                 jsonData.timestamp = parseInt(timestampMatch[1], 10);
-                console.log(`[Revolut] Extracted timestamp from raw output: ${jsonData.timestamp}`);
+                console.log(`[Revolut] Extracted timestamp from raw output: ${jsonData.timestamp} (${new Date(jsonData.timestamp).toISOString()})`);
+                
+                // Verify the timestamp is recent (within the last 24 hours)
+                const currentTime = Date.now();
+                const oneDayInMs = 24 * 60 * 60 * 1000;
+                if ((currentTime - jsonData.timestamp) > oneDayInMs) {
+                  console.warn(`[Revolut] Extracted timestamp is more than 24 hours old: ${jsonData.timestamp} (${new Date(jsonData.timestamp).toISOString()})`);
+                  console.warn(`[Revolut] This may indicate an issue with the Revolut API caching old rate data.`);
+                }
               } else {
-                console.log('[Revolut] No timestamp found in API response');
+                console.log('[Revolut] No timestamp found in API response, will use current time');
+                jsonData.timestamp = Date.now();
               }
             }
             

@@ -7,6 +7,8 @@ import { Link } from 'react-router-dom';
 /**
  * About Us page component with a design inspired by modern UI/UX principles
  */
+
+import SEO from '../components/SEO';
 const AboutUs = () => {
   // Navigate back to home page
   const handleNavigateHome = () => {
@@ -25,6 +27,11 @@ const AboutUs = () => {
   
   return (
     <div className="flex flex-col bg-white text-gray-900 overflow-hidden">
+      <SEO 
+        title="About Us | MyMoneyTransfers"
+        description=" About Us - MyMoneyTransfers provides detailed information to help you make informed decisions about international money transfers."
+        canonicalUrl="/about-us"
+      />
       {/* Our Brand Statement - Animated with visual elements */}
       <section className="py-16 md:py-28 relative overflow-hidden bg-gradient-to-br from-white via-white to-indigo-50/30">
         <div className="absolute inset-0 overflow-hidden">

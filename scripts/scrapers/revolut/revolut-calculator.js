@@ -99,8 +99,19 @@ const destCountry   = (dstCtryArg || isoGuess2(destCur)).toUpperCase();
     if (!rate || !Array.isArray(routes)) throw new Error('Malformed response (missing rate or routes)');
 
     // Extract the timestamp from the rate data
-    const timestamp = rate.timestamp || Date.now();
-    console.log(`Rate timestamp from API: ${timestamp}`);
+    // Use current time if no timestamp is provided or if it's stale 
+    // (more than 2 hours old, which might indicate a caching issue on Revolut's end)
+    let timestamp = rate.timestamp || Date.now();
+    
+    // Check if timestamp is stale (more than 2 hours old)
+    const currentTime = Date.now();
+    const twoHoursInMs = 2 * 60 * 60 * 1000;
+    if (timestamp && (currentTime - timestamp) > twoHoursInMs) {
+      console.log(`Rate timestamp from API is stale (${new Date(timestamp).toISOString()}), using current time instead`);
+      timestamp = currentTime;
+    } else {
+      console.log(`Rate timestamp from API: ${timestamp} (${new Date(timestamp).toISOString()})`);
+    }
 
     /* 3️⃣  Filter to find BANK routes with STANDARD plans */
     // First find all BANK routes
@@ -194,7 +205,7 @@ const destCountry   = (dstCtryArg || isoGuess2(destCur)).toUpperCase();
         amount_received:  recipientAmountDecimal,
         transfer_type:    route.transferType || null,
         estimate:         route.estimate || null,
-        timestamp:        timestamp
+        timestamp:        timestamp || Date.now()
       }));
     }
 

@@ -8,10 +8,12 @@ import heroImageJpg from '../../../assets/images/guides/method/digital-native-he
 import heroImageWebp from '../../../assets/images/guides/method/digital-native-hero-new.webp';
 // Import responsive image component
 import ResponsiveImage from '../../../components/common/ResponsiveImage';
+import SEO from '../../../components/SEO';
 
 /**
  * Guide for digital natives managing international money transfers
  */
+
 const DigitalNative = () => {
   // Define sections to be expandable
   const sections = {
@@ -318,16 +320,23 @@ const DigitalNative = () => {
 
   // Return the GuideDetail component with our content
   return (
-    <GuideDetail
-      title="The Digital Native's Guide to International Money Transfers"
-      subtitle="Leverage modern technology for efficient and secure international transfers"
-      content={content}
-      heroImage={heroImageJpg}
-      webp={heroImageWebp}
-      publishDate="Updated May 5, 2025"
-      readTime="10"
-      relatedGuides={relatedGuides}
-    />
+    <>
+      <SEO
+        title="Digital Native Money Transfers | MyMoneyTransfers"
+        description="Learn how to use modern digital tools to optimize your international money transfers as a digital native."
+        canonicalUrl="/guides/method/digital-native"
+      />
+      <GuideDetail
+        title="Digital Native Money Transfers"
+        subtitle="Leveraging modern tools for seamless international payments"
+        content={content}
+        heroImage={heroImageJpg}
+        webp={heroImageWebp}
+        publishDate="Updated May 5, 2025"
+        readTime="10"
+        relatedGuides={relatedGuides}
+      />
+    </>
   );
 };
 

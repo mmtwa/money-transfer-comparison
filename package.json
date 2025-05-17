@@ -10,7 +10,16 @@
         "dev": "concurrently \"npm run server\" \"npm run client\"",
         "install-client": "cd client && npm install",
         "build-client": "cd client && npm run build",
-        "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm run install-client && npm run build-client"
+        "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm run install-client && npm run build-client",
+        "generate-sitemap": "node scripts/generate-sitemap.js",
+        "check-seo": "node scripts/check-seo.js",
+        "fix-seo-components": "node scripts/add-seo-components.js",
+        "fix-content-seo": "node scripts/add-content-seo-metadata.js",
+        "fix-canonical-urls": "node scripts/fix-canonical-urls.js",
+        "fix-seo-title-tags": "node scripts/fix-seo-title-tags.js",
+        "fix-remaining-seo": "node scripts/fix-remaining-seo-issues.js",
+        "fix-guide-seo": "node scripts/fix-guide-seo.js",
+        "fix-all-seo": "npm run fix-seo-components && npm run fix-content-seo && npm run fix-canonical-urls && npm run fix-seo-title-tags && npm run fix-guide-seo"
     },
     "author": "",
     "license": "MIT",

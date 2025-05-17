@@ -4,10 +4,12 @@ import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import ResponsiveImage from '../../components/common/ResponsiveImage';
 import useScrollProgress from '../../hooks/useScrollProgress';
+import SEO from '../../components/SEO';
 
 /**
  * GuideDetail component - template for all guide articles
  */
+
 const GuideDetail = ({ 
   title, 
   subtitle, 
@@ -48,6 +50,11 @@ const GuideDetail = ({
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-900">
+      <SEO 
+        title=" Guide Detail | MyMoneyTransfers"
+        description=" Guide Detail - MyMoneyTransfers provides detailed information to help you make informed decisions about international money transfers."
+        canonicalUrl="/guides\guide-detail"
+      />
       {/* Progress Bar - Positioned at 72px to match mobile menu */}
       <div 
         className="fixed top-[72px] left-0 h-2 z-[9999] transition-all duration-300 shadow-lg"

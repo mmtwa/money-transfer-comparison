@@ -3,11 +3,12 @@ import { BrowserRouter, useNavigate, Route, Routes } from 'react-router-dom';
 import MoneyCompare from './containers/MoneyCompare';
 import Analytics from './components/Analytics';
 import FontLoader from './components/FontLoader';
-import StructuredData from './components/StructuredData';
+import SEO from './components/SEO';
 import CookieConsent from './components/CookieConsent';
 import Login from './pages/Login';
 import './App.css';
 import { AuthProvider } from './hooks/useAuth';
+import { getSchemaByPageType } from './utils/structuredData';
 
 // Lazy load admin components
 const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
@@ -66,8 +67,72 @@ function App() {
   const getPageType = () => {
     const path = initialPath.toLowerCase();
     if (path.includes('/about')) return 'about';
+    if (path.includes('/guides')) return 'guide';
+    if (path.includes('/faq')) return 'faq';
+    if (path.includes('/historical-rates')) return 'historical-rates';
     if (path === '/' || path.includes('/compare') || path.includes('/results')) return 'comparison';
     return 'home';
+  };
+
+  // Get SEO data based on page type and path
+  const getSeoData = () => {
+    const pageType = getPageType();
+    const path = initialPath.toLowerCase();
+    
+    let title = 'Compare Money Transfer Services – Low Fees, Unbiased Rankings';
+    let description = 'Send money overseas with confidence. MyMoneyTransfers compares international money transfer providers in real-time – 100% independent, no commissions, just the best rates.';
+    
+    if (pageType === 'about') {
+      title = 'About Us – Independent Money Transfer Comparisons';
+      description = 'Learn about MyMoneyTransfers.com, your 100% independent resource for comparing international money transfer services with no commissions, no bias – just the best rates.';
+    } else if (pageType === 'faq') {
+      title = 'International Money Transfer FAQs – Answers & Expert Advice';
+      description = 'Get answers to common questions about international money transfers, exchange rates, fees, and finding the cheapest way to send money abroad from our independent experts.';
+    } else if (pageType === 'historical-rates') {
+      title = 'Historical Exchange Rates & Currency Trends Tracker';
+      description = 'Monitor real-time and historical exchange rates with our interactive currency charts. Track trends, analyze volatility, and make informed decisions for international money transfers.';
+    } else if (path.includes('/guides')) {
+      if (path === '/guides' || path === '/guides/') {
+        title = 'Money Transfer Guides – Comprehensive, Unbiased Advice';
+        description = 'Explore our comprehensive guides to help you understand international money transfers, compare providers, and make informed decisions with no sponsored recommendations.';
+      } else {
+        // For specific country guides
+        if (path.includes('send-money-to-')) {
+          const country = path.replace('/guides/send-money-to-', '').replace(/-/g, ' ');
+          if (country) {
+            const countryName = country
+              .split(' ')
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(' ');
+              
+            title = `Send Money to ${countryName} – Best Options, Rates & Guide (${new Date().getFullYear()})`;
+            description = `Need to send money to ${countryName}? Discover the cheapest, fastest ways – from bank transfers to online apps. MyMoneyTransfers' independent guide ranks the top providers (no bias or fees).`;
+          }
+        } 
+        // For other specific guides
+        else {
+          const guidePath = path.replace('/guides/', '').replace(/-/g, ' ');
+          const guideTitle = guidePath
+            .split('/')
+            .pop()
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+            
+          if (guideTitle) {
+            title = `${guideTitle} – Complete Money Transfer Guide (${new Date().getFullYear()})`;
+            description = `Learn all about ${guideTitle.toLowerCase()} with our comprehensive guide. Compare rates, fees, and services from multiple money transfer providers with 100% independent rankings.`;
+          }
+        }
+      }
+    }
+    
+    return {
+      title,
+      description,
+      canonicalUrl: initialPath,
+      structuredData: getSchemaByPageType(pageType)
+    };
   };
 
   // Wrap CookieConsent in a component that has access to navigation
@@ -92,9 +157,16 @@ function App() {
 
   // Public routes wrapper component
   const PublicRoutes = () => {
+    const seoData = getSeoData();
+    
     return (
       <>
-        <StructuredData page={getPageType()} />
+        <SEO 
+          title={seoData.title}
+          description={seoData.description}
+          canonicalUrl={seoData.canonicalUrl}
+          structuredData={seoData.structuredData}
+        />
         <Analytics measurementId={measurementId} />
         <FontLoader />
         <MoneyCompare initialPath={initialPath} />

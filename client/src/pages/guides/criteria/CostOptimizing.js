@@ -4,12 +4,16 @@ import GuideDetail from '../GuideDetail';
 import ClickableHeadline from '../../../components/common/ClickableHeadline';
 import useExpandableSections from '../../../hooks/useExpandableSections';
 // Import images
-import heroImageJpg from '../../../assets/images/guides/cost-optimizing-hero-optimized.jpg';
-import heroImageWebp from '../../../assets/images/guides/cost-optimizing-hero-new.webp';
+import heroImageJpg from '../../../assets/images/guides/mid-value-transfer-hero-optimized.jpg';
+import heroImageWebp from '../../../assets/images/guides/mid-value-transfer-hero-new.webp';
+// Import responsive image component
+import ResponsiveImage from '../../../components/common/ResponsiveImage';
+import SEO from '../../../components/SEO';
 
 /**
  * Guide to optimizing costs for international transfers
  */
+
 const CostOptimizing = () => {
   // Define sections to be expandable
   const sections = {
@@ -314,16 +318,23 @@ const CostOptimizing = () => {
 
   // Return the GuideDetail component with our content
   return (
-    <GuideDetail
-      title="The Complete Guide to Cost-Effective International Money Transfers"
-      subtitle="Learn how to minimize costs and maximize value in your international transfers"
-      content={content}
-      heroImage={heroImageJpg}
-      webp={heroImageWebp}
-      publishDate="Updated May 5, 2025"
-      readTime="8"
-      relatedGuides={relatedGuides}
-    />
+    <>
+      <SEO 
+        title="Cost Optimization in Money Transfers | MyMoneyTransfers"
+        description="Learn how to minimize costs and maximize value when transferring money internationally."
+        canonicalUrl="/guides/criteria/cost-optimizing"
+      />
+      <GuideDetail
+        title="Optimizing Costs for Money Transfers"
+        subtitle="Strategies to minimize fees and get the best exchange rates"
+        content={content}
+        heroImage={heroImageJpg}
+        webp={heroImageWebp}
+        publishDate="Updated May 5, 2025"
+        readTime="10"
+        relatedGuides={relatedGuides}
+      />
+    </>
   );
 };
 
